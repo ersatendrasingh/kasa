@@ -19,6 +19,8 @@ import {
   UploadCloud,
   X,
 } from "lucide-react";
+import { createResumeAtsPdf, needsUnicodePrint } from "@/lib/resume/report-pdf";
+import { reportSections, type ResumeAnalysis } from "@/lib/resume/analysis";
 import { ToolToast, type ToolToastState } from "@/components/tools/tool-toast";
 
 const roleFamilies = [
@@ -136,7 +138,7 @@ const popularSkills = [
   "Figma",
 ] as const;
 
-const storageKey = "kasa-ai-resume-ats:last";
+const storageKey = "kasa-ai-resume-ats:v2:last";
 const resumeBuilderDraftKey = "kasa-ai-resume-builder:draft";
 const resumeBuilderAtsHandoffKey = "kasa-resume-builder:ats-handoff";
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(Number.isFinite(value) ? value : min, min), max);
@@ -147,25 +149,6 @@ type UploadedResume = {
   data: string;
   size: number;
   text?: string;
-};
-
-type ResumeAnalysis = {
-  atsScore: number;
-  roleFit: string;
-  verdict: string;
-  summary: string;
-  missingKeywords: string[];
-  missingSkills: string[];
-  strengths: string[];
-  weakAreas: string[];
-  improvedBullets: string[];
-  projectsToAdd: string[];
-  interviewQuestions: string[];
-  roadmap: { week: string; focus: string; tasks: string[] }[];
-  salaryRange: string;
-  recruiterChecklist: string[];
-  componentScores: { label: string; score: number }[];
-  quickWins: string[];
 };
 
 type ResumeProfile = {
@@ -179,6 +162,7 @@ type ResumeProfile = {
 };
 
 type SavedResumeAnalysis = {
+  jobDescription: string;
   resumeText: string;
   uploadedResume: UploadedResume | null;
   targetRole: string;
@@ -194,15 +178,22 @@ type SavedResumeAnalysis = {
   analysis: ResumeAnalysis;
 };
 
+type InputPanel = "resume-text" | "job-match" | "preferences" | null;
+
 export function ResumeAtsChecker() {
   const resultPanelRef = useRef<HTMLDivElement>(null);
+  const uploadVersion = useRef(0);
+  const [jobDescription, setJobDescription] = useState("");
+  const [saveReport, setSaveReport] = useState(false);
+  const [isReadingFile, setIsReadingFile] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const [resumeText, setResumeText] = useState("");
   const [uploadedResume, setUploadedResume] = useState<UploadedResume | null>(null);
   const [roleFamily, setRoleFamily] = useState<(typeof roleFamilies)[number]>("Software Engineering");
   const [candidateName, setCandidateName] = useState("Candidate");
-  const [targetRole, setTargetRole] = useState("Frontend Developer");
+  const [targetRole, setTargetRole] = useState("General resume review");
   const [yearsExperience, setYearsExperience] = useState(0);
-  const [selectedSkills, setSelectedSkills] = useState<string[]>(["JavaScript", "React", "Git"]);
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [customSkill, setCustomSkill] = useState("");
   const [targetPackage, setTargetPackage] = useState(8);
   const [dailyHours, setDailyHours] = useState(2);
@@ -213,9 +204,10 @@ export function ResumeAtsChecker() {
   const [progress, setProgress] = useState(0);
   const [isDetectingProfile, setIsDetectingProfile] = useState(false);
   const [detectedSummary, setDetectedSummary] = useState("");
-  const [actionMessage, setActionMessage] = useState("Upload your resume PDF/DOC/DOCX or paste resume text to begin.");
+  const [actionMessage, setActionMessage] = useState("Upload a PDF, DOCX or TXT resume, or paste resume text to begin.");
   const [savedAvailable, setSavedAvailable] = useState(false);
   const [toast, setToast] = useState<ToolToastState>(null);
+  const [activeInputPanel, setActiveInputPanel] = useState<InputPanel>(null);
 
   const notify = useCallback((type: NonNullable<ToolToastState>["type"], title: string, message: string) => {
     setToast({ id: Date.now(), type, title, message });
@@ -224,6 +216,8 @@ export function ResumeAtsChecker() {
   const restoreSavedReport = useCallback((saved: Partial<SavedResumeAnalysis>, message = "Last AI resume report restored.") => {
     if (!saved.analysis) return;
     setResumeText(saved.resumeText || "");
+    setJobDescription(saved.jobDescription || "");
+    setSaveReport(true);
     setUploadedResume(saved.uploadedResume || null);
     setCandidateName(saved.candidateName || deriveNameFromResume(saved.uploadedResume?.name) || "Candidate");
     setTargetRole(saved.targetRole || "Frontend Developer");
@@ -300,90 +294,58 @@ export function ResumeAtsChecker() {
 
   const resultText = useMemo(() => {
     if (!analysis) return "";
-    return [
-      "AI Resume ATS Report",
-      `Candidate: ${candidateName}`,
-      `Target role: ${targetRole}`,
-      `Role family: ${roleFamily}`,
-      `Target package: ${targetPackage} LPA`,
-      `ATS score: ${analysis.atsScore}/100`,
-      `Role fit: ${analysis.roleFit}`,
-      "",
-      `Verdict: ${analysis.verdict}`,
-      `Summary: ${analysis.summary}`,
-      "",
-      "Score breakdown:",
-      ...analysis.componentScores.map((item) => `- ${item.label}: ${item.score}/100`),
-      "",
-      "Quick wins:",
-      ...analysis.quickWins.map((item) => `- ${item}`),
-      "",
-      "Missing keywords:",
-      ...analysis.missingKeywords.map((item) => `- ${item}`),
-      "",
-      "Missing skills:",
-      ...analysis.missingSkills.map((item) => `- ${item}`),
-      "",
-      "Improved resume bullets:",
-      ...analysis.improvedBullets.map((item) => `- ${item}`),
-      "",
-      "Projects to add:",
-      ...analysis.projectsToAdd.map((item) => `- ${item}`),
-      "",
-      "Interview questions:",
-      ...analysis.interviewQuestions.map((item) => `- ${item}`),
-      "",
-      "Roadmap:",
-      ...analysis.roadmap.flatMap((item) => [`${item.week}: ${item.focus}`, ...item.tasks.map((task) => `- ${task}`)]),
-      "",
-      `Salary note: ${analysis.salaryRange}`,
-      "Generated with KASA AI Resume ATS Checker",
-    ].join("\n");
-  }, [analysis, candidateName, roleFamily, targetPackage, targetRole]);
+    return ["KASA Resume Review", `Candidate: ${candidateName}`, `Target role: ${targetRole}`, `ATS readiness: ${analysis.atsScore}/100`, ...reportSections(analysis).flatMap(([title, items]) => ["", title, ...items.map((item) => `- ${item}`)])].join("\n");
+  }, [analysis, candidateName, targetRole]);
 
   const clearGenerated = () => {
     if (analysis) setActionMessage("Inputs changed. Generate a fresh ATS report for the updated resume.");
     setAnalysis(null);
   };
 
-  const handleFileUpload = (file: File | undefined) => {
-    if (!file) return;
+  const handleFileUpload = async (file: File | undefined) => {
+    if (!file || isGenerating) return;
     const mimeType = getSupportedMimeType(file);
-    if (!mimeType) {
-      setActionMessage("Upload a PDF, DOC, DOCX, or TXT resume file.");
-      notify("error", "Unsupported file", "Upload a PDF, DOC, DOCX, or TXT resume file.");
+    if (!mimeType || mimeType === "application/msword") {
+      notify("error", "Unsupported file", "Use PDF, DOCX or TXT. Convert older DOC files to PDF first.");
       return;
     }
-    if (file.size > 4_000_000) {
-      setActionMessage("Please upload a resume under 4 MB.");
-      notify("error", "File too large", "Please upload a resume under 4 MB.");
+    if (!file.size || file.size > 4_000_000) {
+      notify("error", "Check file size", "Upload a non-empty resume under 4 MB.");
       return;
     }
-    setUploadProgress(8);
-    const reader = new FileReader();
-    reader.onprogress = (event) => {
-      if (event.lengthComputable) setUploadProgress(Math.min(95, Math.round((event.loaded / event.total) * 95)));
-    };
-    reader.onload = async () => {
-      const raw = String(reader.result || "");
-      const base64 = raw.includes(",") ? raw.split(",")[1] || "" : raw;
+    const version = ++uploadVersion.current;
+    setIsReadingFile(true);
+    setUploadProgress(15);
+    clearGenerated();
+    trackAts("upload_started", { file_type: mimeType === "application/pdf" ? "pdf" : mimeType === "text/plain" ? "txt" : "docx" });
+    try {
       const extractedText = await extractReadableTextFromUpload(file, mimeType);
-      const nextResume = { name: file.name, mimeType, data: base64, size: file.size, text: extractedText || undefined };
+      if (mimeType !== "application/pdf" && extractedText.trim().length < 300) throw new Error("Not enough readable resume text. Try a PDF or paste at least 300 characters.");
+      if (extractedText.length > 30000) throw new Error("This resume is too long. Use up to 30,000 characters.");
+      const raw = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ""));
+        reader.onerror = () => reject(new Error("File could not be read. Try uploading again."));
+        reader.readAsDataURL(file);
+      });
+      if (version !== uploadVersion.current) return;
+      const nextResume = { name: file.name, mimeType, data: mimeType === "application/pdf" ? raw.split(",")[1] || "" : "", size: file.size, text: extractedText || undefined };
       setUploadedResume(nextResume);
-      if (extractedText.length >= 300) setResumeText(extractedText);
+      setResumeText(extractedText);
       setCandidateName(deriveNameFromResume(file.name) || "Candidate");
-      setUploadProgress(100);
-      clearGenerated();
-      setActionMessage("Resume uploaded. Detecting role, experience, and skills from the file...");
-      void detectResumeProfile(nextResume, extractedText || resumeText);
-      window.setTimeout(() => setUploadProgress(0), 600);
-    };
-    reader.onerror = () => {
-      setUploadProgress(0);
-      setActionMessage("Resume upload failed. Try another file.");
-      notify("error", "Upload failed", "Resume upload failed. Try another file.");
-    };
-    reader.readAsDataURL(file);
+      setDetectedSummary("");
+      setActionMessage("Resume uploaded. Detecting your role, experience, and skills…");
+      trackAts("upload_completed");
+      void detectResumeProfile(nextResume, extractedText);
+    } catch (error) {
+      if (version !== uploadVersion.current) return;
+      setUploadedResume(null);
+      setResumeText("");
+      notify("error", "Could not read resume", error instanceof Error ? error.message : "Try a PDF or paste resume text.");
+      trackAts("upload_failed");
+    } finally {
+      if (version === uploadVersion.current) { setIsReadingFile(false); setUploadProgress(0); }
+    }
   };
 
   const detectResumeProfile = async (resumeFile = uploadedResume, pastedText = resumeText) => {
@@ -400,8 +362,8 @@ export function ResumeAtsChecker() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           resumeText: pastedText || resumeFile?.text || "",
-          fileData: shouldAttachResumeFile(resumeFile, pastedText) ? resumeFile?.data : undefined,
-          fileMimeType: shouldAttachResumeFile(resumeFile, pastedText) ? resumeFile?.mimeType : undefined,
+          fileData: shouldAttachResumeFile(resumeFile) ? resumeFile?.data : undefined,
+          fileMimeType: shouldAttachResumeFile(resumeFile) ? resumeFile?.mimeType : undefined,
           fileName: resumeFile?.name,
         }),
       });
@@ -457,13 +419,19 @@ export function ResumeAtsChecker() {
   };
 
   const reset = () => {
+    uploadVersion.current += 1;
+    setIsReadingFile(false);
+    setJobDescription("");
+    setSavedAvailable(false);
+    setSaveReport(false);
+    try { window.localStorage.removeItem(storageKey); window.localStorage.removeItem("kasa-ai-resume-ats:last"); } catch { /* Storage may be disabled. */ }
     setResumeText("");
     setUploadedResume(null);
     setRoleFamily("Software Engineering");
     setCandidateName("Candidate");
-    setTargetRole("Frontend Developer");
+    setTargetRole("General resume review");
     setYearsExperience(0);
-    setSelectedSkills(["JavaScript", "React", "Git"]);
+    setSelectedSkills([]);
     setCustomSkill("");
     setTargetPackage(8);
     setDailyHours(2);
@@ -472,12 +440,13 @@ export function ResumeAtsChecker() {
     setProgress(0);
     setUploadProgress(0);
     setDetectedSummary("");
-    setActionMessage("Upload your resume PDF/DOC/DOCX or paste resume text to begin.");
+    setActionMessage("Upload a PDF, DOCX or TXT resume, or paste resume text to begin.");
   };
 
   const generateAnalysis = async () => {
+    if (isGenerating || isReadingFile || isDetectingProfile) return;
     const effectiveResumeText = resumeText.trim() || uploadedResume?.text || "";
-    const attachFile = shouldAttachResumeFile(uploadedResume, effectiveResumeText);
+    const attachFile = shouldAttachResumeFile(uploadedResume);
     if (!uploadedResume && effectiveResumeText.length < 300) {
       setActionMessage("Upload a resume file or paste at least 300 characters from your resume.");
       notify("error", "Resume needed", "Upload a resume file or paste at least 300 characters from your resume.");
@@ -485,13 +454,15 @@ export function ResumeAtsChecker() {
     }
     setIsGenerating(true);
     setProgress(8);
-    setActionMessage("AI is extracting resume data, checking ATS score, and building your roadmap...");
+    setActionMessage("Reviewing your resume and prioritizing useful fixes...");
+    trackAts("analysis_started", { has_job_description: Boolean(jobDescription.trim()) });
     try {
       const response = await fetch("/api/tools/resume-ats", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           resumeText: effectiveResumeText,
+          jobDescription,
           fileData: attachFile ? uploadedResume?.data : undefined,
           fileMimeType: attachFile ? uploadedResume?.mimeType : undefined,
           fileName: uploadedResume?.name,
@@ -510,12 +481,14 @@ export function ResumeAtsChecker() {
       if (!data.analysis) throw new Error("AI did not return a usable resume report.");
       setProgress(96);
       setAnalysis(data.analysis);
-      window.localStorage.setItem(
-        storageKey,
-        JSON.stringify({ resumeText: effectiveResumeText, uploadedResume, targetRole, roleFamily, candidateName, yearsExperience, selectedSkills, customSkill, targetPackage, dailyHours, language, analysis: data.analysis } satisfies SavedResumeAnalysis),
-      );
-      setSavedAvailable(true);
-      const successMessage = typeof data.remaining === "number" ? `ATS report generated. ${data.remaining} free AI generations left today.` : "ATS report generated.";
+      if (saveReport) {
+        try {
+          window.localStorage.setItem(storageKey, JSON.stringify({ resumeText: effectiveResumeText, jobDescription, uploadedResume: null, targetRole, roleFamily, candidateName, yearsExperience, selectedSkills, customSkill, targetPackage, dailyHours, language, analysis: data.analysis } satisfies SavedResumeAnalysis));
+          setSavedAvailable(true);
+        } catch { notify("error", "Report not saved on device", "Your analysis is ready. Download it before leaving this page."); }
+      }
+      trackAts("analysis_completed", { has_job_description: Boolean(jobDescription.trim()) });
+      const successMessage = "ATS report generated.";
       setActionMessage(successMessage);
       notify("success", "ATS report generated", successMessage);
       window.setTimeout(() => resultPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
@@ -523,6 +496,7 @@ export function ResumeAtsChecker() {
       const message = error instanceof Error ? error.message : "AI resume analysis failed. Please try again.";
       setActionMessage(message);
       notify("error", "ATS analysis failed", message);
+      trackAts("analysis_failed");
     } finally {
       setProgress(100);
       window.setTimeout(() => {
@@ -546,6 +520,8 @@ export function ResumeAtsChecker() {
 
   const downloadReport = () => {
     if (!analysis) return;
+    if (needsUnicodePrint(resultText)) { printReport(); return; }
+    trackAts("report_downloaded");
     const blob = createResumeAtsPdf({
       analysis,
       candidateName,
@@ -561,9 +537,9 @@ export function ResumeAtsChecker() {
     document.body.appendChild(link);
     link.click();
     link.remove();
-    URL.revokeObjectURL(url);
-    setActionMessage("Beautiful ATS score PDF downloaded.");
-    notify("success", "PDF downloaded", "Beautiful ATS score PDF downloaded.");
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setActionMessage("Your complete resume report has been downloaded.");
+    notify("success", "PDF downloaded", "Your complete resume report has been downloaded.");
   };
 
   const printReport = () => {
@@ -588,12 +564,11 @@ export function ResumeAtsChecker() {
     frameDocument.write(createPrintableAtsReport({ analysis, candidateName, targetRole, roleFamily, yearsExperience, targetPackage }));
     frameDocument.close();
     frameWindow.focus();
-    window.setTimeout(() => {
-      frameWindow.print();
-      frame.remove();
-    }, 300);
+    frameWindow.onafterprint = () => frame.remove();
+    window.setTimeout(() => { frameWindow.print(); }, 300);
+    window.setTimeout(() => frame.remove(), 120_000);
     setActionMessage("Print view opened with only the ATS report.");
-    notify("success", "Print view opened", "Only the ATS report will be printed.");
+    notify("success", "Print view opened", "Choose Save as PDF in the print dialog. This preserves all languages in your full report.");
   };
 
   const shareReport = async () => {
@@ -601,6 +576,7 @@ export function ResumeAtsChecker() {
     const shareUrl = `${window.location.origin}/tools/resume-ats-checker`;
     const shareTitle = `${candidateName}'s ATS score is ${analysis.atsScore}/100`;
     const shareText = `${candidateName}'s ATS score is ${analysis.atsScore}/100 for ${targetRole}. Check your resume score free on KASA: ${shareUrl}`;
+    if (needsUnicodePrint(resultText)) { printReport(); return; }
     const pdfFile = new File(
       [createResumeAtsPdf({ analysis, candidateName, targetRole, roleFamily, yearsExperience, targetPackage })],
       `${slugify(candidateName || targetRole)}-ats-score-report.pdf`,
@@ -656,147 +632,128 @@ export function ResumeAtsChecker() {
   };
 
   return (
-    <section className="relative px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto grid w-full max-w-[108rem] gap-5 lg:grid-cols-[0.92fr_1.08fr]">
-        <div className="rounded-[1.25rem] border border-blue-950/10 bg-white/92 p-5 shadow-xl shadow-blue-950/8 backdrop-blur dark:border-white/10 dark:bg-surface/90 sm:p-7">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-primary dark:text-emerald-200">Career OS setup</p>
-              <h2 className="mt-2 font-heading text-3xl font-semibold text-slate-950 dark:text-white">Upload your resume</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">PDF, DOC, DOCX, or pasted text. Choose your target role and let AI build the report.</p>
+    <section id="resume-checker" aria-label="Resume checker" className="relative scroll-mt-24 px-4 pb-10 pt-3 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-[108rem] space-y-6">
+        <div className="overflow-hidden rounded-[1.35rem] border border-blue-950/10 bg-white/95 shadow-[0_20px_60px_-28px_rgba(15,53,104,0.38)] backdrop-blur dark:border-white/10 dark:bg-surface/92">
+          <div className="flex items-center justify-between gap-4 border-b border-blue-950/10 bg-[linear-gradient(120deg,rgba(43,168,255,0.09),rgba(34,181,115,0.07),transparent)] px-4 py-3.5 dark:border-white/10 sm:px-6">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <h2 className="font-heading text-lg font-semibold text-slate-950 dark:text-white sm:text-xl">Check your resume</h2>
+                <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-800 dark:bg-emerald-400/15 dark:text-emerald-200">Free · no signup</span>
+              </div>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">PDF, DOCX or TXT · up to 4 MB · report in about a minute</p>
             </div>
-            <button type="button" onClick={reset} className="grid size-10 cursor-pointer place-items-center rounded-full border border-blue-950/10 bg-white text-slate-700 shadow-sm transition hover:border-primary/35 hover:text-primary dark:border-white/10 dark:bg-white/7 dark:text-white" aria-label="Reset resume checker">
+            <button type="button" onClick={reset} className="grid size-9 shrink-0 cursor-pointer place-items-center rounded-full border border-blue-950/10 bg-white text-slate-600 shadow-sm transition hover:border-primary/35 hover:text-primary dark:border-white/10 dark:bg-white/7 dark:text-white" aria-label="Reset resume checker">
               <RotateCcw className="size-4" aria-hidden="true" />
             </button>
           </div>
 
-          <div className="mt-6 grid gap-4">
-            <div className="rounded-[1.2rem] border border-dashed border-primary/25 bg-[linear-gradient(135deg,rgba(43,168,255,0.08),rgba(34,181,115,0.08))] p-5 text-center dark:border-emerald-300/25 dark:bg-white/[0.04]">
-              <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-white text-primary shadow-sm dark:bg-white/10 dark:text-emerald-200">
-                <UploadCloud className="size-7" aria-hidden="true" />
+          <fieldset disabled={isGenerating || isReadingFile || isDetectingProfile} className="grid min-w-0 gap-3 p-4 disabled:opacity-70 sm:p-5">
+            <div
+              onDragOver={(event) => { event.preventDefault(); if (!isGenerating) setIsDragging(true); }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={(event) => { event.preventDefault(); setIsDragging(false); void handleFileUpload(event.dataTransfer.files[0]); }}
+              data-dragging={isDragging}
+              className="grid items-center gap-4 rounded-2xl border border-dashed border-primary/30 bg-[linear-gradient(135deg,rgba(43,168,255,0.08),rgba(34,181,115,0.07))] p-4 transition duration-200 data-[dragging=true]:border-primary data-[dragging=true]:ring-4 data-[dragging=true]:ring-primary/10 dark:border-emerald-300/25 dark:bg-white/[0.04] sm:grid-cols-[minmax(0,1fr)_auto] sm:p-5"
+            >
+              <div className="flex min-w-0 items-center gap-3.5">
+                <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-white text-primary shadow-sm dark:bg-white/10 dark:text-emerald-200">
+                  {uploadedResume ? <FileText className="size-5" aria-hidden="true" /> : <UploadCloud className="size-5" aria-hidden="true" />}
+                </div>
+                <div className="min-w-0 text-left">
+                  <h3 className="truncate text-sm font-semibold text-slate-950 dark:text-white sm:text-base">{uploadedResume ? uploadedResume.name : "Drop your resume here"}</h3>
+                  <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">{uploadedResume ? `${formatFileSize(uploadedResume.size)} · ${isDetectingProfile ? "detecting profile…" : "ready to review"}` : "Drag a file here or choose it from your device"}</p>
+                </div>
               </div>
-              <h3 className="mt-4 font-heading text-2xl font-semibold text-slate-950 dark:text-white">Drop your resume here</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">Upload PDF, DOC, DOCX, or TXT. AI will extract the resume content and analyze it.</p>
-              <div className="mt-4 flex flex-wrap justify-center gap-2">
-                <label className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-[image:var(--button-solid)] px-5 text-sm font-semibold !text-white shadow-lg shadow-primary/15 transition hover:-translate-y-0.5">
+              <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                {isDetectingProfile ? <span className="inline-flex h-10 items-center gap-2 rounded-full border border-emerald-200 bg-white px-4 text-xs font-semibold text-emerald-800 dark:border-emerald-300/20 dark:bg-white/8 dark:text-emerald-200"><LoaderCircle className="size-3.5 animate-spin" aria-hidden="true" />Reading profile…</span> : null}
+                <label className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-full bg-[image:var(--button-solid)] px-5 text-sm font-semibold !text-white shadow-lg shadow-primary/15 transition hover:-translate-y-0.5">
                   <UploadCloud className="size-4" aria-hidden="true" />
-                  Choose resume
-                  <input type="file" accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" onChange={(event) => { handleFileUpload(event.target.files?.[0]); event.currentTarget.value = ""; }} className="sr-only" />
+                  {uploadedResume ? "Replace" : "Choose resume"}
+                  <input type="file" accept=".pdf,.docx,.txt" onChange={(event) => { handleFileUpload(event.target.files?.[0]); event.currentTarget.value = ""; }} className="sr-only" />
                 </label>
-                {uploadedResume ? (
-                  <button type="button" onClick={() => { setUploadedResume(null); clearGenerated(); }} className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full border border-blue-950/10 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-rose-300 hover:text-rose-600 dark:border-white/10 dark:bg-white/7 dark:text-slate-200">
-                    <X className="size-4" aria-hidden="true" />
-                    Remove
-                  </button>
-                ) : null}
+                {uploadedResume ? <button type="button" onClick={() => { setUploadedResume(null); setResumeText(""); clearGenerated(); }} className="grid size-10 cursor-pointer place-items-center rounded-full border border-blue-950/10 bg-white text-slate-500 transition hover:border-rose-300 hover:text-rose-600 dark:border-white/10 dark:bg-white/7" aria-label="Remove uploaded resume"><X className="size-4" aria-hidden="true" /></button> : null}
                 {savedAvailable ? <ActionButton label="Restore last" icon={Sparkles} onClick={restoreLast} /> : null}
               </div>
-              {uploadProgress > 0 ? (
-                <div className="mx-auto mt-4 max-w-md">
-                  <div className="flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500"><span>Uploading</span><span>{uploadProgress}%</span></div>
-                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200"><div className="h-full rounded-full bg-[image:var(--button-solid)]" style={{ width: `${uploadProgress}%` }} /></div>
-                </div>
-              ) : null}
-              {uploadedResume ? (
-                <div className="mx-auto mt-4 max-w-md rounded-xl border border-emerald-200 bg-white/82 px-4 py-3 text-left text-sm dark:border-emerald-300/20 dark:bg-white/[0.06]">
-                  <div className="font-semibold text-slate-950 dark:text-white">{uploadedResume.name}</div>
-                  <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">{formatFileSize(uploadedResume.size)} · {isDetectingProfile ? "detecting profile..." : "ready for AI extraction"}</div>
-                  <button
-                    type="button"
-                    onClick={() => void detectResumeProfile()}
-                    disabled={isDetectingProfile}
-                    className="mt-3 inline-flex h-9 cursor-pointer items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 text-xs font-semibold text-emerald-800 transition hover:border-emerald-400 disabled:pointer-events-none disabled:opacity-60 dark:border-emerald-300/20 dark:bg-emerald-400/10 dark:text-emerald-200"
-                  >
-                    {isDetectingProfile ? <LoaderCircle className="size-3.5 animate-spin" aria-hidden="true" /> : <Sparkles className="size-3.5" aria-hidden="true" />}
-                    Auto-detect profile
+              {uploadProgress > 0 ? <div className="sm:col-span-2"><div className="h-1.5 overflow-hidden rounded-full bg-slate-200"><div className="h-full rounded-full bg-[image:var(--button-solid)] transition-[width]" style={{ width: `${uploadProgress}%` }} /></div></div> : null}
+            </div>
+
+            {detectedSummary ? <div className="flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50/80 px-3 py-2 text-xs leading-5 text-emerald-900 dark:border-emerald-300/20 dark:bg-emerald-400/10 dark:text-emerald-100"><CheckCircle2 className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" /><span>{detectedSummary}</span></div> : null}
+
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3" role="tablist" aria-label="Additional resume inputs">
+              {([
+                ["resume-text", "Paste resume text", !uploadedResume && resumeWords ? `${resumeWords} words` : "Use text instead"],
+                ["job-match", "Match a job", jobDescription ? "Job added" : "Optional"],
+                ["preferences", "Fine-tune", selectedSkills.length ? `${selectedSkills.length} skills` : "Optional"],
+              ] as const).map(([panel, label, meta]) => {
+                const isActive = activeInputPanel === panel;
+                return (
+                  <button key={panel} type="button" role="tab" aria-selected={isActive} aria-expanded={isActive} aria-controls={`resume-input-${panel}`} onClick={() => setActiveInputPanel(isActive ? null : panel)} className={`group flex min-h-12 cursor-pointer items-center justify-between gap-3 rounded-xl border px-3.5 py-2.5 text-left transition duration-200 ${isActive ? "border-primary/35 bg-blue-50 text-primary shadow-sm dark:border-emerald-300/30 dark:bg-emerald-400/10 dark:text-emerald-200" : "border-blue-950/10 bg-white text-slate-800 hover:border-primary/25 hover:bg-blue-50/60 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-100"}`}>
+                    <span className="text-sm font-semibold">{label}</span>
+                    <span className="flex shrink-0 items-center gap-1.5 text-[11px] font-medium text-slate-500 dark:text-slate-400">{meta}<ChevronDown className={`size-3.5 transition-transform duration-300 ${isActive ? "rotate-180" : ""}`} aria-hidden="true" /></span>
                   </button>
+                );
+              })}
+            </div>
+
+            <div className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out ${activeInputPanel ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
+              <div className="min-h-0 overflow-hidden">
+                <div key={activeInputPanel} id={activeInputPanel ? `resume-input-${activeInputPanel}` : undefined} className="animate-in fade-in-0 slide-in-from-top-2 rounded-2xl border border-blue-950/10 bg-slate-50/80 p-3 duration-300 dark:border-white/10 dark:bg-white/[0.035] sm:p-4">
+                  {activeInputPanel === "resume-text" ? (
+                    <textarea value={resumeText} maxLength={30000} onChange={(event) => { setResumeText(event.target.value); setUploadedResume(null); clearGenerated(); }} rows={5} autoFocus placeholder="Paste your complete resume here…" className="w-full resize-y rounded-xl border border-blue-950/10 bg-white px-4 py-3 text-sm font-medium leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 dark:border-white/10 dark:bg-white/[0.06] dark:text-white" />
+                  ) : null}
+
+                  {activeInputPanel === "job-match" ? (
+                    <div className="grid items-start gap-3 lg:grid-cols-[minmax(0,1.7fr)_minmax(16rem,0.8fr)]">
+                      <label className="grid gap-1.5">
+                        <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Job description</span>
+                        <textarea value={jobDescription} maxLength={12000} onChange={(event) => { setJobDescription(event.target.value); clearGenerated(); }} rows={5} autoFocus placeholder="Paste responsibilities and requirements…" className="w-full resize-y rounded-xl border border-blue-950/10 bg-white p-3 text-sm leading-6 outline-none transition focus:border-primary/50 focus:ring-4 focus:ring-primary/10 dark:border-white/10 dark:bg-white/[0.06]" />
+                        <span className="text-right text-[11px] text-slate-500">{jobDescription.length.toLocaleString()} / 12,000</span>
+                      </label>
+                      <SearchSelect key={targetRole} label="Target role" value={targetRole} onChange={(value) => { setTargetRole(value); clearGenerated(); }} options={roleOptions} />
+                    </div>
+                  ) : null}
+
+                  {activeInputPanel === "preferences" ? (
+                    <div className="grid items-start gap-3 xl:grid-cols-2">
+                      <div className="grid gap-3">
+                        <NumberField label="Experience" value={yearsExperience} onChange={(value) => { setYearsExperience(value); clearGenerated(); }} min={0} max={20} suffix={yearsExperience === 1 ? " year" : " years"} presets={[0, 1, 3, 5, 8, 11, 15]} note={experienceLabel} />
+                        <ChoiceGrid label="Role family" value={roleFamily} options={roleFamilies} onChange={(value) => { setRoleFamily(value); clearGenerated(); }} />
+                        <ChoiceGrid label="Output language" value={language} options={languageOptions} onChange={(value) => { setLanguage(value); clearGenerated(); }} />
+                      </div>
+                      <div className="grid gap-3">
+                        <div className="rounded-[1.1rem] border border-blue-950/10 bg-white/82 p-4 shadow-sm shadow-blue-950/5 dark:border-white/10 dark:bg-white/[0.04]">
+                          <div className="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100"><BarChart3 className="size-4 text-primary dark:text-emerald-200" aria-hidden="true" />Skills you already know</div>
+                          <div className="mt-3 flex flex-wrap gap-1.5">
+                            {popularSkills.map((skill) => { const active = selectedSkills.some((item) => skillsMatch(item, skill)); return <button key={skill} type="button" onClick={() => toggleSkill(skill)} className={`cursor-pointer rounded-full border px-2.5 py-1.5 text-xs font-semibold transition ${active ? "border-emerald-500 bg-emerald-50 text-emerald-800 dark:border-emerald-300 dark:bg-emerald-300 dark:text-slate-950" : "border-blue-950/10 bg-white text-slate-700 hover:border-emerald-300 hover:text-emerald-700 dark:border-white/10 dark:bg-white/7 dark:text-slate-200"}`}>{skill}</button>; })}
+                          </div>
+                          <input value={customSkill} onChange={(event) => { setCustomSkill(event.target.value); clearGenerated(); }} placeholder="Other skills: Tableau, SAP, Unreal Engine…" className="mt-3 h-10 w-full rounded-xl border border-blue-950/10 bg-blue-50/60 px-3 text-sm font-semibold text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-primary/50 dark:border-white/10 dark:bg-white/[0.06] dark:text-white" />
+                        </div>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <NumberField label="Target package" value={targetPackage} onChange={(value) => { setTargetPackage(value); clearGenerated(); }} min={0} max={100} suffix=" LPA" presets={[3, 6, 12, 25, 50]} />
+                          <NumberField label="Daily prep time" value={dailyHours} onChange={(value) => { setDailyHours(value); clearGenerated(); }} min={1} max={10} suffix="h" presets={[1, 2, 3, 4, 6]} />
+                        </div>
+                        <label className="flex items-start gap-2.5 px-1 text-xs leading-5 text-slate-600 dark:text-slate-300"><input type="checkbox" checked={saveReport} onChange={(event) => { setSaveReport(event.target.checked); if (!event.target.checked) { try { window.localStorage.removeItem(storageKey); } catch {} setSavedAvailable(false); } }} className="mt-1" />Save my resume text and report on this device.</label>
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
-              ) : null}
+              </div>
             </div>
 
-            <label className="rounded-[1.1rem] border border-blue-950/10 bg-white/82 p-4 shadow-sm shadow-blue-950/5 dark:border-white/10 dark:bg-white/[0.04]">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">Or paste resume text</span>
-                <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-white/[0.06] dark:text-slate-300">{resumeWords} words</span>
+            <div className="flex flex-col gap-2 border-t border-blue-950/8 pt-3 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                <p role="status" className="truncate text-xs font-medium text-slate-600 dark:text-slate-300">{actionMessage}</p>
               </div>
-              <textarea
-                value={resumeText}
-                onChange={(event) => { setResumeText(event.target.value); clearGenerated(); }}
-                rows={6}
-                placeholder="Paste resume text here if you do not want to upload a file..."
-                className="mt-3 w-full resize-y rounded-xl border border-blue-950/10 bg-blue-50/60 px-4 py-3 text-sm font-medium leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-primary/50 dark:border-white/10 dark:bg-white/[0.06] dark:text-white"
-              />
-            </label>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <SearchSelect key={targetRole} label="Target role" value={targetRole} onChange={(value) => { setTargetRole(value); clearGenerated(); }} options={roleOptions} />
-              <NumberField label="Experience" value={yearsExperience} onChange={(value) => { setYearsExperience(value); clearGenerated(); }} min={0} max={20} suffix={yearsExperience === 1 ? " year" : " years"} presets={[0, 1, 3, 5, 8, 11, 15]} note={experienceLabel} />
+              <button type="button" disabled={isGenerating || isReadingFile || isDetectingProfile} onClick={generateAnalysis} className="inline-flex h-11 w-full shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full bg-[image:var(--button-solid)] px-7 text-sm font-semibold !text-white shadow-lg shadow-primary/20 transition hover:-translate-y-0.5 disabled:cursor-not-allowed sm:w-auto sm:min-w-56">
+                <Sparkles className="size-4 animate-pulse" aria-hidden="true" />
+                {isGenerating ? "Reviewing…" : isReadingFile ? "Reading resume…" : "Check my resume"}
+              </button>
             </div>
-
-            {detectedSummary ? (
-              <div className="rounded-[1.1rem] border border-emerald-200 bg-emerald-50/80 p-4 text-sm leading-6 text-emerald-900 dark:border-emerald-300/20 dark:bg-emerald-400/10 dark:text-emerald-100">
-                <div className="flex items-start gap-2">
-                  <CheckCircle2 className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                  <span>{detectedSummary}</span>
-                </div>
-              </div>
-            ) : null}
-
-            <ChoiceGrid label="Role family" value={roleFamily} options={roleFamilies} onChange={(value) => { setRoleFamily(value); clearGenerated(); }} />
-
-            <div className="rounded-[1.1rem] border border-blue-950/10 bg-white/82 p-4 shadow-sm shadow-blue-950/5 dark:border-white/10 dark:bg-white/[0.04]">
-              <div className="flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
-                <BarChart3 className="size-4 text-primary dark:text-emerald-200" aria-hidden="true" />
-                Skills you already know
-              </div>
-              {selectedSkills.length ? (
-                <div className="mt-3 flex flex-wrap gap-2 rounded-xl bg-emerald-50/70 p-3 dark:bg-emerald-400/10">
-                  {selectedSkills.map((skill) => (
-                    <button
-                      key={skill}
-                      type="button"
-                      onClick={() => toggleSkill(skill)}
-                      className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-emerald-200 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-800 transition hover:border-rose-300 hover:text-rose-600 dark:border-emerald-300/20 dark:bg-white/8 dark:text-emerald-100"
-                    >
-                      {skill}
-                      <X className="size-3" aria-hidden="true" />
-                    </button>
-                  ))}
-                </div>
-              ) : null}
-              <div className="mt-3 flex flex-wrap gap-2">
-                {popularSkills.map((skill) => {
-                  const active = selectedSkills.some((item) => skillsMatch(item, skill));
-                  return (
-                    <button key={skill} type="button" onClick={() => toggleSkill(skill)} className={`cursor-pointer rounded-full border px-3 py-2 text-sm font-semibold transition ${active ? "border-emerald-500 bg-emerald-50 text-emerald-800 dark:border-emerald-300 dark:bg-emerald-300 dark:text-slate-950" : "border-blue-950/10 bg-white text-slate-700 hover:border-emerald-300 hover:text-emerald-700 dark:border-white/10 dark:bg-white/7 dark:text-slate-200"}`}>
-                      {skill}
-                    </button>
-                  );
-                })}
-              </div>
-              <input
-                value={customSkill}
-                onChange={(event) => { setCustomSkill(event.target.value); clearGenerated(); }}
-                placeholder="Add other skills: C++, Tableau, SAP, Unreal Engine..."
-                className="mt-4 h-12 w-full rounded-xl border border-blue-950/10 bg-blue-50/60 px-4 text-sm font-semibold text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-primary/50 dark:border-white/10 dark:bg-white/[0.06] dark:text-white"
-              />
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <NumberField label="Target package" value={targetPackage} onChange={(value) => { setTargetPackage(value); clearGenerated(); }} min={0} max={100} suffix=" LPA" presets={[3, 6, 12, 25, 50]} />
-              <NumberField label="Daily prep time" value={dailyHours} onChange={(value) => { setDailyHours(value); clearGenerated(); }} min={1} max={10} suffix="h" presets={[1, 2, 3, 4, 6]} />
-            </div>
-
-            <ChoiceGrid label="Output language" value={language} options={languageOptions} onChange={(value) => { setLanguage(value); clearGenerated(); }} />
-
-            <button type="button" onClick={generateAnalysis} className="inline-flex h-12 cursor-pointer items-center justify-center gap-2 rounded-full bg-[image:var(--button-solid)] px-5 text-sm font-semibold !text-white shadow-xl shadow-primary/20 transition hover:-translate-y-0.5">
-              <Sparkles className="size-4 animate-pulse" aria-hidden="true" />
-              Generate AI ATS Report
-            </button>
-          </div>
+          </fieldset>
         </div>
 
-        <ResultPanel
+        {analysis ? <ResultPanel
           ref={resultPanelRef}
           analysis={analysis}
           readiness={readiness}
@@ -806,9 +763,7 @@ export function ResumeAtsChecker() {
           onPrint={printReport}
           onShare={shareReport}
           onBuildResume={buildResumeFromReport}
-          savedAvailable={savedAvailable}
-          onRestore={restoreLast}
-        />
+        /> : null}
       </div>
 
       {isGenerating ? <GenerationOverlay progress={progress} /> : null}
@@ -826,9 +781,9 @@ type ResultPanelProps = {
   onPrint: () => void;
   onShare: () => void;
   onBuildResume: () => void;
-  savedAvailable: boolean;
-  onRestore: () => void;
 };
+
+type ResultTab = "overview" | "keywords" | "writing" | "plan";
 
 const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(function ResultPanel({
   analysis,
@@ -839,105 +794,110 @@ const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(function Result
   onPrint,
   onShare,
   onBuildResume,
-  savedAvailable,
-  onRestore,
 }, ref) {
+  const [activeResultTab, setActiveResultTab] = useState<ResultTab>("overview");
+  if (!analysis) return null;
+
+  const resultTabs = [
+    { id: "overview" as const, label: "Overview", hint: "Main findings", icon: BarChart3 },
+    { id: "keywords" as const, label: "Keywords & skills", hint: "Matched and missing", count: analysis.missingKeywords.length + analysis.missingSkills.length, icon: Search },
+    { id: "writing" as const, label: "Writing & format", hint: "Fixes and rewrites", count: analysis.grammarIssues.length + analysis.formattingIssues.length + analysis.bulletSuggestions.length, icon: FileText },
+    { id: "plan" as const, label: "Recruiter plan", hint: "Prepare and improve", count: analysis.recruiterChecklist.length, icon: BriefcaseBusiness },
+  ];
+
   return (
-    <div ref={ref} className="rounded-[1.25rem] border border-blue-950/10 bg-white/94 p-5 shadow-2xl shadow-blue-950/12 backdrop-blur dark:border-white/10 dark:bg-surface/92 sm:p-7">
-      <div className="grid gap-5 xl:grid-cols-[0.82fr_1.18fr] xl:items-start">
-        <div className="space-y-4">
-          <div className="grid place-items-center rounded-[1.2rem] border border-blue-950/10 bg-[radial-gradient(circle_at_50%_20%,rgba(43,168,255,0.12),transparent_15rem),linear-gradient(180deg,#ffffff,#f1f8ff)] p-6 dark:border-white/10 dark:bg-white/[0.04]">
-            <ScoreRing score={analysis?.atsScore ?? 0} />
-            <span className={`mt-4 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold ${getToneClasses(readiness.tone)}`}>
-              {analysis && analysis.atsScore < 55 ? <AlertCircle className="size-4" aria-hidden="true" /> : <CheckCircle2 className="size-4" aria-hidden="true" />}
-              {analysis ? readiness.label : "Not analyzed"}
-            </span>
+    <div ref={ref} className="scroll-mt-24 overflow-hidden rounded-[1.35rem] border border-blue-950/10 bg-white/95 shadow-[0_24px_70px_-34px_rgba(15,53,104,0.42)] backdrop-blur dark:border-white/10 dark:bg-surface/92">
+      <div className="grid gap-4 border-b border-blue-950/10 bg-[linear-gradient(120deg,rgba(43,168,255,0.10),rgba(34,181,115,0.07),transparent)] p-4 dark:border-white/10 sm:p-5 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center">
+        <div className="flex items-center gap-3">
+          <ScoreRing score={analysis.atsScore} />
+          <div className="lg:hidden">
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-primary dark:text-emerald-200">ATS readiness</p>
+            <p className={`mt-1 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${getToneClasses(readiness.tone)}`}>{analysis.atsScore < 55 ? <AlertCircle className="size-3.5" aria-hidden="true" /> : <CheckCircle2 className="size-3.5" aria-hidden="true" />}{readiness.label}</p>
           </div>
-          {analysis ? (
-            <div className="rounded-[1.2rem] border border-emerald-200 bg-[linear-gradient(135deg,rgba(34,181,115,0.13),rgba(43,168,255,0.11))] p-5 shadow-lg shadow-blue-950/8 dark:border-emerald-300/25 dark:bg-emerald-400/10">
-              <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-emerald-800 dark:text-emerald-200">
-                <Sparkles className="size-4 animate-pulse" aria-hidden="true" />
-                Recommended next step
-              </div>
-              <h4 className="mt-2 font-heading text-xl font-semibold leading-tight text-slate-950 dark:text-white">
-                Build a stronger ATS-friendly resume
-              </h4>
-              <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-300">
-                Turn this report into a cleaner resume with better keywords, stronger bullets, and improved sections.
-              </p>
-              <button type="button" onClick={onBuildResume} className="mt-4 inline-flex h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-[image:var(--button-solid)] px-4 text-sm font-semibold !text-white shadow-xl shadow-primary/20 transition hover:-translate-y-0.5">
-                <FileText className="size-4" aria-hidden="true" />
-                Build improved resume
-              </button>
-            </div>
-          ) : null}
         </div>
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-primary dark:text-emerald-200">Your ATS result</p>
-          <h3 className="mt-3 font-heading text-2xl font-semibold leading-tight text-slate-950 dark:text-white lg:text-3xl">{analysis ? analysis.roleFit : "Upload a resume to unlock your score"}</h3>
-          <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">{analysis ? analysis.summary : "Get ATS score, skill gaps, missing keywords, better bullet points, project ideas, interview questions, and a roadmap."}</p>
-          {analysis ? <p className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-slate-700 dark:border-emerald-300/25 dark:bg-emerald-400/10 dark:text-slate-200">{analysis.verdict}</p> : null}
+        <div className="min-w-0">
+          <div className="hidden items-center gap-2 lg:flex"><span className="text-[10px] font-bold uppercase tracking-[0.14em] text-primary dark:text-emerald-200">ATS readiness</span><span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${getToneClasses(readiness.tone)}`}>{readiness.label}</span></div>
+          <h3 className="mt-1 font-heading text-xl font-semibold leading-tight text-slate-950 dark:text-white sm:text-2xl">{analysis.roleFit}</h3>
+          <p className="mt-1.5 max-w-4xl text-sm leading-5 text-slate-600 dark:text-slate-300">{analysis.summary}</p>
+          <p className="mt-2 line-clamp-2 text-xs font-medium leading-5 text-emerald-900 dark:text-emerald-100">{analysis.verdict}</p>
         </div>
+        <button type="button" onClick={onBuildResume} className="inline-flex h-10 w-full shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full bg-[image:var(--button-solid)] px-5 text-sm font-semibold !text-white shadow-lg shadow-primary/20 transition hover:-translate-y-0.5 lg:w-auto">
+          <FileText className="size-4" aria-hidden="true" />Build improved resume
+        </button>
       </div>
 
-      {analysis ? (
-        <div className="mt-6 grid gap-4">
-          <div className="grid gap-3 md:grid-cols-3">
-            {analysis.componentScores.map((item) => <MetricBar key={item.label} label={item.label} score={item.score} />)}
+      <div className="grid gap-4 p-4 sm:p-5">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+          {analysis.componentScores.map((item) => <MetricBar key={item.label} label={item.label} score={item.score} />)}
+        </div>
+
+        <div className="rounded-2xl border border-blue-950/10 bg-slate-50/90 p-2.5 dark:border-white/10 dark:bg-white/[0.035]">
+          <div className="mb-2 flex items-end justify-between gap-3 px-1">
+            <div><h4 className="text-xs font-bold uppercase tracking-[0.12em] text-slate-700 dark:text-slate-200">Explore your report</h4><p className="mt-0.5 text-[11px] text-slate-500">Choose a section to see its details</p></div>
+            <span className="hidden text-[10px] font-semibold text-slate-400 sm:inline">4 report sections</span>
           </div>
-          <ListCard title="Quick wins" items={analysis.quickWins} large />
-          <div className="grid gap-4 md:grid-cols-2">
-            <ListCard title="Missing keywords" items={analysis.missingKeywords} />
-            <ListCard title="Missing skills" items={analysis.missingSkills} />
-            <ListCard title="Strengths" items={analysis.strengths} />
-            <ListCard title="Weak areas" items={analysis.weakAreas} />
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4" role="tablist" aria-label="ATS report sections">
+            {resultTabs.map((tab) => {
+              const active = activeResultTab === tab.id;
+              const Icon = tab.icon;
+              return <button key={tab.id} id={`result-tab-${tab.id}`} type="button" role="tab" aria-selected={active} aria-controls={`result-panel-${tab.id}`} onClick={() => setActiveResultTab(tab.id)} className={`group flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition duration-200 ${active ? "border-transparent bg-[image:var(--button-solid)] !text-white shadow-lg shadow-primary/20" : "border-blue-950/10 bg-white text-slate-700 hover:-translate-y-0.5 hover:border-primary/30 hover:bg-blue-50 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-200"}`}>
+                <span className={`grid size-8 shrink-0 place-items-center rounded-lg ${active ? "bg-white/16" : "bg-blue-50 text-primary group-hover:bg-white dark:bg-white/8 dark:text-emerald-200"}`}><Icon className="size-4" aria-hidden="true" /></span>
+                <span className="min-w-0 flex-1"><span className="block text-xs font-bold">{tab.label}</span><span className={`mt-0.5 block truncate text-[10px] ${active ? "text-white/75" : "text-slate-400"}`}>{tab.hint}</span></span>
+                {typeof tab.count === "number" ? <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${active ? "bg-white/18 text-white" : "bg-slate-100 text-slate-500 dark:bg-white/10 dark:text-slate-300"}`}>{tab.count}</span> : null}
+                {active ? <span className="size-2 rounded-full bg-white shadow-[0_0_0_4px_rgba(255,255,255,0.15)]" aria-hidden="true" /> : null}
+              </button>;
+            })}
           </div>
-          <ListCard title="Improved resume bullets" items={analysis.improvedBullets} large />
-          <ListCard title="Projects to add" items={analysis.projectsToAdd} large />
-          <div className="grid gap-4 md:grid-cols-2">
-            <ListCard title="Interview questions" items={analysis.interviewQuestions} />
-            <ListCard title="Recruiter checklist" items={analysis.recruiterChecklist} />
-          </div>
-          <RoadmapCard roadmap={analysis.roadmap} />
-          <div className="rounded-[1.1rem] border border-blue-950/10 bg-blue-50/70 p-4 dark:border-white/10 dark:bg-white/[0.05]">
-            <div className="font-semibold text-slate-950 dark:text-white">Salary note</div>
-            <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{analysis.salaryRange}</p>
-          </div>
-          <div className="rounded-[1.1rem] border-2 border-primary/20 bg-[linear-gradient(135deg,rgba(43,168,255,0.10),rgba(34,181,115,0.10))] p-4 shadow-lg shadow-blue-950/8 dark:border-emerald-300/20 dark:bg-emerald-400/10">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-xs font-semibold leading-5 text-slate-700 dark:text-slate-200">Report review complete. Copy, share, print, download, or build the improved resume from here.</p>
-              <div className="flex flex-wrap gap-2 sm:justify-end">
-                <ActionButton label="Copy" icon={Copy} onClick={onCopy} />
-                <ActionButton label="Share PDF" icon={Share2} onClick={onShare} />
-                <ActionButton label="Print" icon={Printer} onClick={onPrint} />
-                <ActionButton label="Download PDF" icon={Download} onClick={onDownload} />
-                <ActionButton label="Build resume" icon={FileText} onClick={onBuildResume} />
+        </div>
+
+        <div key={activeResultTab} id={`result-panel-${activeResultTab}`} role="tabpanel" aria-labelledby={`result-tab-${activeResultTab}`} className="animate-in fade-in-0 slide-in-from-bottom-1 duration-200">
+          {activeResultTab === "overview" ? (
+            <div className="grid items-stretch gap-3 lg:grid-cols-3">
+              <CompactList title="Top fixes" items={analysis.quickWins.slice(0, 3)} tone="priority" numbered />
+              <CompactList title="Strengths" items={analysis.strengths} tone="positive" />
+              <CompactList title="Weak areas" items={analysis.weakAreas} tone="warning" />
+              <details className="rounded-xl border border-blue-950/10 px-3.5 py-3 text-xs leading-5 dark:border-white/10 lg:col-span-3"><summary className="cursor-pointer font-semibold text-slate-800 dark:text-slate-100">How this score was calculated</summary><p className="mt-2 text-slate-500 dark:text-slate-400">AI-assisted readiness estimate: Keywords 20%, Skills 20%, Projects 15%, Impact 20%, Structure 10%, Clarity 15%.</p><div className="mt-2 grid gap-x-5 gap-y-1 sm:grid-cols-2">{analysis.componentScores.map((item) => <p key={item.label}><strong>{item.label}:</strong> {item.reason}</p>)}</div></details>
+            </div>
+          ) : null}
+
+          {activeResultTab === "keywords" ? (
+            <div className="grid items-start gap-3 lg:grid-cols-3">
+              <TagCard title="Skills found" items={analysis.matchedSkills} tone="positive" />
+              <TagCard title="Missing keywords" items={analysis.missingKeywords} tone="warning" />
+              <TagCard title="Missing skills" items={analysis.missingSkills} tone="danger" />
+              <div className="rounded-xl border border-blue-950/10 p-4 dark:border-white/10 lg:col-span-3">
+                <div className="flex flex-wrap items-center justify-between gap-2"><h4 className="text-sm font-semibold text-slate-950 dark:text-white">{analysis.jobMatchScore == null ? "Job-specific match" : `Job description match · ${analysis.jobMatchScore}/100`}</h4>{analysis.jobMatchScore == null ? <span className="rounded-full bg-blue-50 px-2 py-1 text-[10px] font-semibold text-primary dark:bg-white/8">Add a job description to enable</span> : null}</div>
+                {analysis.jobRequirements.length ? <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">{analysis.jobRequirements.map((item, index) => <div key={index} className="rounded-lg bg-slate-50 p-3 dark:bg-white/[0.05]"><div className="flex items-start justify-between gap-2"><strong className="text-xs">{item.keyword}</strong><span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${item.status === "matched" ? "bg-emerald-100 text-emerald-800" : item.status === "partial" ? "bg-amber-100 text-amber-800" : "bg-rose-100 text-rose-800"}`}>{item.status}</span></div><p className="mt-1 line-clamp-2 text-[11px] leading-4 text-slate-500 dark:text-slate-400">{item.evidence}</p></div>)}</div> : <p className="mt-2 text-xs leading-5 text-slate-500">Add the target job description above and run the check again to compare exact requirements.</p>}
               </div>
             </div>
-          </div>
-        </div>
-      ) : (
-        <div className="mt-8 rounded-[1.1rem] border border-dashed border-blue-950/15 bg-blue-50/60 p-8 text-center dark:border-white/10 dark:bg-white/[0.05]">
-          <div className="mx-auto grid size-12 place-items-center rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-200"><FileText className="size-5" aria-hidden="true" /></div>
-          <h3 className="mt-4 font-heading text-2xl font-semibold text-slate-950 dark:text-white">Your AI resume report will appear here.</h3>
-          <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">No fake sample report. Upload your real resume and generate a fresh analysis.</p>
-          {savedAvailable ? (
-            <button type="button" onClick={onRestore} className="mt-5 inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-[image:var(--button-solid)] px-5 text-sm font-semibold !text-white shadow-lg shadow-primary/15 transition hover:-translate-y-0.5">
-              <Sparkles className="size-4" aria-hidden="true" />
-              See last result
-            </button>
+          ) : null}
+
+          {activeResultTab === "writing" ? (
+            <div className="grid items-start gap-3 lg:grid-cols-2">
+              <SuggestionCard title="Grammar & writing" items={analysis.grammarIssues} />
+              <SuggestionCard title="Bullet improvements" items={analysis.bulletSuggestions} />
+              <div className="rounded-xl border border-blue-950/10 p-4 dark:border-white/10 lg:col-span-2"><h4 className="text-sm font-semibold text-slate-950 dark:text-white">Formatting review</h4><p className="mt-1 text-xs leading-5 text-slate-500">{analysis.formattingNote}</p>{analysis.formattingIssues.length ? <div className="mt-3 grid gap-2 sm:grid-cols-2">{analysis.formattingIssues.map((item, index) => <div key={index} className="rounded-lg bg-slate-50 p-3 dark:bg-white/[0.05]"><p className="text-xs font-semibold">{item.issue}</p><p className="mt-1 text-[11px] leading-4 text-slate-500">{item.evidence}</p><p className="mt-1.5 text-xs leading-5">{item.suggestion}</p></div>)}</div> : <p className="mt-2 text-xs text-slate-500">No specific formatting issues were flagged.</p>}</div>
+            </div>
+          ) : null}
+
+          {activeResultTab === "plan" ? (
+            <div className="grid items-start gap-3 lg:grid-cols-2">
+              <CompactList title="Recruiter checklist" items={analysis.recruiterChecklist} tone="positive" />
+              <CompactList title="Interview questions" items={analysis.interviewQuestions} />
+              <CompactList title="Projects worth adding" items={analysis.projectsToAdd} tone="priority" />
+              <RoadmapCard roadmap={analysis.roadmap} />
+              <div className="rounded-xl border border-blue-950/10 bg-blue-50/60 p-3 text-xs leading-5 text-slate-600 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-300 lg:col-span-2"><strong className="text-slate-950 dark:text-white">Salary context:</strong> {analysis.salaryRange}</div>
+            </div>
           ) : null}
         </div>
-      )}
 
-      <div className="mt-6 rounded-[1.1rem] border border-blue-950/10 bg-white p-4 dark:border-white/10 dark:bg-white/[0.05]">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs leading-5 text-slate-600 dark:text-slate-300">{actionMessage}</p>
+        <div className="flex flex-col gap-2 border-t border-blue-950/10 pt-3 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-slate-500">{actionMessage}</p>
           <div className="flex flex-wrap gap-2">
-            <ActionButton label="Copy" icon={Copy} onClick={onCopy} disabled={!analysis} />
-            <ActionButton label="Share PDF" icon={Share2} onClick={onShare} disabled={!analysis} />
-            <ActionButton label="Print" icon={Printer} onClick={onPrint} disabled={!analysis} />
-            <ActionButton label="Download PDF" icon={Download} onClick={onDownload} disabled={!analysis} />
+            <ActionButton label="Copy" icon={Copy} onClick={onCopy} />
+            <ActionButton label="Share" icon={Share2} onClick={onShare} />
+            <ActionButton label="Print" icon={Printer} onClick={onPrint} />
+            <ActionButton label="Download PDF" icon={Download} onClick={onDownload} />
           </div>
         </div>
       </div>
@@ -954,51 +914,18 @@ function getSupportedMimeType(file: File) {
   return "";
 }
 
-function shouldAttachResumeFile(resumeFile: UploadedResume | null | undefined, resumeText: string) {
-  if (!resumeFile?.data) return false;
-  if (resumeFile.mimeType === "application/msword" && (resumeText.trim().length >= 300 || (resumeFile.text || "").trim().length >= 300)) return false;
-  return true;
+function shouldAttachResumeFile(resumeFile: UploadedResume | null | undefined) {
+  return Boolean(resumeFile?.data && resumeFile.mimeType === "application/pdf");
 }
 
 async function extractReadableTextFromUpload(file: File, mimeType: string) {
-  const name = file.name.toLowerCase();
-  const shouldReadAsText =
-    mimeType === "application/msword" ||
-    mimeType === "text/plain" ||
-    name.endsWith(".html") ||
-    name.endsWith(".htm") ||
-    name.endsWith(".rtf");
-  if (!shouldReadAsText) return "";
-  try {
-    const raw = await file.text();
-    return normalizeReadableResumeText(raw);
-  } catch {
-    return "";
+  if (mimeType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+    const mammoth = await import("mammoth");
+    const result = await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
+    return result.value.trim();
   }
-}
-
-function normalizeReadableResumeText(raw: string) {
-  const looksHtml = /<\/?[a-z][\s\S]*>/i.test(raw);
-  const withoutMarkup = looksHtml
-    ? raw
-        .replace(/<script[\s\S]*?<\/script>/gi, " ")
-        .replace(/<style[\s\S]*?<\/style>/gi, " ")
-        .replace(/<br\s*\/?>/gi, "\n")
-        .replace(/<\/(p|div|li|tr|h[1-6]|section|table)>/gi, "\n")
-        .replace(/<[^>]+>/g, " ")
-    : raw;
-  return withoutMarkup
-    .replace(/\\'[0-9a-f]{2}/gi, " ")
-    .replace(/[{}\\]/g, " ")
-    .replace(/&nbsp;/gi, " ")
-    .replace(/&amp;/gi, "&")
-    .replace(/&lt;/gi, "<")
-    .replace(/&gt;/gi, ">")
-    .replace(/&quot;/gi, "\"")
-    .replace(/&#039;|&#39;/gi, "'")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 12000);
+  if (mimeType === "text/plain") return (await file.text()).trim();
+  return "";
 }
 
 function formatFileSize(size: number) {
@@ -1078,9 +1005,6 @@ function createPrintableAtsReport({
   targetPackage: number;
 }) {
   const list = (items: string[]) => items.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
-  const bars = analysis.componentScores
-    .map((item) => `<div class="bar-row"><span>${escapeHtml(item.label)}</span><strong>${item.score}%</strong><i><b style="width:${clamp(item.score, 0, 100)}%"></b></i></div>`)
-    .join("");
   return `<!doctype html>
 <html>
 <head>
@@ -1104,7 +1028,8 @@ function createPrintableAtsReport({
     .label { color: #65748b; font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
     .value { margin-top: 6px; font-size: 16px; font-weight: 800; }
     .notice { margin: 16px 0; padding: 16px; border-radius: 16px; background: #ecfdf4; border: 1px solid #bcebd1; font-weight: 700; }
-    h2 { margin: 22px 0 10px; font-size: 18px; }
+    li { white-space: pre-line; overflow-wrap: anywhere; }
+    h2 { break-after: avoid; margin: 22px 0 10px; font-size: 18px; }
     ul { margin: 0; padding-left: 18px; color: #334155; line-height: 1.55; }
     .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .panel { border: 1px solid #e0ebf6; border-radius: 16px; padding: 16px; break-inside: avoid; }
@@ -1132,134 +1057,12 @@ function createPrintableAtsReport({
         <div class="card"><div class="label">Skill gaps</div><div class="value">${analysis.missingSkills.length}</div></div>
       </div>
       <div class="notice">${escapeHtml(analysis.verdict)}</div>
-      <div class="panel"><h2>Score Breakdown</h2>${bars}</div>
-      <div class="columns">
-        <div class="panel"><h2>Quick Wins</h2><ul>${list(analysis.quickWins)}</ul></div>
-        <div class="panel"><h2>Missing Keywords</h2><ul>${list(analysis.missingKeywords)}</ul></div>
-        <div class="panel"><h2>Missing Skills</h2><ul>${list(analysis.missingSkills)}</ul></div>
-        <div class="panel"><h2>Improved Bullets</h2><ul>${list(analysis.improvedBullets.slice(0, 5))}</ul></div>
-      </div>
-      <div class="panel"><h2>30-Day Roadmap</h2><ul>${list(analysis.roadmap.flatMap((item) => [`${item.week}: ${item.focus}`, ...item.tasks]))}</ul></div>
+      ${reportSections(analysis).map(([title, items]) => `<section><h2>${escapeHtml(title)}</h2><ul>${list(items.length ? items : ["No specific findings in this review."])}</ul></section>`).join("")}
       <div class="footer">Generated by KASA. Check your resume score free at /tools/resume-ats-checker.</div>
     </section>
   </main>
 </body>
 </html>`;
-}
-
-function createResumeAtsPdf({
-  analysis,
-  candidateName,
-  targetRole,
-  roleFamily,
-  yearsExperience,
-  targetPackage,
-}: {
-  analysis: ResumeAnalysis;
-  candidateName: string;
-  targetRole: string;
-  roleFamily: string;
-  yearsExperience: number;
-  targetPackage: number;
-}) {
-  const commands: string[] = [];
-  const pageWidth = 595;
-  const pageHeight = 842;
-  const safe = (value: string) => value.replace(/[^\x20-\x7E]/g, " ").replace(/[\\()]/g, "\\$&");
-  const colors = {
-    slate950: "0.027 0.067 0.122",
-    slate700: "0.200 0.255 0.333",
-    slate500: "0.392 0.455 0.545",
-    blue: "0.086 0.239 0.561",
-    lightBlue: "0.886 0.945 1",
-    green: "0.133 0.710 0.443",
-    border: "0.863 0.910 0.965",
-    white: "1 1 1",
-  };
-  const text = (value: string, x: number, y: number, size = 11, color = colors.slate700, font = "F1") => {
-    commands.push(`BT /${font} ${size} Tf ${color} rg ${x} ${y} Td (${safe(value).slice(0, 110)}) Tj ET`);
-  };
-  const rect = (x: number, y: number, w: number, h: number, color: string) => commands.push(`${color} rg ${x} ${y} ${w} ${h} re f`);
-  const strokeRect = (x: number, y: number, w: number, h: number, color: string) => commands.push(`${color} RG ${x} ${y} ${w} ${h} re S`);
-  const wrapText = (value: string, x: number, y: number, maxChars: number, size = 10, color = colors.slate700) => {
-    const words = safe(value).split(/\s+/);
-    const lines: string[] = [];
-    let line = "";
-    words.forEach((word) => {
-      if (`${line} ${word}`.trim().length > maxChars) {
-        lines.push(line);
-        line = word;
-      } else {
-        line = `${line} ${word}`.trim();
-      }
-    });
-    if (line) lines.push(line);
-    lines.slice(0, 4).forEach((row, index) => text(row, x, y - index * (size + 5), size, color));
-    return y - Math.min(lines.length, 4) * (size + 5);
-  };
-  const list = (title: string, items: string[], x: number, y: number, maxItems = 5) => {
-    text(title, x, y, 13, colors.slate950, "F2");
-    let nextY = y - 20;
-    items.slice(0, maxItems).forEach((item) => {
-      nextY = wrapText(`- ${item}`, x, nextY, 58, 9, colors.slate700) - 4;
-    });
-    return nextY;
-  };
-
-  rect(0, pageHeight - 150, pageWidth, 150, colors.blue);
-  rect(0, pageHeight - 150, pageWidth, 18, colors.green);
-  text("KASA AI RESUME ATS CHECKER", 40, 790, 11, colors.white, "F2");
-  text(`${candidateName} ATS Score Report`, 40, 752, 28, colors.white, "F2");
-  text(`${targetRole} | ${roleFamily} | ${yearsExperience} years | Target ${targetPackage} LPA`, 40, 724, 11, "0.886 0.945 1");
-  rect(410, 705, 120, 76, colors.white);
-  text(`${analysis.atsScore}/100`, 430, 744, 26, colors.blue, "F2");
-  text("ATS SCORE", 438, 724, 9, colors.slate500, "F2");
-
-  text("Verdict", 40, 650, 15, colors.slate950, "F2");
-  wrapText(analysis.verdict, 40, 628, 88, 10);
-
-  const metricY = 565;
-  analysis.componentScores.slice(0, 6).forEach((item, index) => {
-    const col = index % 3;
-    const row = Math.floor(index / 3);
-    const x = 40 + col * 175;
-    const y = metricY - row * 64;
-    strokeRect(x, y - 42, 150, 48, colors.border);
-    text(item.label, x + 12, y - 8, 8, colors.slate500, "F2");
-    text(`${item.score}%`, x + 12, y - 28, 18, colors.slate950, "F2");
-    rect(x + 76, y - 30, 58, 6, colors.border);
-    rect(x + 76, y - 30, clamp(item.score, 0, 100) * 0.58, 6, colors.green);
-  });
-
-  list("Quick Wins", analysis.quickWins, 40, 410);
-  list("Missing Keywords", analysis.missingKeywords, 315, 410);
-  list("Missing Skills", analysis.missingSkills, 40, 255);
-  list("Projects To Add", analysis.projectsToAdd, 315, 255);
-  text("Generated by KASA. Check your resume score free at kasa.co/tools/resume-ats-checker", 40, 44, 9, colors.slate500);
-
-  const stream = commands.join("\n");
-  const streamLength = new TextEncoder().encode(stream).length;
-  const objects = [
-    "<< /Type /Catalog /Pages 2 0 R >>",
-    "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-    `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>`,
-    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
-    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>",
-    `<< /Length ${streamLength} >>\nstream\n${stream}\nendstream`,
-  ];
-  let pdf = "%PDF-1.4\n";
-  const offsets = [0];
-  objects.forEach((object, index) => {
-    offsets.push(pdf.length);
-    pdf += `${index + 1} 0 obj\n${object}\nendobj\n`;
-  });
-  const xref = pdf.length;
-  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
-  offsets.slice(1).forEach((offset) => {
-    pdf += `${String(offset).padStart(10, "0")} 00000 n \n`;
-  });
-  pdf += `trailer << /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
-  return new Blob([new TextEncoder().encode(pdf)], { type: "application/pdf" });
 }
 
 function uniqueList(items: unknown[], limit: number) {
@@ -1297,7 +1100,7 @@ function getReadiness(score: number) {
   if (score >= 80) return { label: "Strong resume", tone: "green" };
   if (score >= 65) return { label: "Good, improve keywords", tone: "blue" };
   if (score >= 50) return { label: "Needs work", tone: "amber" };
-  return { label: "High rejection risk", tone: "red" };
+  return { label: "Needs substantial improvement", tone: "red" };
 }
 
 function getToneClasses(tone: string) {
@@ -1310,11 +1113,11 @@ function getToneClasses(tone: string) {
 function ScoreRing({ score }: { score: number }) {
   const safeScore = clamp(score, 0, 100);
   return (
-    <div className="relative grid size-52 place-items-center rounded-full" style={{ background: `conic-gradient(#22b573 ${safeScore * 3.6}deg,#dbe8f5 ${safeScore * 3.6}deg)` }}>
-      <div className="grid size-40 place-items-center rounded-full bg-white shadow-inner dark:bg-slate-950">
+    <div className="relative grid size-24 shrink-0 place-items-center rounded-full sm:size-28" style={{ background: `conic-gradient(#22b573 ${safeScore * 3.6}deg,#dbe8f5 ${safeScore * 3.6}deg)` }}>
+      <div className="grid size-19 place-items-center rounded-full bg-white shadow-inner dark:bg-slate-950 sm:size-22">
         <div className="text-center">
-          <div className="font-heading text-5xl font-semibold text-slate-950 dark:text-white">{score ? safeScore : "--"}</div>
-          <div className="mt-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">ATS Score</div>
+          <div className="font-heading text-3xl font-semibold text-slate-950 dark:text-white sm:text-4xl">{score ? safeScore : "--"}</div>
+          <div className="text-[9px] font-bold uppercase tracking-[0.1em] text-slate-500">ATS score</div>
         </div>
       </div>
     </div>
@@ -1441,39 +1244,40 @@ function NumberField({ label, value, onChange, min, max, suffix, presets, note }
 
 function MetricBar({ label, score }: { label: string; score: number }) {
   return (
-    <div className="rounded-[1rem] border border-blue-950/10 bg-white p-4 dark:border-white/10 dark:bg-white/[0.05]">
-      <div className="flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-[0.13em] text-slate-500 dark:text-slate-400"><span>{label}</span><span>{score}%</span></div>
-      <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-white/12"><div className="h-full rounded-full bg-[image:var(--button-solid)]" style={{ width: `${clamp(score, 0, 100)}%` }} /></div>
+    <div className="rounded-xl border border-blue-950/10 bg-white p-3 dark:border-white/10 dark:bg-white/[0.05]">
+      <div className="flex items-center justify-between gap-2 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500 dark:text-slate-400"><span>{label}</span><span className="text-xs text-slate-800 dark:text-slate-100">{score}</span></div>
+      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-white/12"><div className="h-full rounded-full bg-[image:var(--button-solid)]" style={{ width: `${clamp(score, 0, 100)}%` }} /></div>
     </div>
   );
 }
 
-function ListCard({ title, items, large }: { title: string; items: string[]; large?: boolean }) {
+function CompactList({ title, items, tone = "default", numbered = false }: { title: string; items: string[]; tone?: "default" | "positive" | "warning" | "priority"; numbered?: boolean }) {
+  const markerClasses = tone === "positive" ? "bg-emerald-500" : tone === "warning" ? "bg-amber-500" : tone === "priority" ? "bg-primary" : "bg-slate-400";
   return (
-    <div className="rounded-[1.1rem] border border-blue-950/10 bg-white p-5 dark:border-white/10 dark:bg-white/[0.05]">
-      <h3 className="font-heading text-xl font-semibold text-slate-950 dark:text-white">{title}</h3>
-      <ul className={`mt-3 grid gap-2 text-sm leading-6 text-slate-600 dark:text-slate-300 ${large ? "sm:grid-cols-2" : ""}`}>
-        {items.length ? items.map((item) => <li key={item} className="rounded-xl bg-blue-50/75 px-3 py-2 dark:bg-white/[0.06]">{item}</li>) : <li>No major gaps found.</li>}
+    <div className="rounded-xl border border-blue-950/10 bg-white p-4 dark:border-white/10 dark:bg-white/[0.05]">
+      <h4 className="text-sm font-semibold text-slate-950 dark:text-white">{title}</h4>
+      <ul className="mt-2.5 grid gap-1.5 text-xs leading-5 text-slate-600 dark:text-slate-300">
+        {items.length ? items.map((item, index) => <li key={`${item}-${index}`} className="flex items-start gap-2 rounded-lg bg-slate-50 px-2.5 py-2 dark:bg-white/[0.05]">{numbered ? <span className="grid size-5 shrink-0 place-items-center rounded-full bg-primary/10 text-[10px] font-bold text-primary dark:text-emerald-200">{index + 1}</span> : <span className={`mt-1.5 size-1.5 shrink-0 rounded-full ${markerClasses}`} />}<span>{item}</span></li>) : <li className="text-slate-500">No specific items in this review.</li>}
       </ul>
     </div>
   );
 }
 
+function TagCard({ title, items, tone }: { title: string; items: string[]; tone: "positive" | "warning" | "danger" }) {
+  const styles = tone === "positive" ? "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-300/20 dark:bg-emerald-400/10 dark:text-emerald-100" : tone === "warning" ? "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-300/20 dark:bg-amber-400/10 dark:text-amber-100" : "border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-300/20 dark:bg-rose-400/10 dark:text-rose-100";
+  return <div className="rounded-xl border border-blue-950/10 p-4 dark:border-white/10"><div className="flex items-center justify-between gap-2"><h4 className="text-sm font-semibold text-slate-950 dark:text-white">{title}</h4><span className="text-xs font-semibold text-slate-400">{items.length}</span></div><div className="mt-3 flex flex-wrap gap-1.5">{items.length ? items.map((item) => <span key={item} className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${styles}`}>{item}</span>) : <span className="text-xs text-slate-500">Nothing flagged.</span>}</div></div>;
+}
+
 function RoadmapCard({ roadmap }: { roadmap: ResumeAnalysis["roadmap"] }) {
   return (
-    <div className="rounded-[1.1rem] border border-blue-950/10 bg-white p-5 dark:border-white/10 dark:bg-white/[0.05]">
-      <div className="flex items-center gap-2 font-heading text-xl font-semibold text-slate-950 dark:text-white">
-        <BriefcaseBusiness className="size-5 text-primary dark:text-emerald-300" aria-hidden="true" />
+    <div className="rounded-xl border border-blue-950/10 bg-white p-4 dark:border-white/10 dark:bg-white/[0.05]">
+      <div className="flex items-center gap-2 text-sm font-semibold text-slate-950 dark:text-white">
+        <BriefcaseBusiness className="size-4 text-primary dark:text-emerald-300" aria-hidden="true" />
         30-day roadmap
       </div>
-      <div className="mt-4 grid gap-3">
+      <div className="mt-2.5 grid gap-1.5">
         {roadmap.map((item) => (
-          <div key={`${item.week}-${item.focus}`} className="rounded-xl bg-blue-50/75 p-4 dark:bg-white/[0.06]">
-            <div className="text-sm font-semibold text-slate-950 dark:text-white">{item.week}: {item.focus}</div>
-            <ul className="mt-2 grid gap-1.5 text-sm leading-6 text-slate-600 dark:text-slate-300">
-              {item.tasks.map((task) => <li key={task}>- {task}</li>)}
-            </ul>
-          </div>
+          <details key={`${item.week}-${item.focus}`} className="rounded-lg bg-slate-50 px-3 py-2 dark:bg-white/[0.05]"><summary className="cursor-pointer text-xs font-semibold text-slate-950 dark:text-white">{item.week}: {item.focus}</summary><ul className="mt-2 grid gap-1 text-xs leading-5 text-slate-600 dark:text-slate-300">{item.tasks.map((task) => <li key={task}>• {task}</li>)}</ul></details>
         ))}
       </div>
     </div>
@@ -1500,7 +1304,7 @@ function GenerationOverlay({ progress }: { progress: number }) {
           </div>
           <div>
             <div className="font-heading text-2xl font-semibold text-slate-950 dark:text-white">Analyzing resume</div>
-            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Extracting resume, scoring ATS fit, and building roadmap...</p>
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Reviewing keywords, writing and resume structure…</p>
           </div>
         </div>
         <div className="mt-6 flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400"><span>AI analysis</span><span>{Math.round(progress)}%</span></div>
@@ -1508,4 +1312,19 @@ function GenerationOverlay({ progress }: { progress: number }) {
       </div>
     </div>
   );
+}
+
+function trackAts(event: string, properties: Record<string, string | boolean> = {}) {
+  const analyticsWindow = window as Window & { dataLayer?: Record<string, unknown>[] };
+  analyticsWindow.dataLayer?.push({ event: `ats_${event}`, tool: "resume_checker", ...properties });
+}
+
+function SuggestionCard({ title, items }: { title: string; items: { original: string; suggestion: string; reason: string }[] }) {
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [copyError, setCopyError] = useState(false);
+  return <section className="rounded-xl border border-blue-950/10 p-4 dark:border-white/10">
+    <div className="flex items-center justify-between gap-2"><h4 className="text-sm font-semibold">{title}</h4><span className="text-xs font-semibold text-slate-400">{items.length}</span></div>
+    {!items.length ? <p className="mt-2 text-xs text-slate-500">No specific changes suggested in this review.</p> : <div className="mt-2.5 grid gap-2">{items.map((item, index) => <details key={index} className="rounded-lg bg-slate-50 px-3 py-2 dark:bg-white/[0.05]"><summary className="cursor-pointer text-xs font-semibold leading-5 text-slate-800 dark:text-slate-100">{item.original}</summary><div className="mt-2 border-t border-blue-950/10 pt-2 dark:border-white/10"><p className="text-xs leading-5 text-emerald-800 dark:text-emerald-200">{item.suggestion}</p><p className="mt-1 text-[11px] leading-4 text-slate-500">{item.reason}</p><button type="button" className="mt-2 rounded-full border border-blue-950/15 px-2.5 py-1 text-[10px] font-semibold dark:border-white/20" onClick={async () => { try { await navigator.clipboard.writeText(item.suggestion); setCopiedIndex(index); setCopyError(false); trackAts("suggestion_copied"); } catch { setCopyError(true); } }}>{copiedIndex === index ? "Copied" : "Copy suggestion"}</button></div></details>)}</div>}
+    <p role="status" className="mt-2 text-xs text-slate-500">{copyError ? "Copy was blocked. Select and copy the suggestion above." : copiedIndex !== null ? "Suggestion copied. Check that it reflects your actual experience." : ""}</p>
+  </section>;
 }

@@ -48,9 +48,9 @@ export const tools: ToolItem[] = [
     status: "Live",
   },
   {
-    title: "AI Resume ATS Checker",
+    title: "Free ATS Resume Checker",
     slug: "resume-ats-checker",
-    description: "Free ATS resume checker with AI resume roast, rejection reasons, keyword gaps, PDF report, and career roadmap.",
+    description: "Check your ATS score, missing keywords, skills, writing and formatting, then download a free resume report.",
     category: "Students",
     isAi: true,
     icon: FileSearch,

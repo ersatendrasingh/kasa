@@ -18,27 +18,6 @@ type ResumeProfileResponse = {
   summary: string;
 };
 
-const requestLog = new Map<string, { count: number; resetAt: number }>();
-const DAY_MS = 24 * 60 * 60 * 1000;
-const DAILY_LIMIT = 8;
-
-function getClientKey(request: NextRequest) {
-  const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  return forwarded || request.headers.get("x-real-ip") || "local";
-}
-
-function checkRateLimit(clientKey: string) {
-  const now = Date.now();
-  const entry = requestLog.get(clientKey);
-  if (!entry || entry.resetAt <= now) {
-    requestLog.set(clientKey, { count: 1, resetAt: now + DAY_MS });
-    return true;
-  }
-  if (entry.count >= DAILY_LIMIT) return false;
-  entry.count += 1;
-  return true;
-}
-
 function cleanString(value: unknown, fallback: string, max = 300) {
   const text = String(value || fallback).replace(/\s+/g, " ").trim();
   return (text || fallback).slice(0, max);
@@ -104,11 +83,6 @@ function normalizeProfile(value: Partial<ResumeProfileResponse>): ResumeProfileR
 }
 
 export async function POST(request: NextRequest) {
-
-  if (!checkRateLimit(getClientKey(request))) {
-    return NextResponse.json({ error: "Daily resume profile detection limit reached. Please try again tomorrow." }, { status: 429 });
-  }
-
   let payload: ReturnType<typeof normalizeRequest>;
   try {
     payload = normalizeRequest(await request.json());

@@ -4,13 +4,11 @@ import {
   ArrowLeft,
   BriefcaseBusiness,
   CheckCircle2,
-  FileSearch,
   FileText,
   GraduationCap,
   Lightbulb,
   ListChecks,
   Search,
-  Sparkles,
   Target,
   TrendingUp,
   UserRoundCheck,
@@ -18,50 +16,41 @@ import {
 import { JsonLd } from "@/components/site/structured-data";
 import { siteContainerClasses } from "@/components/site/site-container";
 import { ResumeAtsChecker } from "@/components/tools/resume-ats-checker";
-import { ToolBreadcrumb, ToolHeroFeatureCard, ToolHeroKeywords } from "@/components/tools/tool-hero-extras";
+import { ToolBreadcrumb } from "@/components/tools/tool-hero-extras";
 import { ToolSeoSection } from "@/components/tools/tool-seo-section";
 
 export const metadata: Metadata = {
-  title: "Free ATS Resume Checker AI | Resume Score, Keywords & Rejection Fixes",
+  title: "Free ATS Resume Checker & ATS Score Checker",
   description:
-    "Free ATS Resume Checker AI to scan your resume, get an ATS score, find missing keywords, fix rejection risks, improve bullets, and download a report.",
+    "Upload a PDF or DOCX to check your ATS score, find missing keywords, review skills, grammar and formatting, and download a free PDF report. No signup.",
   keywords: [
-    "free ATS resume checker",
-    "ATS resume checker free",
-    "free ATS checker",
     "ATS resume checker",
-    "ATS checker free",
     "ATS score checker",
     "resume ATS checker",
-    "resume score checker free",
+    "resume ATS score checker",
+    "ATS resume checker free online",
+    "ATS friendly resume checker",
+    "ATS checker resume",
+    "free ATS score checker",
+    "free ATS resume checker",
     "AI resume checker",
-    "AI resume roast",
-    "resume roast AI",
-    "why resume gets rejected",
-    "resume ATS score",
-    "resume score checker",
-    "resume scanner free",
-    "free resume checker no signup",
-    "PDF resume checker",
-    "DOCX resume checker",
-    "resume roast AI",
-    "fresher resume checker",
-    "experienced resume checker",
     "resume keyword checker",
-    "resume keyword scanner",
-    "ATS resume keywords",
-    "resume rejection checker",
-    "resume improvement tool",
-    "career roadmap generator",
-    "interview preparation roadmap",
-    "student resume checker",
+    "resume score checker",
   ],
   alternates: { canonical: "/tools/resume-ats-checker" },
   openGraph: {
-    title: "Free ATS Resume Checker AI",
-    description: "Scan your resume, get an ATS score, find missing keywords, fix rejection risks, and download a shareable improvement report.",
+    title: "Free ATS Resume Checker & ATS Score Checker",
+    description: "Check your ATS score, missing keywords, skills, grammar and formatting. Get practical AI suggestions and download a free PDF report.",
     url: "/tools/resume-ats-checker",
     type: "website",
+    siteName: "KASA",
+    images: [{ url: "/kasa-hero.png", width: 1200, height: 630, alt: "KASA free ATS resume checker and ATS score report" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Free ATS Resume Checker & ATS Score Checker",
+    description: "Upload your resume to check its ATS score, missing keywords, writing and formatting, then download a free report.",
+    images: ["/kasa-hero.png"],
   },
 };
 
@@ -69,84 +58,57 @@ const pageUrl = "https://www.getkasa.in/tools/resume-ats-checker";
 
 const resumeAtsFaqs = [
   {
-    question: "What is an ATS Resume Checker?",
+    question: "What is an ATS resume checker?",
     answer:
-      "An ATS Resume Checker scans your resume for applicant tracking system compatibility, role keywords, formatting issues, missing skills, weak bullets, and recruiter screening risks.",
+      "An ATS resume checker reviews resume content for role keywords, relevant skills, clear sections, measurable impact and readable writing. It helps identify gaps before you apply, but it does not reproduce every employer’s applicant tracking system.",
   },
   {
-    question: "Is this ATS resume checker free?",
+    question: "Is this ATS resume checker free online?",
     answer:
-      "Yes. KASA's Free ATS Resume Checker AI lets you upload or paste your resume, get an ATS score, review keyword gaps, and download a report without signup.",
+      "Yes. KASA is a free online ATS resume checker with no signup required. Upload or paste your resume, review the score and suggestions, and download the report as a PDF.",
   },
   {
     question: "How does the ATS score checker work?",
     answer:
-      "The ATS score checker compares your resume content with the target role, skills, keywords, experience level, bullet quality, formatting clarity, and recruiter expectations.",
+      "The ATS score checker reviews six areas: keywords, skills, projects, impact, structure and clarity. Add a job description to measure requirement coverage separately from the overall resume-readiness score.",
   },
   {
-    question: "Can I check my resume without signup?",
-    answer:
-      "Yes. You can use the resume checker without creating an account. Upload a PDF, DOC, DOCX, TXT file, or paste resume text directly.",
+    question: "Can I compare my resume with a job description?",
+    answer: "Yes. Paste a job description to see matched, partial and missing requirements with evidence from your resume. The job-match score reports requirement coverage; it is not a hiring probability.",
   },
   {
-    question: "Can I upload a PDF resume?",
-    answer:
-      "Yes. The tool supports PDF resumes along with DOC, DOCX, and TXT formats. You can also paste text if you prefer not to upload a file.",
+    question: "Does the resume ATS checker find missing keywords?",
+    answer: "Yes. It highlights role-specific terms and skills that are missing from the resume. Add only keywords that accurately describe your experience, projects or knowledge.",
   },
   {
-    question: "Can I upload a DOCX resume?",
-    answer:
-      "Yes. DOCX resumes are supported. The checker reads the content and gives feedback on score, keywords, weak areas, and improvements.",
+    question: "Does the checker review grammar and resume formatting?",
+    answer: "It suggests sentence-level writing corrections and reviews observable structure, headings, dates and consistency. Text extraction cannot fully verify fonts, margins, columns or how a specific employer’s ATS parses the file.",
   },
   {
-    question: "Why does my resume get rejected by ATS?",
-    answer:
-      "Resumes often get rejected because they miss role-specific keywords, use vague bullets, hide skills in complex formatting, lack measurable impact, or target the wrong role.",
+    question: "Which resume files can I upload?",
+    answer: "You can upload PDF, DOCX and TXT resumes up to 4 MB, or paste resume text directly. The tool automatically detects the likely role, experience level and skills after upload.",
   },
   {
     question: "What is a good ATS resume score?",
     answer:
-      "A higher ATS score usually means your resume is better aligned with the target role, but the score is a guide. You should still customize each resume for the job description.",
+      "Use the score as a diagnostic guide rather than a pass mark. A stronger score indicates clearer evidence and better role alignment, but recruiters, job requirements and ATS configurations vary.",
   },
   {
-    question: "Does this tool find missing resume keywords?",
-    answer:
-      "Yes. It works as a resume keyword checker by highlighting missing ATS keywords, role skills, tools, technologies, and phrases recruiters expect for the selected role.",
+    question: "How can I make my resume ATS friendly?",
+    answer: "Use familiar section headings, write concise achievement bullets, include relevant skills naturally, keep dates consistent and avoid claiming experience you cannot verify. Tailor the resume to each job description.",
   },
   {
-    question: "Can freshers use this resume checker?",
-    answer:
-      "Yes. Freshers can use it to improve projects, internships, technical skills, certifications, college experience, and entry-level resume bullets.",
+    question: "Can freshers and experienced professionals use it?",
+    answer: "Yes. Freshers can improve projects, internships and entry-level keywords. Experienced professionals can strengthen achievements, leadership evidence, domain skills and senior-role alignment.",
   },
   {
-    question: "Can experienced professionals use this ATS checker?",
-    answer:
-      "Yes. Experienced professionals can use it to improve leadership signals, measurable achievements, role fit, seniority, domain keywords, and recruiter-facing impact.",
-  },
-  {
-    question: "What is Resume Roast AI?",
-    answer:
-      "Resume Roast AI is direct, practical feedback on why your resume may look weak, where bullets are vague, which keywords are missing, and what to rewrite before applying.",
-  },
-  {
-    question: "Can this AI resume checker improve bullet points?",
-    answer:
-      "Yes. The report suggests stronger bullet points that focus on action, skill, result, metrics, and role relevance.",
-  },
-  {
-    question: "Does it create an interview preparation roadmap?",
-    answer:
-      "Yes. The report includes a practical roadmap with focus areas, missing skills, project ideas, and interview questions for the target role.",
-  },
-  {
-    question: "Can I download the ATS report?",
-    answer:
-      "Yes. You can download or share the report with score, rejection risks, keyword gaps, improved bullets, checklist, and roadmap.",
+    question: "How is my resume data handled?",
+    answer: "Your resume and optional job description are sent to the configured AI provider for analysis. Saving the resume text and report on your device is optional, and Reset clears the saved checker report.",
   },
   {
     question: "Does an ATS score guarantee interview selection?",
     answer:
-      "No. An ATS score helps improve alignment and reduce obvious rejection risks, but interview calls depend on the job description, competition, recruiter judgment, and your actual experience.",
+      "No. An ATS score is an AI-assisted review estimate. Interview selection depends on the job description, recruiter judgment, competition and the evidence in your actual experience.",
   },
 ];
 
@@ -212,50 +174,68 @@ export default function ResumeAtsCheckerPage() {
   const jsonLd = [
     {
       "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
+      "@type": ["WebApplication", "SoftwareApplication"],
       "@id": `${pageUrl}#softwareapplication`,
-      name: "Free ATS Resume Checker AI",
-      alternateName: ["ATS Resume Checker", "Resume Score Checker", "AI Resume Checker", "Resume Keyword Checker"],
+      name: "KASA Free ATS Resume Checker",
+      alternateName: ["ATS Score Checker", "Resume ATS Checker", "ATS Friendly Resume Checker", "AI Resume Checker"],
       applicationCategory: "BusinessApplication",
+      applicationSubCategory: "Resume analysis and career tools",
       operatingSystem: "Web",
+      browserRequirements: "Requires JavaScript and a modern web browser",
       url: pageUrl,
       isAccessibleForFree: true,
-      offers: { "@type": "Offer", price: "0", priceCurrency: "INR" },
+      inLanguage: "en-IN",
+      featureList: [
+        "ATS resume score",
+        "Job description match",
+        "Missing keyword analysis",
+        "Skills analysis",
+        "Grammar and writing suggestions",
+        "Resume formatting review",
+        "Recruiter checklist",
+        "Downloadable PDF report",
+      ],
+      offers: { "@type": "Offer", price: 0, priceCurrency: "INR", availability: "https://schema.org/InStock" },
       description:
-        "Free ATS Resume Checker AI to scan resumes, calculate ATS score, find missing keywords, diagnose rejection risks, improve bullets, and generate a career roadmap.",
+        "Free online ATS resume checker and ATS score checker for PDF, DOCX and TXT resumes. Find missing keywords, skills gaps, writing issues and practical improvements.",
       publisher: {
-        "@type": "Organization",
-        name: "KASA",
-        url: "https://www.getkasa.in",
+        "@id": "https://www.getkasa.in/#organization",
       },
     },
     {
       "@context": "https://schema.org",
-      "@type": "HowTo",
-      "@id": `${pageUrl}#howto`,
-      name: "How to check your resume ATS score",
-      description: "Scan your resume with AI, find ATS keyword gaps, improve weak bullets, and download a resume report.",
-      totalTime: "PT2M",
-      step: [
+      "@type": "WebPage",
+      "@id": `${pageUrl}#webpage`,
+      url: pageUrl,
+      name: "Free ATS Resume Checker & ATS Score Checker",
+      description: "Check your resume ATS score, missing keywords, skills, grammar and formatting, then download a free PDF report.",
+      isPartOf: { "@id": "https://www.getkasa.in/#website" },
+      mainEntity: { "@id": `${pageUrl}#softwareapplication` },
+      breadcrumb: { "@id": `${pageUrl}#breadcrumb` },
+      inLanguage: "en-IN",
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "@id": `${pageUrl}#breadcrumb`,
+      itemListElement: [
         {
-          "@type": "HowToStep",
-          name: "Upload or paste your resume",
-          text: "Upload a PDF, DOC, DOCX, TXT resume, or paste your resume text into the checker.",
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: "https://www.getkasa.in",
         },
         {
-          "@type": "HowToStep",
-          name: "Choose the target role",
-          text: "Select the job role, role family, experience level, skills, target package, and preparation time.",
+          "@type": "ListItem",
+          position: 2,
+          name: "Free AI Tools",
+          item: "https://www.getkasa.in/tools",
         },
         {
-          "@type": "HowToStep",
-          name: "Run the ATS scan",
-          text: "Generate an ATS score, resume roast, missing keywords, weak areas, improved bullets, and recruiter checklist.",
-        },
-        {
-          "@type": "HowToStep",
-          name: "Download and improve",
-          text: "Download the report, rewrite weak sections, add missing keywords, and use the roadmap before applying.",
+          "@type": "ListItem",
+          position: 3,
+          name: "ATS Resume Checker",
+          item: pageUrl,
         },
       ],
     },
@@ -266,50 +246,20 @@ export default function ResumeAtsCheckerPage() {
       <JsonLd data={jsonLd} />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_14%,rgba(43,168,255,0.24),transparent_26rem),radial-gradient(circle_at_14%_76%,rgba(34,181,115,0.11),transparent_24rem),linear-gradient(180deg,#ffffff_0%,#eef7ff_48%,#f8fbff_100%)] dark:bg-[radial-gradient(circle_at_74%_24%,rgba(88,201,138,0.18),transparent_23rem),linear-gradient(180deg,rgba(18,35,67,0.96),rgba(6,17,38,1))]" />
 
-      <section className="relative pb-8 pt-[9.25rem] sm:pt-[10.25rem] lg:pb-10 lg:pt-[10.75rem]">
-        <div className={siteContainerClasses({ className: "grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center" })}>
-          <div>
-            <Link href="/tools" className="inline-flex items-center gap-2 rounded-full border border-blue-950/10 bg-white/72 px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm shadow-blue-950/5 transition hover:border-primary/35 hover:text-primary dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-300 dark:hover:text-white">
-              <ArrowLeft className="size-4" aria-hidden="true" />
-              All tools
-            </Link>
-            <ToolBreadcrumb current="AI Resume ATS Checker" />
-            <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white/76 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary shadow-sm shadow-blue-950/5 dark:border-emerald-300/25 dark:bg-emerald-400/10 dark:text-emerald-200">
-              <Sparkles className="size-3.5 animate-pulse" aria-hidden="true" />
-              Free AI career tool
+      <section className="relative pb-2 pt-[7.75rem] sm:pt-[8.5rem] lg:pt-[9rem]">
+        <div className={siteContainerClasses()}>
+          <ToolBreadcrumb current="ATS Resume Checker" />
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
+            <div>
+              <h1 className="font-heading text-3xl font-semibold leading-tight text-slate-950 sm:text-4xl dark:text-white">
+                Free ATS Resume Checker &amp; ATS Score Checker
+              </h1>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base dark:text-slate-300">
+                Upload a PDF or DOCX to check your ATS score, find missing keywords, and get clear resume fixes before you apply.
+              </p>
             </div>
-            <h1 className="mt-5 max-w-3xl font-heading text-4xl font-semibold leading-[1.08] text-slate-950 sm:text-5xl lg:text-[3.35rem] dark:text-white">
-              Free ATS Resume Checker AI: score your resume before recruiters reject it.
-            </h1>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-slate-700 sm:text-lg dark:text-muted">
-              Upload a PDF or DOCX resume, choose any target role, and get an ATS score, resume roast, missing keywords,
-              skill gaps, improved bullets, interview questions, and a practical roadmap to become interview-ready.
-            </p>
-            <ToolHeroKeywords
-              keywords={[
-                "free ATS resume checker",
-                "free ATS checker",
-                "resume roast AI",
-                "why your resume gets rejected",
-                "resume score checker",
-                "resume keyword checker",
-                "ATS score checker",
-                "PDF resume checker",
-                "resume checker no signup",
-              ]}
-            />
+            <p className="shrink-0 text-xs font-semibold text-slate-500 dark:text-slate-400">No signup · PDF report included</p>
           </div>
-
-          <ToolHeroFeatureCard
-            icon={FileSearch}
-            title="Resume roast + ATS report"
-            description="Turn a plain resume into a role-focused ATS score, rejection diagnosis, and improvement plan."
-            points={[
-              "Upload PDF, DOC, DOCX, or TXT resumes without creating an account.",
-              "Find missing ATS keywords, weak bullets, role gaps, and rejection risks.",
-              "Download or share a clean PDF report with score, fixes, and roadmap.",
-            ]}
-          />
         </div>
       </section>
 
@@ -318,26 +268,19 @@ export default function ResumeAtsCheckerPage() {
       <ResumeAtsSeoContent />
 
       <ToolSeoSection
-        eyebrow="Resume ATS Checker FAQ"
-        title="Free ATS Resume Checker AI FAQ"
+        eyebrow="ATS Resume Checker FAQ"
+        title="ATS Resume Checker and ATS Score Checker FAQs"
         description="Learn how to read the ATS report, improve weak resume sections, and apply only the suggestions that match your real experience."
         keywords={[
           "free ATS resume checker",
-          "ATS resume checker free",
-          "ATS score",
-          "resume rejection",
-          "resume roast AI",
+          "ATS score checker",
+          "resume ATS checker",
+          "resume ATS score checker",
+          "ATS resume checker free online",
+          "ATS friendly resume checker",
           "AI resume checker",
-          "resume keywords",
-          "ATS resume keywords",
           "resume keyword checker",
-          "resume bullet points",
-          "missing skills",
-          "resume scanner",
-          "resume checker no signup",
           "PDF resume checker",
-          "interview questions",
-          "career roadmap",
         ]}
         faqs={resumeAtsFaqs}
         relatedTools={[
@@ -359,23 +302,23 @@ function ResumeAtsSeoContent() {
         <div className="grid gap-6 lg:grid-cols-[0.72fr_0.28fr] lg:items-start">
           <div className="rounded-[1.25rem] border border-blue-950/10 bg-white/88 p-5 shadow-xl shadow-blue-950/8 dark:border-white/10 dark:bg-surface/90 sm:p-7">
             <p className="text-sm font-semibold uppercase tracking-[0.16em] text-primary dark:text-emerald-200">
-              How Free ATS Resume Checker AI Works
+              Free Online ATS Resume Checker
             </p>
             <h2 className="mt-2 font-heading text-3xl font-semibold leading-tight text-slate-950 dark:text-white">
-              Scan your resume before recruiters and ATS systems reject it
+              How the ATS resume checker and score checker works
             </h2>
             <div className="mt-5 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-300 sm:text-base">
               <p>
-                KASA&apos;s Free ATS Resume Checker AI helps students, freshers, and experienced professionals understand why a resume may not get shortlisted. Upload a PDF, DOC, DOCX, or TXT resume, or paste your resume text directly. Then choose the target role, role family, experience level, current skills, expected package, daily preparation time, and report language. The tool returns a score, role-fit verdict, plain-English feedback, missing skills, weak areas, stronger bullet examples, interview questions, recruiter checklist, and a practical career roadmap.
+                KASA&apos;s free ATS resume checker reads a PDF, DOCX, TXT file, or pasted resume text and organizes the findings into a clear report. The ATS score checker reviews keywords, skills, projects, measurable impact, structure, and writing clarity. Add a job description when you want an exact requirement match; otherwise, the review uses the target role detected from your resume.
               </p>
               <p>
-                Most resumes fail because they are written like a biography instead of a job-matching document. Recruiters look for readable sections, relevant skills, measurable achievements, and proof that the candidate can do the work. For example, a frontend resume should show shipped interfaces, APIs, performance work, testing, and collaboration. A data resume should show analysis tools, business questions, dashboards, cleaning steps, and decisions influenced by the work.
+                The report separates general resume readiness from job-description coverage. It shows skills already supported by the resume, missing keywords, grammar and formatting observations, stronger bullet suggestions, and recruiter checks. The score is an AI-assisted diagnostic estimate, not a result from an employer&apos;s private ATS and not a guarantee of interview selection.
               </p>
               <p>
-                For students and freshers, the checker is useful for improving placement resumes, internship applications, project descriptions, and entry-level job profiles. It points out weak project bullets, missing technical skills, unclear tools, and places where achievements should be more specific. For experienced professionals, it helps sharpen leadership impact, domain keywords, team ownership, metrics, seniority signals, and recruiter-facing results. Career switchers can use the report to understand which transferable skills are visible and which new skills or projects should be added.
+                Students and freshers can use the resume ATS checker to improve projects, internships, placement resumes, technical skills, and entry-level keywords. Experienced professionals can strengthen quantified achievements, leadership evidence, domain expertise, and senior-role alignment. Career switchers can check whether transferable skills and recent projects clearly support the new target role.
               </p>
               <p>
-                Use this page before applying to a job, after updating your resume, or when tailoring your resume for a new role. Start with the report, rewrite weak bullets, add relevant terms naturally, remove unrelated filler, and make sure your best projects or achievements appear near the top. If you need to rebuild the resume after the scan, use the{" "}
+                Use the checker after a major resume edit and before each important application. Fix the highest-priority issues first, add relevant terms only where they truthfully describe your work, and run another check after tailoring the resume. If you need to rebuild the document, continue with the{" "}
                 <Link href="/tools/ai-resume-builder" className="font-semibold text-primary hover:underline dark:text-emerald-200">
                   AI Resume Builder
                 </Link>
@@ -401,10 +344,10 @@ function ResumeAtsSeoContent() {
               <Lightbulb className="size-5 !text-white [stroke:white]" aria-hidden="true" />
             </div>
             <h3 className="mt-4 font-heading text-xl font-semibold text-slate-950 dark:text-white">
-              ATS report includes
+              What the ATS report includes
             </h3>
             <div className="mt-4 grid gap-3 text-sm font-semibold text-slate-700 dark:text-slate-200">
-              {["ATS score", "Missing keywords", "Resume roast", "Improved bullets", "Interview roadmap"].map((item) => (
+              {["ATS score", "Missing keywords", "Resume review", "Improved bullets", "Interview roadmap"].map((item) => (
                 <div key={item} className="flex items-center gap-2">
                   <CheckCircle2 className="size-4 text-primary dark:text-emerald-200" aria-hidden="true" />
                   {item}
@@ -419,7 +362,7 @@ function ResumeAtsSeoContent() {
             Use Cases
           </p>
           <h2 className="mt-2 font-heading text-3xl font-semibold text-slate-950 dark:text-white">
-            Resume checker for every job search stage
+            ATS-friendly resume checks for every job search stage
           </h2>
           <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
             {useCases.map((useCase) => {
@@ -447,7 +390,7 @@ function ResumeAtsSeoContent() {
                 Example Resume Fixes
               </p>
               <h2 className="mt-2 font-heading text-3xl font-semibold text-slate-950 dark:text-white">
-                Sample improvements an ATS checker can reveal
+                Resume ATS checker examples by role
               </h2>
             </div>
             <Link href="/tools/ai-resume-builder" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline dark:text-emerald-200">

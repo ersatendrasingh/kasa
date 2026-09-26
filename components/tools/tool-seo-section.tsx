@@ -16,6 +16,7 @@ type RelatedTool = {
 export function ToolSeoSection({
   eyebrow,
   title,
+  description,
   keywords,
   faqs,
   relatedTools,
@@ -60,7 +61,7 @@ export function ToolSeoSection({
                 {title}
               </h2>
               <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                Use the FAQ below to understand what the tool needs, what it returns, and when you should verify the result manually.
+                {description}
               </p>
               <div className="mt-5 grid gap-3">
                 {practicalCards.map((card) => (
