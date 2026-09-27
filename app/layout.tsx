@@ -47,7 +47,9 @@ const poppins = localFont({
 });
 
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID ?? "GTM-WCLQ27XF";
-const ADSENSE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_CLIENT_ID?.trim();
+const DEFAULT_ADSENSE_CLIENT_ID = "ca-pub-2007753908126813";
+const ADSENSE_CLIENT_ID =
+  process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_CLIENT_ID?.trim() || DEFAULT_ADSENSE_CLIENT_ID;
 const hasValidAdsenseClientId = /^ca-pub-\d{10,}$/.test(ADSENSE_CLIENT_ID ?? "");
 
 export const metadata: Metadata = {
@@ -108,6 +110,9 @@ export const metadata: Metadata = {
       "max-snippet": -1,
       "max-video-preview": -1,
     },
+  },
+  other: {
+    "google-adsense-account": ADSENSE_CLIENT_ID,
   },
 };
 
