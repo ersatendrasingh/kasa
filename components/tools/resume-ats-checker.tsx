@@ -778,6 +778,7 @@ export function ResumeAtsChecker() {
           onBuildResume={buildResumeFromReport}
           onRecheck={(nextResumeText) => void generateAnalysis(nextResumeText)}
           sourceResumeText={resumeText}
+          uploadedResume={uploadedResume}
         /> : null}
       </div>
 
@@ -790,6 +791,7 @@ export function ResumeAtsChecker() {
 type ResultPanelProps = {
   analysis: ResumeAnalysis | null;
   sourceResumeText: string;
+  uploadedResume: UploadedResume | null;
   readiness: { label: string; tone: string };
   actionMessage: string;
   onCopy: () => void;
@@ -817,6 +819,7 @@ type ImprovementAction = {
 const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(function ResultPanel({
   analysis,
   sourceResumeText,
+  uploadedResume,
   readiness,
   actionMessage,
   onCopy,
@@ -834,6 +837,7 @@ const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(function Result
   const [appliedFixes, setAppliedFixes] = useState<string[]>([]);
   const [undoStack, setUndoStack] = useState<Array<{ text: string; appliedFixes: string[] }>>([]);
   const [workspaceMessage, setWorkspaceMessage] = useState("");
+  const [previewMode, setPreviewMode] = useState<"improved" | "original" | "edit">("improved");
 
   if (!analysis) return null;
 
@@ -841,6 +845,7 @@ const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(function Result
   const appliedActions = improvementActions.filter((item) => appliedFixes.includes(item.id));
   const projectedGain = appliedActions.reduce((total, item) => total + item.impact, 0);
   const projectedScore = clamp(analysis.atsScore + projectedGain, 0, 100);
+  const findAction = (kind: ImprovementAction["kind"], term: string) => improvementActions.find((item) => item.kind === kind && item.replacement.toLowerCase() === term.toLowerCase());
 
   const resultTabs = [
     { id: "overview" as const, label: "Overview", hint: "Main findings", icon: BarChart3 },
@@ -993,8 +998,12 @@ const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(function Result
                 </section>
 
                 <section className="rounded-xl border border-blue-950/10 p-4 dark:border-white/10">
-                  <div className="flex flex-wrap items-center justify-between gap-2"><div><h4 className="text-sm font-semibold text-slate-950 dark:text-white">Your editable resume</h4><p className="mt-1 text-xs text-slate-500">Review every AI change before using it.</p></div><div className="flex gap-2"><button type="button" disabled={!undoStack.length} onClick={undoLastFix} className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full border border-blue-950/10 bg-white px-3 text-[11px] font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200"><Undo2 className="size-3.5" aria-hidden="true" />Undo</button><button type="button" onClick={downloadImprovedText} className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full border border-blue-950/10 bg-white px-3 text-[11px] font-semibold text-slate-700 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200"><Download className="size-3.5" aria-hidden="true" />Text</button></div></div>
-                  <textarea value={workspaceText} onChange={(event) => { setWorkspaceText(event.target.value); setWorkspaceMessage("Manual edit added. Recheck to measure its effect."); }} className="mt-3 min-h-[25rem] w-full resize-y rounded-xl border border-blue-950/10 bg-slate-50 p-3 font-mono text-xs leading-5 text-slate-800 outline-none transition focus:border-primary/50 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-100" aria-label="Editable resume text" />
+                  <div className="flex flex-wrap items-center justify-between gap-2"><div><h4 className="text-sm font-semibold text-slate-950 dark:text-white">Resume preview</h4><p className="mt-1 text-xs text-slate-500">Applied changes appear here immediately.</p></div><div className="flex flex-wrap gap-1.5"><button type="button" onClick={() => setPreviewMode("improved")} className={`h-8 rounded-full px-3 text-[11px] font-semibold ${previewMode === "improved" ? "bg-primary text-white" : "border border-blue-950/10 bg-white text-slate-700 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200"}`}>Improved draft</button>{uploadedResume?.mimeType === "application/pdf" ? <button type="button" onClick={() => setPreviewMode("original")} className={`h-8 rounded-full px-3 text-[11px] font-semibold ${previewMode === "original" ? "bg-primary text-white" : "border border-blue-950/10 bg-white text-slate-700 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200"}`}>Original PDF</button> : null}<button type="button" onClick={() => setPreviewMode("edit")} className={`h-8 rounded-full px-3 text-[11px] font-semibold ${previewMode === "edit" ? "bg-primary text-white" : "border border-blue-950/10 bg-white text-slate-700 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200"}`}>Edit text</button><button type="button" onClick={downloadImprovedText} className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full border border-blue-950/10 bg-white px-3 text-[11px] font-semibold text-slate-700 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200"><Download className="size-3.5" aria-hidden="true" />Text</button><button type="button" disabled={!undoStack.length} onClick={undoLastFix} className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full border border-blue-950/10 bg-white px-3 text-[11px] font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200"><Undo2 className="size-3.5" aria-hidden="true" />Undo</button></div></div>
+                  <div className="mt-3 min-h-[31rem] overflow-hidden rounded-xl border border-blue-950/10 bg-slate-100 dark:border-white/10 dark:bg-slate-950">
+                    {previewMode === "original" && uploadedResume?.mimeType === "application/pdf" ? <iframe title="Original uploaded resume" src={`data:application/pdf;base64,${uploadedResume.data}`} className="h-[31rem] w-full bg-white" /> : null}
+                    {previewMode === "improved" ? <VisualResumePreview resumeText={workspaceText} appliedTerms={appliedActions.filter((item) => item.kind !== "replace").map((item) => item.replacement)} /> : null}
+                    {previewMode === "edit" ? <textarea value={workspaceText} onChange={(event) => { setWorkspaceText(event.target.value); setWorkspaceMessage("Manual edit added. Switch to Improved draft to see it formatted."); }} className="h-[31rem] w-full resize-none bg-white p-4 font-mono text-xs leading-5 text-slate-800 outline-none dark:bg-slate-950 dark:text-slate-100" aria-label="Editable resume text" /> : null}
+                  </div>
                   <p role="status" className="mt-2 min-h-5 text-xs text-slate-500 dark:text-slate-400">{workspaceMessage || "Use the one-click fixes or type changes directly here."}</p>
                   <div className="mt-3 flex flex-col gap-2 border-t border-blue-950/10 pt-3 dark:border-white/10 sm:flex-row"><button type="button" onClick={() => onRecheck(workspaceText)} disabled={workspaceText.trim().length < 300} className="inline-flex h-10 flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-[image:var(--button-solid)] px-4 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-45"><RefreshCw className="size-4" aria-hidden="true" />Recheck improved resume</button><button type="button" onClick={() => onBuildResume(workspaceText)} className="inline-flex h-10 flex-1 cursor-pointer items-center justify-center gap-2 rounded-full border border-blue-950/15 bg-white px-4 text-sm font-semibold text-primary transition hover:border-primary/40 dark:border-white/15 dark:bg-white/[0.06] dark:text-emerald-200"><FileText className="size-4" aria-hidden="true" />Open visual resume builder</button></div>
                 </section>
@@ -1005,8 +1014,8 @@ const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(function Result
           {activeResultTab === "keywords" ? (
             <div className="grid items-start gap-3 lg:grid-cols-3">
               <TagCard title="Skills found" items={analysis.matchedSkills} tone="positive" />
-              <TagCard title="Missing keywords" items={analysis.missingKeywords} tone="warning" />
-              <TagCard title="Missing skills" items={analysis.missingSkills} tone="danger" />
+              <ActionTagCard title="Missing keywords" items={analysis.missingKeywords} tone="warning" onApply={(term) => { const action = findAction("keyword", term); if (action) applyFix(action); }} appliedTerms={appliedActions.map((item) => item.replacement)} />
+              <ActionTagCard title="Missing skills" items={analysis.missingSkills} tone="danger" onApply={(term) => { const action = findAction("skill", term); if (action) applyFix(action); }} appliedTerms={appliedActions.map((item) => item.replacement)} />
               <div className="rounded-xl border border-blue-950/10 p-4 dark:border-white/10 lg:col-span-3">
                 <div className="flex flex-wrap items-center justify-between gap-2"><h4 className="text-sm font-semibold text-slate-950 dark:text-white">{analysis.jobMatchScore == null ? "Job-specific match" : `Job description match · ${analysis.jobMatchScore}/100`}</h4>{analysis.jobMatchScore == null ? <span className="rounded-full bg-blue-50 px-2 py-1 text-[10px] font-semibold text-primary dark:bg-white/8">Add a job description to enable</span> : null}</div>
                 {analysis.jobRequirements.length ? <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">{analysis.jobRequirements.map((item, index) => <div key={index} className="rounded-lg bg-slate-50 p-3 dark:bg-white/[0.05]"><div className="flex items-start justify-between gap-2"><strong className="text-xs">{item.keyword}</strong><span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${item.status === "matched" ? "bg-emerald-100 text-emerald-800" : item.status === "partial" ? "bg-amber-100 text-amber-800" : "bg-rose-100 text-rose-800"}`}>{item.status}</span></div><p className="mt-1 line-clamp-2 text-[11px] leading-4 text-slate-500 dark:text-slate-400">{item.evidence}</p></div>)}</div> : <p className="mt-2 text-xs leading-5 text-slate-500">Add the target job description above and run the check again to compare exact requirements.</p>}
@@ -1016,8 +1025,8 @@ const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(function Result
 
           {activeResultTab === "writing" ? (
             <div className="grid items-start gap-3 lg:grid-cols-2">
-              <SuggestionCard title="Grammar & writing" items={analysis.grammarIssues} />
-              <SuggestionCard title="Bullet improvements" items={analysis.bulletSuggestions} />
+              <SuggestionCard title="Grammar & writing" items={analysis.grammarIssues} onApply={(item) => { const action = improvementActions.find((candidate) => candidate.original === item.original && candidate.replacement === item.suggestion); if (action) applyFix(action); }} appliedItems={appliedActions} />
+              <SuggestionCard title="Bullet improvements" items={analysis.bulletSuggestions} onApply={(item) => { const action = improvementActions.find((candidate) => candidate.original === item.original && candidate.replacement === item.suggestion); if (action) applyFix(action); }} appliedItems={appliedActions} />
               <div className="rounded-xl border border-blue-950/10 p-4 dark:border-white/10 lg:col-span-2"><h4 className="text-sm font-semibold text-slate-950 dark:text-white">Formatting review</h4><p className="mt-1 text-xs leading-5 text-slate-500">{analysis.formattingNote}</p>{analysis.formattingIssues.length ? <div className="mt-3 grid gap-2 sm:grid-cols-2">{analysis.formattingIssues.map((item, index) => <div key={index} className="rounded-lg bg-slate-50 p-3 dark:bg-white/[0.05]"><p className="text-xs font-semibold">{item.issue}</p><p className="mt-1 text-[11px] leading-4 text-slate-500">{item.evidence}</p><p className="mt-1.5 text-xs leading-5">{item.suggestion}</p></div>)}</div> : <p className="mt-2 text-xs text-slate-500">No specific formatting issues were flagged.</p>}</div>
             </div>
           ) : null}
@@ -1120,6 +1129,43 @@ function applyImprovementToResume(resumeText: string, action: ImprovementAction)
     }
   }
   return `${resumeText.trim()}\n\nSkills\n${action.replacement}\n`;
+}
+
+function VisualResumePreview({ resumeText, appliedTerms }: { resumeText: string; appliedTerms: string[] }) {
+  const sections = splitResumeSections(resumeText);
+  return <article className="h-[31rem] overflow-y-auto bg-white p-5 text-slate-800 shadow-inner sm:p-7 dark:bg-slate-950 dark:text-slate-100">
+    {sections.map((section, index) => <section key={`${section.heading}-${index}`} className={index ? "mt-6 border-t border-slate-200 pt-5 dark:border-white/10" : ""}>
+      {index === 0 ? <div className="border-b-2 border-primary pb-4"><h5 className="font-heading text-2xl font-semibold text-slate-950 dark:text-white">{section.heading || "Resume draft"}</h5><div className="mt-2 whitespace-pre-line text-xs leading-5 text-slate-600 dark:text-slate-300"><HighlightedResumeText text={section.content} terms={appliedTerms} /></div></div> : <><h6 className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary dark:text-emerald-200">{section.heading}</h6><div className="mt-2 whitespace-pre-line text-sm leading-6 text-slate-700 dark:text-slate-200"><HighlightedResumeText text={section.content} terms={appliedTerms} /></div></>}
+    </section>)}
+  </article>;
+}
+
+function HighlightedResumeText({ text, terms }: { text: string; terms: string[] }) {
+  const cleanTerms = terms.filter(Boolean).sort((left, right) => right.length - left.length);
+  if (!cleanTerms.length) return <>{text}</>;
+  const expression = new RegExp(`(${cleanTerms.map(escapeRegExp).join("|")})`, "gi");
+  return <>{text.split(expression).map((part, index) => cleanTerms.some((term) => term.toLowerCase() === part.toLowerCase()) ? <mark key={`${part}-${index}`} className="rounded bg-emerald-100 px-1 font-semibold text-emerald-900 dark:bg-emerald-400/25 dark:text-emerald-100">{part}</mark> : part)}</>;
+}
+
+function splitResumeSections(value: string) {
+  const lines = value.replace(/\r\n?/g, "\n").split("\n").map((line) => line.trim()).filter(Boolean);
+  const headingPattern = /^(professional summary|summary|profile|experience|work experience|employment|projects?|technical skills|core technical skills|skills|education|certifications?|achievements?|contact)$/i;
+  const sections: Array<{ heading: string; content: string }> = [];
+  let current = { heading: lines.shift() || "Resume draft", content: "" };
+  lines.forEach((line) => {
+    if (headingPattern.test(line.replace(/:$/, ""))) {
+      sections.push(current);
+      current = { heading: line.replace(/:$/, ""), content: "" };
+      return;
+    }
+    current.content = current.content ? `${current.content}\n${line}` : line;
+  });
+  sections.push(current);
+  return sections.filter((section) => section.heading || section.content);
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function getSupportedMimeType(file: File) {
@@ -1485,6 +1531,11 @@ function TagCard({ title, items, tone }: { title: string; items: string[]; tone:
   return <div className="rounded-xl border border-blue-950/10 p-4 dark:border-white/10"><div className="flex items-center justify-between gap-2"><h4 className="text-sm font-semibold text-slate-950 dark:text-white">{title}</h4><span className="text-xs font-semibold text-slate-400">{items.length}</span></div><div className="mt-3 flex flex-wrap gap-1.5">{items.length ? items.map((item) => <span key={item} className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${styles}`}>{item}</span>) : <span className="text-xs text-slate-500">Nothing flagged.</span>}</div></div>;
 }
 
+function ActionTagCard({ title, items, tone, onApply, appliedTerms }: { title: string; items: string[]; tone: "warning" | "danger"; onApply: (term: string) => void; appliedTerms: string[] }) {
+  const styles = tone === "warning" ? "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-300/20 dark:bg-amber-400/10 dark:text-amber-100" : "border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-300/20 dark:bg-rose-400/10 dark:text-rose-100";
+  return <div className="rounded-xl border border-blue-950/10 p-4 dark:border-white/10"><div className="flex items-center justify-between gap-2"><h4 className="text-sm font-semibold text-slate-950 dark:text-white">{title}</h4><span className="text-xs font-semibold text-slate-400">{items.length}</span></div><div className="mt-3 grid gap-2">{items.length ? items.map((item) => { const applied = appliedTerms.some((term) => term.toLowerCase() === item.toLowerCase()); return <div key={item} className={`flex items-center justify-between gap-2 rounded-lg border px-2.5 py-2 ${styles}`}><span className="min-w-0 text-xs font-semibold">{item}</span><button type="button" disabled={applied} onClick={() => onApply(item)} className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-bold ${applied ? "bg-emerald-600 text-white" : "bg-white text-slate-700 shadow-sm"}`}>{applied ? "Added" : "Add"}</button></div>; }) : <span className="text-xs text-slate-500">Nothing flagged.</span>}</div><p className="mt-2 text-[10px] leading-4 text-slate-500">Add only terms you can support with real work, study, or a project.</p></div>;
+}
+
 function RoadmapCard({ roadmap }: { roadmap: ResumeAnalysis["roadmap"] }) {
   return (
     <div className="rounded-xl border border-blue-950/10 bg-white p-4 dark:border-white/10 dark:bg-white/[0.05]">
@@ -1536,12 +1587,12 @@ function trackAts(event: string, properties: Record<string, string | boolean> = 
   analyticsWindow.dataLayer?.push({ event: `ats_${event}`, tool: "resume_checker", ...properties });
 }
 
-function SuggestionCard({ title, items }: { title: string; items: { original: string; suggestion: string; reason: string }[] }) {
+function SuggestionCard({ title, items, onApply, appliedItems }: { title: string; items: { original: string; suggestion: string; reason: string }[]; onApply?: (item: { original: string; suggestion: string; reason: string }) => void; appliedItems?: ImprovementAction[] }) {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [copyError, setCopyError] = useState(false);
   return <section className="rounded-xl border border-blue-950/10 p-4 dark:border-white/10">
     <div className="flex items-center justify-between gap-2"><h4 className="text-sm font-semibold">{title}</h4><span className="text-xs font-semibold text-slate-400">{items.length}</span></div>
-    {!items.length ? <p className="mt-2 text-xs text-slate-500">No specific changes suggested in this review.</p> : <div className="mt-2.5 grid gap-2">{items.map((item, index) => <details key={index} className="rounded-lg bg-slate-50 px-3 py-2 dark:bg-white/[0.05]"><summary className="cursor-pointer text-xs font-semibold leading-5 text-slate-800 dark:text-slate-100">{item.original}</summary><div className="mt-2 border-t border-blue-950/10 pt-2 dark:border-white/10"><p className="text-xs leading-5 text-emerald-800 dark:text-emerald-200">{item.suggestion}</p><p className="mt-1 text-[11px] leading-4 text-slate-500">{item.reason}</p><button type="button" className="mt-2 rounded-full border border-blue-950/15 px-2.5 py-1 text-[10px] font-semibold dark:border-white/20" onClick={async () => { try { await navigator.clipboard.writeText(item.suggestion); setCopiedIndex(index); setCopyError(false); trackAts("suggestion_copied"); } catch { setCopyError(true); } }}>{copiedIndex === index ? "Copied" : "Copy suggestion"}</button></div></details>)}</div>}
+    {!items.length ? <p className="mt-2 text-xs text-slate-500">No specific changes suggested in this review.</p> : <div className="mt-2.5 grid gap-2">{items.map((item, index) => { const applied = appliedItems?.some((action) => action.original === item.original && action.replacement === item.suggestion); return <details key={index} className="rounded-lg bg-slate-50 px-3 py-2 dark:bg-white/[0.05]"><summary className="cursor-pointer text-xs font-semibold leading-5 text-slate-800 dark:text-slate-100">{item.original}</summary><div className="mt-2 border-t border-blue-950/10 pt-2 dark:border-white/10"><p className="text-xs leading-5 text-emerald-800 dark:text-emerald-200">{item.suggestion}</p><p className="mt-1 text-[11px] leading-4 text-slate-500">{item.reason}</p><div className="mt-2 flex flex-wrap gap-2">{onApply ? <button type="button" disabled={applied} className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${applied ? "bg-emerald-600 text-white" : "bg-[image:var(--button-solid)] text-white"}`} onClick={() => onApply(item)}>{applied ? "Applied" : "Apply to improved draft"}</button> : null}<button type="button" className="rounded-full border border-blue-950/15 px-2.5 py-1 text-[10px] font-semibold dark:border-white/20" onClick={async () => { try { await navigator.clipboard.writeText(item.suggestion); setCopiedIndex(index); setCopyError(false); trackAts("suggestion_copied"); } catch { setCopyError(true); } }}>{copiedIndex === index ? "Copied" : "Copy suggestion"}</button></div></div></details>; })}</div>}
     <p role="status" className="mt-2 text-xs text-slate-500">{copyError ? "Copy was blocked. Select and copy the suggestion above." : copiedIndex !== null ? "Suggestion copied. Check that it reflects your actual experience." : ""}</p>
   </section>;
 }
