@@ -1,6 +1,8 @@
 "use client";
 
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import JSZip from "jszip";
 import {
   AlertCircle,
   ArrowRight,
@@ -832,12 +834,14 @@ const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(function Result
   const [activeResultTab, setActiveResultTab] = useState<ResultTab>("overview");
   const [workspaceText, setWorkspaceText] = useState(() => {
     const extractedText = analysis?.editableResumeText?.trim();
-    return extractedText && !extractedText.startsWith("Resume text could not be extracted") ? extractedText : sourceResumeText;
+    return normalizeResumeBulletText(extractedText && !extractedText.startsWith("Resume text could not be extracted") ? extractedText : sourceResumeText);
   });
   const [appliedFixes, setAppliedFixes] = useState<string[]>([]);
+  const [alreadyPresentFixes, setAlreadyPresentFixes] = useState<string[]>([]);
   const [undoStack, setUndoStack] = useState<Array<{ text: string; appliedFixes: string[] }>>([]);
   const [workspaceMessage, setWorkspaceMessage] = useState("");
   const [previewMode, setPreviewMode] = useState<"improved" | "original" | "edit">("improved");
+  const [resumeDownloadOpen, setResumeDownloadOpen] = useState(false);
 
   if (!analysis) return null;
 
@@ -846,6 +850,9 @@ const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(function Result
   const projectedGain = appliedActions.reduce((total, item) => total + item.impact, 0);
   const projectedScore = clamp(analysis.atsScore + projectedGain, 0, 100);
   const findAction = (kind: ImprovementAction["kind"], term: string) => improvementActions.find((item) => item.kind === kind && item.replacement.toLowerCase() === term.toLowerCase());
+  const writingActions = improvementActions.filter((item) => item.kind === "replace");
+  const skillActions = improvementActions.filter((item) => item.kind === "skill");
+  const keywordActions = improvementActions.filter((item) => item.kind === "keyword");
 
   const resultTabs = [
     { id: "overview" as const, label: "Overview", hint: "Main findings", icon: BarChart3 },
@@ -857,9 +864,14 @@ const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(function Result
 
   const applyFix = (action: ImprovementAction) => {
     if (appliedFixes.includes(action.id)) return;
+    if (action.kind !== "replace" && workspaceText.toLowerCase().includes(action.replacement.toLowerCase())) {
+      setAlreadyPresentFixes((items) => items.includes(action.id) ? items : [...items, action.id]);
+      setWorkspaceMessage(`${action.replacement} is already in your resume, so no duplicate was added.`);
+      return;
+    }
     const nextText = applyImprovementToResume(workspaceText, action);
     if (nextText === workspaceText) {
-      setWorkspaceMessage("This exact line was not found in the editable copy. Edit it manually below, then recheck.");
+      setWorkspaceMessage("This sentence could not be matched safely. Open Edit text to make the change yourself, then recheck.");
       return;
     }
     setUndoStack((items) => [...items, { text: workspaceText, appliedFixes }].slice(-20));
@@ -867,6 +879,19 @@ const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(function Result
     setAppliedFixes((items) => [...items, action.id]);
     setWorkspaceMessage(`${action.title} applied. Recheck to confirm the actual score.`);
     trackAts("improvement_applied", { category: action.component.toLowerCase() });
+  };
+
+  const removeFix = (action: ImprovementAction) => {
+    if (!appliedFixes.includes(action.id)) return;
+    const nextText = removeImprovementFromResume(workspaceText, action);
+    if (nextText === workspaceText) {
+      setWorkspaceMessage("This change was edited after it was applied. Use Edit text to remove it safely.");
+      return;
+    }
+    setUndoStack((items) => [...items, { text: workspaceText, appliedFixes }].slice(-20));
+    setWorkspaceText(nextText);
+    setAppliedFixes((items) => items.filter((item) => item !== action.id));
+    setWorkspaceMessage(`${action.title} removed from the improved draft.`);
   };
 
   const applySafeFixes = () => {
@@ -904,17 +929,23 @@ const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(function Result
     setWorkspaceMessage("Last AI change undone.");
   };
 
-  const downloadImprovedText = () => {
-    const blob = new Blob([workspaceText], { type: "text/plain;charset=utf-8" });
+  const downloadImprovedResume = async (format: "pdf" | "doc" | "txt") => {
+    const candidateName = splitResumeSections(workspaceText)[0]?.heading || "improved-resume";
+    const blob = format === "pdf"
+      ? createImprovedResumePdfBlob(workspaceText)
+      : format === "doc"
+        ? await createImprovedResumeDocxBlob(workspaceText)
+        : new Blob([workspaceText], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "improved-resume.txt";
+    link.download = `${slugify(candidateName)}-improved-resume.${format === "doc" ? "docx" : format}`;
     document.body.appendChild(link);
     link.click();
     link.remove();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-    setWorkspaceMessage("Editable resume downloaded.");
+    setResumeDownloadOpen(false);
+    setWorkspaceMessage(`${format === "pdf" ? "PDF" : format === "doc" ? "Word" : "Text"} resume downloaded.`);
   };
 
   return (
@@ -985,23 +1016,26 @@ const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(function Result
 
               <div className="grid gap-3 xl:grid-cols-[0.95fr_1.05fr]">
                 <section className="rounded-xl border border-blue-950/10 p-4 dark:border-white/10">
-                  <div className="flex flex-wrap items-center justify-between gap-2"><div><h4 className="text-sm font-semibold text-slate-950 dark:text-white">Suggested improvements</h4><p className="mt-1 text-xs text-slate-500">Apply only facts you can stand behind.</p></div><button type="button" onClick={applySafeFixes} className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-full border border-primary/20 bg-blue-50 px-3 text-xs font-semibold text-primary transition hover:border-primary/45 dark:bg-white/8 dark:text-emerald-200"><Sparkles className="size-3.5" aria-hidden="true" />Apply writing fixes</button></div>
+                  <div className="flex flex-wrap items-center justify-between gap-2"><div><h4 className="text-sm font-semibold text-slate-950 dark:text-white">Suggested improvements</h4><p className="mt-1 text-xs text-slate-500">Use writing fixes or add only skills you can support.</p></div><button type="button" onClick={applySafeFixes} className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-full border border-primary/20 bg-blue-50 px-3 text-xs font-semibold text-primary transition hover:border-primary/45 dark:bg-white/8 dark:text-emerald-200"><Sparkles className="size-3.5" aria-hidden="true" />Apply writing fixes</button></div>
                   <div className="mt-3 grid gap-2">
-                    {improvementActions.length ? improvementActions.map((item) => {
+                    {writingActions.length ? writingActions.map((item) => {
                       const isApplied = appliedFixes.includes(item.id);
                       return <article key={item.id} className={`rounded-xl border p-3 transition ${isApplied ? "border-emerald-200 bg-emerald-50/70 dark:border-emerald-300/20 dark:bg-emerald-400/10" : "border-blue-950/10 bg-slate-50/70 dark:border-white/10 dark:bg-white/[0.035]"}`}>
-                        <div className="flex gap-3"><span className={`grid size-8 shrink-0 place-items-center rounded-lg ${isApplied ? "bg-emerald-600 text-white" : "bg-blue-100 text-primary dark:bg-white/10 dark:text-emerald-200"}`}>{isApplied ? <CheckCircle2 className="size-4" aria-hidden="true" /> : item.kind === "replace" ? <PenLine className="size-4" aria-hidden="true" /> : <Plus className="size-4" aria-hidden="true" />}</span><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h5 className="text-xs font-semibold text-slate-950 dark:text-white">{item.title}</h5><span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-emerald-700 shadow-sm dark:bg-slate-950 dark:text-emerald-200">+{item.impact} {item.component}</span></div><p className="mt-1 text-[11px] leading-4 text-slate-500 dark:text-slate-400">{item.reason}</p>{item.original ? <p className="mt-2 rounded-lg bg-white/80 px-2 py-1.5 text-[11px] leading-4 text-slate-500 line-through dark:bg-white/[0.05]">{item.original}</p> : null}<p className="mt-1.5 text-xs leading-5 text-slate-700 dark:text-slate-200">{item.replacement}</p>{item.requiresTruth ? <p className="mt-1.5 text-[10px] font-semibold text-amber-700 dark:text-amber-200">Add this only if you genuinely have it.</p> : null}</div></div>
-                        <div className="mt-3 flex justify-end"><button type="button" disabled={isApplied} onClick={() => applyFix(item)} className={`inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full px-3 text-[11px] font-semibold transition disabled:cursor-default ${isApplied ? "bg-emerald-600 text-white" : "bg-[image:var(--button-solid)] text-white hover:-translate-y-0.5"}`}>{isApplied ? "Applied" : item.requiresTruth ? "I have this skill" : "Apply to resume"}{!isApplied ? <ArrowRight className="size-3" aria-hidden="true" /> : null}</button></div>
+                        <div className="flex gap-3"><span className={`grid size-8 shrink-0 place-items-center rounded-lg ${isApplied ? "bg-emerald-600 text-white" : "bg-blue-100 text-primary dark:bg-white/10 dark:text-emerald-200"}`}>{isApplied ? <CheckCircle2 className="size-4" aria-hidden="true" /> : item.kind === "replace" ? <PenLine className="size-4" aria-hidden="true" /> : <Plus className="size-4" aria-hidden="true" />}</span><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h5 className="text-xs font-semibold text-slate-950 dark:text-white">{item.title}</h5><span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-emerald-700 shadow-sm dark:bg-slate-950 dark:text-emerald-200">+{item.impact} {item.component}</span></div><p className="mt-1 text-[11px] leading-4 text-slate-500 dark:text-slate-400">{item.reason}</p>{item.original ? <p className="mt-2 rounded-lg bg-white/80 px-2 py-1.5 text-[11px] leading-4 text-slate-500 line-through dark:bg-white/[0.05]">{normalizeResumeBulletText(item.original)}</p> : null}<p className="mt-1.5 text-xs leading-5 text-slate-700 dark:text-slate-200">{item.replacement}</p>{item.requiresTruth ? <p className="mt-1.5 text-[10px] font-semibold text-amber-700 dark:text-amber-200">Add this only if you genuinely have it.</p> : null}</div></div>
+                        <div className="mt-3 flex justify-end">{isApplied ? <button type="button" onClick={() => removeFix(item)} className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full border border-emerald-300 bg-white px-3 text-[11px] font-semibold text-emerald-800 transition hover:border-rose-300 hover:text-rose-700 dark:border-emerald-300/30 dark:bg-slate-950 dark:text-emerald-200"><RotateCcw className="size-3" aria-hidden="true" />Remove</button> : <button type="button" onClick={() => applyFix(item)} className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full bg-[image:var(--button-solid)] px-3 text-[11px] font-semibold text-white transition hover:-translate-y-0.5">{alreadyPresentFixes.includes(item.id) ? "Already included" : item.requiresTruth ? "I have this skill" : "Apply to resume"}<ArrowRight className="size-3" aria-hidden="true" /></button>}</div>
                       </article>;
-                    }) : <p className="rounded-xl bg-slate-50 px-3 py-4 text-xs text-slate-500 dark:bg-white/[0.05]">No direct edits were generated. Use the editor to strengthen factual outcomes, then recheck.</p>}
+                    }) : null}
+                    {skillActions.length ? <ImprovementShelf title="Skills to verify" description={`${skillActions.length} skill gaps found in this review. Add only skills you have actually used.`} items={skillActions} appliedFixes={appliedFixes} onApply={applyFix} onRemove={removeFix} /> : null}
+                    {keywordActions.length ? <ImprovementShelf title="Keywords to verify" description={`${keywordActions.length} keyword gaps found in this review. Add only terms that truthfully match your work.`} items={keywordActions} appliedFixes={appliedFixes} onApply={applyFix} onRemove={removeFix} /> : null}
+                    {!improvementActions.length ? <p className="rounded-xl bg-slate-50 px-3 py-4 text-xs text-slate-500 dark:bg-white/[0.05]">No direct edits were generated. Use the editor to strengthen factual outcomes, then recheck.</p> : null}
                   </div>
                 </section>
 
                 <section className="rounded-xl border border-blue-950/10 p-4 dark:border-white/10">
-                  <div className="flex flex-wrap items-center justify-between gap-2"><div><h4 className="text-sm font-semibold text-slate-950 dark:text-white">Resume preview</h4><p className="mt-1 text-xs text-slate-500">Applied changes appear here immediately.</p></div><div className="flex flex-wrap gap-1.5"><button type="button" onClick={() => setPreviewMode("improved")} className={`h-8 rounded-full px-3 text-[11px] font-semibold ${previewMode === "improved" ? "bg-primary text-white" : "border border-blue-950/10 bg-white text-slate-700 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200"}`}>Improved draft</button>{uploadedResume?.mimeType === "application/pdf" ? <button type="button" onClick={() => setPreviewMode("original")} className={`h-8 rounded-full px-3 text-[11px] font-semibold ${previewMode === "original" ? "bg-primary text-white" : "border border-blue-950/10 bg-white text-slate-700 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200"}`}>Original PDF</button> : null}<button type="button" onClick={() => setPreviewMode("edit")} className={`h-8 rounded-full px-3 text-[11px] font-semibold ${previewMode === "edit" ? "bg-primary text-white" : "border border-blue-950/10 bg-white text-slate-700 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200"}`}>Edit text</button><button type="button" onClick={downloadImprovedText} className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full border border-blue-950/10 bg-white px-3 text-[11px] font-semibold text-slate-700 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200"><Download className="size-3.5" aria-hidden="true" />Text</button><button type="button" disabled={!undoStack.length} onClick={undoLastFix} className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full border border-blue-950/10 bg-white px-3 text-[11px] font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200"><Undo2 className="size-3.5" aria-hidden="true" />Undo</button></div></div>
+                  <div className="flex flex-wrap items-center justify-between gap-2"><div><h4 className="text-sm font-semibold text-slate-950 dark:text-white">Resume preview</h4><p className="mt-1 text-xs text-slate-500">Applied changes appear here immediately.</p>{appliedActions.length ? <div className="mt-1.5 flex flex-wrap gap-2 text-[10px] font-semibold text-slate-500"><span className="inline-flex items-center gap-1"><span className="size-2 rounded-sm bg-blue-200 ring-1 ring-blue-300" />Rewritten</span><span className="inline-flex items-center gap-1"><span className="size-2 rounded-sm bg-emerald-200 ring-1 ring-emerald-300" />Added</span></div> : null}</div><div className="flex flex-wrap gap-1.5"><button type="button" onClick={() => setPreviewMode("improved")} className={`h-8 rounded-full px-3 text-[11px] font-semibold ${previewMode === "improved" ? "bg-primary text-white" : "border border-blue-950/10 bg-white text-slate-700 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200"}`}>Improved draft</button>{uploadedResume?.mimeType === "application/pdf" ? <button type="button" onClick={() => setPreviewMode("original")} className={`h-8 rounded-full px-3 text-[11px] font-semibold ${previewMode === "original" ? "bg-primary text-white" : "border border-blue-950/10 bg-white text-slate-700 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200"}`}>Original PDF</button> : null}<button type="button" onClick={() => setPreviewMode("edit")} className={`h-8 rounded-full px-3 text-[11px] font-semibold ${previewMode === "edit" ? "bg-primary text-white" : "border border-blue-950/10 bg-white text-slate-700 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200"}`}>Edit text</button><button type="button" onClick={() => setResumeDownloadOpen(true)} className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full border border-blue-950/10 bg-white px-3 text-[11px] font-semibold text-slate-700 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200"><Download className="size-3.5" aria-hidden="true" />Download</button><button type="button" disabled={!undoStack.length} onClick={undoLastFix} className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full border border-blue-950/10 bg-white px-3 text-[11px] font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200"><Undo2 className="size-3.5" aria-hidden="true" />Undo</button></div></div>
                   <div className="mt-3 min-h-[31rem] overflow-hidden rounded-xl border border-blue-950/10 bg-slate-100 dark:border-white/10 dark:bg-slate-950">
                     {previewMode === "original" && uploadedResume?.mimeType === "application/pdf" ? <iframe title="Original uploaded resume" src={`data:application/pdf;base64,${uploadedResume.data}`} className="h-[31rem] w-full bg-white" /> : null}
-                    {previewMode === "improved" ? <VisualResumePreview resumeText={workspaceText} appliedTerms={appliedActions.filter((item) => item.kind !== "replace").map((item) => item.replacement)} /> : null}
+                    {previewMode === "improved" ? <VisualResumePreview resumeText={workspaceText} appliedActions={appliedActions} /> : null}
                     {previewMode === "edit" ? <textarea value={workspaceText} onChange={(event) => { setWorkspaceText(event.target.value); setWorkspaceMessage("Manual edit added. Switch to Improved draft to see it formatted."); }} className="h-[31rem] w-full resize-none bg-white p-4 font-mono text-xs leading-5 text-slate-800 outline-none dark:bg-slate-950 dark:text-slate-100" aria-label="Editable resume text" /> : null}
                   </div>
                   <p role="status" className="mt-2 min-h-5 text-xs text-slate-500 dark:text-slate-400">{workspaceMessage || "Use the one-click fixes or type changes directly here."}</p>
@@ -1014,8 +1048,8 @@ const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(function Result
           {activeResultTab === "keywords" ? (
             <div className="grid items-start gap-3 lg:grid-cols-3">
               <TagCard title="Skills found" items={analysis.matchedSkills} tone="positive" />
-              <ActionTagCard title="Missing keywords" items={analysis.missingKeywords} tone="warning" onApply={(term) => { const action = findAction("keyword", term); if (action) applyFix(action); }} appliedTerms={appliedActions.map((item) => item.replacement)} />
-              <ActionTagCard title="Missing skills" items={analysis.missingSkills} tone="danger" onApply={(term) => { const action = findAction("skill", term); if (action) applyFix(action); }} appliedTerms={appliedActions.map((item) => item.replacement)} />
+              <ActionTagCard title="Missing keywords" items={analysis.missingKeywords} tone="warning" onApply={(term) => { const action = findAction("keyword", term); if (action) applyFix(action); }} onRemove={(term) => { const action = findAction("keyword", term); if (action) removeFix(action); }} appliedTerms={appliedActions.map((item) => item.replacement)} />
+              <ActionTagCard title="Missing skills" items={analysis.missingSkills} tone="danger" onApply={(term) => { const action = findAction("skill", term); if (action) applyFix(action); }} onRemove={(term) => { const action = findAction("skill", term); if (action) removeFix(action); }} appliedTerms={appliedActions.map((item) => item.replacement)} />
               <div className="rounded-xl border border-blue-950/10 p-4 dark:border-white/10 lg:col-span-3">
                 <div className="flex flex-wrap items-center justify-between gap-2"><h4 className="text-sm font-semibold text-slate-950 dark:text-white">{analysis.jobMatchScore == null ? "Job-specific match" : `Job description match · ${analysis.jobMatchScore}/100`}</h4>{analysis.jobMatchScore == null ? <span className="rounded-full bg-blue-50 px-2 py-1 text-[10px] font-semibold text-primary dark:bg-white/8">Add a job description to enable</span> : null}</div>
                 {analysis.jobRequirements.length ? <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">{analysis.jobRequirements.map((item, index) => <div key={index} className="rounded-lg bg-slate-50 p-3 dark:bg-white/[0.05]"><div className="flex items-start justify-between gap-2"><strong className="text-xs">{item.keyword}</strong><span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${item.status === "matched" ? "bg-emerald-100 text-emerald-800" : item.status === "partial" ? "bg-amber-100 text-amber-800" : "bg-rose-100 text-rose-800"}`}>{item.status}</span></div><p className="mt-1 line-clamp-2 text-[11px] leading-4 text-slate-500 dark:text-slate-400">{item.evidence}</p></div>)}</div> : <p className="mt-2 text-xs leading-5 text-slate-500">Add the target job description above and run the check again to compare exact requirements.</p>}
@@ -1025,8 +1059,8 @@ const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(function Result
 
           {activeResultTab === "writing" ? (
             <div className="grid items-start gap-3 lg:grid-cols-2">
-              <SuggestionCard title="Grammar & writing" items={analysis.grammarIssues} onApply={(item) => { const action = improvementActions.find((candidate) => candidate.original === item.original && candidate.replacement === item.suggestion); if (action) applyFix(action); }} appliedItems={appliedActions} />
-              <SuggestionCard title="Bullet improvements" items={analysis.bulletSuggestions} onApply={(item) => { const action = improvementActions.find((candidate) => candidate.original === item.original && candidate.replacement === item.suggestion); if (action) applyFix(action); }} appliedItems={appliedActions} />
+              <SuggestionCard title="Grammar & writing" items={analysis.grammarIssues} onApply={(item) => { const action = improvementActions.find((candidate) => candidate.original === item.original && candidate.replacement === item.suggestion); if (action) applyFix(action); }} onRemove={(item) => { const action = improvementActions.find((candidate) => candidate.original === item.original && candidate.replacement === item.suggestion); if (action) removeFix(action); }} appliedItems={appliedActions} />
+              <SuggestionCard title="Bullet improvements" items={analysis.bulletSuggestions} onApply={(item) => { const action = improvementActions.find((candidate) => candidate.original === item.original && candidate.replacement === item.suggestion); if (action) applyFix(action); }} onRemove={(item) => { const action = improvementActions.find((candidate) => candidate.original === item.original && candidate.replacement === item.suggestion); if (action) removeFix(action); }} appliedItems={appliedActions} />
               <div className="rounded-xl border border-blue-950/10 p-4 dark:border-white/10 lg:col-span-2"><h4 className="text-sm font-semibold text-slate-950 dark:text-white">Formatting review</h4><p className="mt-1 text-xs leading-5 text-slate-500">{analysis.formattingNote}</p>{analysis.formattingIssues.length ? <div className="mt-3 grid gap-2 sm:grid-cols-2">{analysis.formattingIssues.map((item, index) => <div key={index} className="rounded-lg bg-slate-50 p-3 dark:bg-white/[0.05]"><p className="text-xs font-semibold">{item.issue}</p><p className="mt-1 text-[11px] leading-4 text-slate-500">{item.evidence}</p><p className="mt-1.5 text-xs leading-5">{item.suggestion}</p></div>)}</div> : <p className="mt-2 text-xs text-slate-500">No specific formatting issues were flagged.</p>}</div>
             </div>
           ) : null}
@@ -1052,12 +1086,20 @@ const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(function Result
           </div>
         </div>
       </div>
+      {resumeDownloadOpen ? <ImprovedResumeDownloadModal onClose={() => setResumeDownloadOpen(false)} onDownload={downloadImprovedResume} /> : null}
     </div>
   );
 });
 
 function buildImprovementActions(analysis: ResumeAnalysis): ImprovementAction[] {
   const actions: ImprovementAction[] = [];
+  const getImpact = (component: ImprovementAction["component"]) => {
+    const score = analysis.componentScores.find((item) => item.label.toLowerCase() === component.toLowerCase())?.score ?? 70;
+    if (score < 55) return 4;
+    if (score < 70) return 3;
+    if (score < 85) return 2;
+    return 1;
+  };
   const addReplaceAction = (item: { original: string; suggestion: string; reason: string }, component: ImprovementAction["component"], impact: number, label: string) => {
     const original = item.original.trim();
     const replacement = item.suggestion.trim();
@@ -1074,11 +1116,13 @@ function buildImprovementActions(analysis: ResumeAnalysis): ImprovementAction[] 
       requiresTruth: false,
     });
   };
-  analysis.grammarIssues.slice(0, 3).forEach((item) => addReplaceAction(item, "Clarity", 2, "Improve writing"));
-  analysis.bulletSuggestions.slice(0, 4).forEach((item) => addReplaceAction(item, "Impact", 3, "Strengthen a bullet"));
+  analysis.grammarIssues.slice(0, 3).forEach((item) => addReplaceAction(item, "Clarity", getImpact("Clarity"), "Improve writing"));
+  analysis.bulletSuggestions.slice(0, 4).forEach((item) => addReplaceAction(item, "Impact", getImpact("Impact"), "Strengthen a bullet"));
 
   const knownTerms = new Set([...analysis.missingSkills, ...analysis.missingKeywords].map((item) => item.toLowerCase()));
-  analysis.missingSkills.slice(0, 4).forEach((skill) => {
+  // The AI analysis decides which gaps belong to this resume. Do not cap the
+  // list here: hiding later items made the workspace look like a fixed demo.
+  analysis.missingSkills.forEach((skill) => {
     const cleanSkill = skill.trim();
     if (!cleanSkill) return;
     actions.push({
@@ -1088,11 +1132,11 @@ function buildImprovementActions(analysis: ResumeAnalysis): ImprovementAction[] 
       replacement: cleanSkill,
       reason: "Add it to the Skills section only if you have used it and can discuss it in an interview.",
       component: "Skills",
-      impact: 2,
+      impact: getImpact("Skills"),
       requiresTruth: true,
     });
   });
-  analysis.missingKeywords.filter((keyword) => !knownTerms.has(keyword.toLowerCase()) || !analysis.missingSkills.some((skill) => skill.toLowerCase() === keyword.toLowerCase())).slice(0, 4).forEach((keyword) => {
+  analysis.missingKeywords.filter((keyword) => !knownTerms.has(keyword.toLowerCase()) || !analysis.missingSkills.some((skill) => skill.toLowerCase() === keyword.toLowerCase())).forEach((keyword) => {
     const cleanKeyword = keyword.trim();
     if (!cleanKeyword) return;
     actions.push({
@@ -1102,54 +1146,242 @@ function buildImprovementActions(analysis: ResumeAnalysis): ImprovementAction[] 
       replacement: cleanKeyword,
       reason: "Use this only where it accurately describes your actual work, project, coursework, or certification.",
       component: "Keywords",
-      impact: 1,
+      impact: getImpact("Keywords"),
       requiresTruth: true,
     });
   });
-  return actions.filter((item, index, all) => all.findIndex((candidate) => candidate.id === item.id) === index).slice(0, 10);
+  // Every term shown in the report must have a matching action. Keeping only a
+  // small subset here made later "Add" buttons appear interactive while doing
+  // nothing, which is especially confusing in a resume editor.
+  return actions.filter((item, index, all) => all.findIndex((candidate) => candidate.id === item.id) === index);
 }
 
 function applyImprovementToResume(resumeText: string, action: ImprovementAction) {
   if (action.kind === "replace" && action.original) {
-    const position = resumeText.toLowerCase().indexOf(action.original.toLowerCase());
-    if (position < 0) return resumeText;
-    return `${resumeText.slice(0, position)}${action.replacement}${resumeText.slice(position + action.original.length)}`;
+    const exactPosition = resumeText.toLowerCase().indexOf(action.original.toLowerCase());
+    if (exactPosition >= 0) return `${resumeText.slice(0, exactPosition)}${action.replacement}${resumeText.slice(exactPosition + action.original.length)}`;
+    const flexibleMatch = findFlexiblePhraseMatch(resumeText, action.original);
+    if (!flexibleMatch) return resumeText;
+    const beforeMatch = resumeText.slice(0, flexibleMatch.index);
+    const leadingBullet = beforeMatch.match(/([•])\s*$/);
+    const remainder = resumeText.slice(flexibleMatch.index + flexibleMatch[0].length);
+    // The flexible matcher deliberately excludes punctuation to survive PDF line
+    // breaks. Do not leave the source period behind when the suggested sentence
+    // already supplies its own ending.
+    const cleanRemainder = /[.!?]$/.test(action.replacement) && /^[.!?]/.test(remainder) ? remainder.replace(/^[.!?]+/, "") : remainder;
+    if (leadingBullet) {
+      const bulletStart = beforeMatch.length - leadingBullet[0].length;
+      return `${resumeText.slice(0, bulletStart)}${leadingBullet[1]} ${action.replacement}${cleanRemainder}`;
+    }
+    return `${beforeMatch}${action.replacement}${cleanRemainder}`;
   }
   const normalizedText = resumeText.toLowerCase();
   if (normalizedText.includes(action.replacement.toLowerCase())) return resumeText;
-  const skillsHeading = /(^|\n)\s*(technical\s+)?skills?\s*:?\s*/i.exec(resumeText);
+  const skillsHeading = /(^|\n)[ \t]*((?:core[ \t]+)?(?:technical[ \t]+)?skills?)[ \t]*:?[ \t]*/i.exec(resumeText);
   if (skillsHeading) {
     const insertAt = skillsHeading.index + skillsHeading[0].length;
     const rest = resumeText.slice(insertAt);
-    const firstLineEnd = rest.indexOf("\n");
+    const lineOffset = rest.startsWith("\n") ? 1 : 0;
+    const firstLineEnd = rest.indexOf("\n", lineOffset);
     if (firstLineEnd >= 0) {
-      const existingSkills = rest.slice(0, firstLineEnd).trim();
+      const existingSkills = rest.slice(lineOffset, firstLineEnd).trim();
       const separator = existingSkills && !/[,:;]$/.test(existingSkills) ? ", " : " ";
-      return `${resumeText.slice(0, insertAt)}${existingSkills}${separator}${action.replacement}${rest.slice(firstLineEnd)}`;
+      const start = rest.startsWith("\n") ? "\n" : "";
+      return `${resumeText.slice(0, insertAt)}${start}${existingSkills}${separator}${action.replacement}${rest.slice(firstLineEnd)}`;
     }
   }
   return `${resumeText.trim()}\n\nSkills\n${action.replacement}\n`;
 }
 
-function VisualResumePreview({ resumeText, appliedTerms }: { resumeText: string; appliedTerms: string[] }) {
-  const sections = splitResumeSections(resumeText);
+function removeImprovementFromResume(resumeText: string, action: ImprovementAction) {
+  if (action.kind === "replace" && action.original) {
+    const position = resumeText.toLowerCase().indexOf(action.replacement.toLowerCase());
+    if (position < 0) return resumeText;
+    const beforeReplacement = resumeText.slice(0, position);
+    const originalWithoutRepeatedBullet = /^[•]/.test(action.original) && /[•]\s*$/.test(beforeReplacement) ? action.original.replace(/^[•]\s*/, "") : action.original;
+    return `${beforeReplacement}${originalWithoutRepeatedBullet}${resumeText.slice(position + action.replacement.length)}`;
+  }
+  const position = resumeText.toLowerCase().indexOf(action.replacement.toLowerCase());
+  if (position < 0) return resumeText;
+  let start = position;
+  let end = position + action.replacement.length;
+  const before = resumeText.slice(0, start);
+  const after = resumeText.slice(end);
+  if (/,[ \t]*$/.test(before)) start = before.lastIndexOf(",");
+  else if (/^[ \t]*,/.test(after)) end += after.match(/^[ \t]*,/)![0].length;
+  return `${resumeText.slice(0, start)}${resumeText.slice(end)}`.replace(/[ \t]+\n/g, "\n").replace(/,\s*,/g, ",");
+}
+
+function findFlexiblePhraseMatch(resumeText: string, phrase: string) {
+  const words = phrase.match(/[a-z0-9]+/gi) || [];
+  if (words.length < 3) return null;
+  const expression = new RegExp(words.map(escapeRegExp).join("[^a-z0-9]+"), "i");
+  return expression.exec(resumeText);
+}
+
+function VisualResumePreview({ resumeText, appliedActions }: { resumeText: string; appliedActions: ImprovementAction[] }) {
+  const appliedTerms = appliedActions.filter((action) => action.kind !== "replace").map((action) => action.replacement);
+  const rewrittenPhrases = appliedActions.filter((action) => action.kind === "replace").map((action) => action.replacement);
+  const sections = mergeSkillSections(splitResumeSections(resumeText));
   return <article className="h-[31rem] overflow-y-auto bg-white p-5 text-slate-800 shadow-inner sm:p-7 dark:bg-slate-950 dark:text-slate-100">
     {sections.map((section, index) => <section key={`${section.heading}-${index}`} className={index ? "mt-6 border-t border-slate-200 pt-5 dark:border-white/10" : ""}>
-      {index === 0 ? <div className="border-b-2 border-primary pb-4"><h5 className="font-heading text-2xl font-semibold text-slate-950 dark:text-white">{section.heading || "Resume draft"}</h5><div className="mt-2 whitespace-pre-line text-xs leading-5 text-slate-600 dark:text-slate-300"><HighlightedResumeText text={section.content} terms={appliedTerms} /></div></div> : <><h6 className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary dark:text-emerald-200">{section.heading}</h6><div className="mt-2 whitespace-pre-line text-sm leading-6 text-slate-700 dark:text-slate-200"><HighlightedResumeText text={section.content} terms={appliedTerms} /></div></>}
+      {index === 0 ? <div className="border-b-2 border-primary pb-4"><h5 className="font-heading text-2xl font-semibold text-slate-950 dark:text-white">{section.heading || "Resume draft"}</h5><div className="mt-2 whitespace-pre-line text-xs leading-5 text-slate-600 dark:text-slate-300"><HighlightedResumeText text={section.content} terms={appliedTerms} rewrittenPhrases={rewrittenPhrases} /></div></div> : <><h6 className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary dark:text-emerald-200">{section.heading}</h6><ResumeSectionContent heading={section.heading} content={section.content} appliedTerms={appliedTerms} rewrittenPhrases={rewrittenPhrases} /></>}
     </section>)}
   </article>;
 }
 
-function HighlightedResumeText({ text, terms }: { text: string; terms: string[] }) {
-  const cleanTerms = terms.filter(Boolean).sort((left, right) => right.length - left.length);
-  if (!cleanTerms.length) return <>{text}</>;
-  const expression = new RegExp(`(${cleanTerms.map(escapeRegExp).join("|")})`, "gi");
-  return <>{text.split(expression).map((part, index) => cleanTerms.some((term) => term.toLowerCase() === part.toLowerCase()) ? <mark key={`${part}-${index}`} className="rounded bg-emerald-100 px-1 font-semibold text-emerald-900 dark:bg-emerald-400/25 dark:text-emerald-100">{part}</mark> : part)}</>;
+function mergeSkillSections(sections: Array<{ heading: string; content: string }>) {
+  const skillIndexes = sections.flatMap((section, index) => /skills?/i.test(section.heading) ? [index] : []);
+  if (skillIndexes.length < 2) return sections;
+  const [primaryIndex, ...extraIndexes] = skillIndexes;
+  const extraContent = extraIndexes.map((index) => sections[index].content).filter(Boolean).join(", ");
+  return sections.flatMap((section, index) => {
+    if (extraIndexes.includes(index)) return [];
+    if (index !== primaryIndex) return [section];
+    return [{ ...section, content: [section.content, extraContent].filter(Boolean).join(", ") }];
+  });
+}
+
+function ResumeSectionContent({ heading, content, appliedTerms, rewrittenPhrases }: { heading: string; content: string; appliedTerms: string[]; rewrittenPhrases: string[] }) {
+  const isSkillsSection = /skills?/i.test(heading);
+  if (isSkillsSection) {
+    const skills = content.split(/[\n,|•]+/).map((item) => item.trim()).filter(Boolean);
+    return <div className="mt-3 flex flex-wrap gap-2">{skills.map((skill, index) => {
+      const isNew = appliedTerms.some((term) => term.toLowerCase() === skill.toLowerCase());
+      return <span key={`${skill}-${index}`} className={`rounded-lg border px-2.5 py-1.5 text-xs font-semibold ${isNew ? "border-emerald-300 bg-emerald-50 text-emerald-800 shadow-sm dark:border-emerald-300/30 dark:bg-emerald-400/15 dark:text-emerald-100" : "border-slate-200 bg-slate-50 text-slate-700 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-200"}`}>{skill}{isNew ? <span className="ml-1 text-[10px]">New</span> : null}</span>;
+    })}</div>;
+  }
+  const lines = getResumeLines(content);
+  if (isSummaryHeading(heading)) return <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200"><HighlightedResumeText text={joinResumeLines(lines)} terms={appliedTerms} rewrittenPhrases={rewrittenPhrases} /></p>;
+  if (isExperienceHeading(heading)) {
+    const entries = parseExperienceEntries(lines);
+    return <div className="mt-3 grid gap-5 text-sm leading-6 text-slate-700 dark:text-slate-200">
+      {entries.map((entry, entryIndex) => <div key={`${entry.title}-${entry.period}-${entryIndex}`}>
+        <div className="mb-3 rounded-lg border-l-2 border-primary/70 bg-slate-50 px-3 py-2.5 dark:border-emerald-300 dark:bg-white/[0.04]">
+          <p className="font-semibold text-slate-900 dark:text-white"><HighlightedResumeText text={entry.title} terms={appliedTerms} rewrittenPhrases={rewrittenPhrases} /></p>
+          {entry.period ? <p className="text-xs font-medium text-slate-500 dark:text-slate-400"><HighlightedResumeText text={entry.period} terms={appliedTerms} rewrittenPhrases={rewrittenPhrases} /></p> : null}
+        </div>
+        {entry.achievements.length ? <ul className="grid gap-2">{entry.achievements.map((line, index) => <li key={`${line}-${index}`} className="flex gap-2"><span className="mt-2 size-1.5 shrink-0 rounded-full bg-primary dark:bg-emerald-300" /><span><HighlightedResumeText text={line} terms={appliedTerms} rewrittenPhrases={rewrittenPhrases} /></span></li>)}</ul> : null}
+      </div>)}
+    </div>;
+  }
+  if (/projects?/i.test(heading)) {
+    const projects = parseProjectEntries(lines);
+    return <div className="mt-3 grid gap-5 text-sm leading-6 text-slate-700 dark:text-slate-200">{projects.map((project, projectIndex) => <div key={`${project.title}-${projectIndex}`}>
+      <p className="mb-2 font-semibold text-slate-900 dark:text-white"><HighlightedResumeText text={project.title} terms={appliedTerms} rewrittenPhrases={rewrittenPhrases} /></p>
+      {project.achievements.length ? <ul className="grid gap-2">{project.achievements.map((line, index) => <li key={`${line}-${index}`} className="flex gap-2"><span className="mt-2 size-1.5 shrink-0 rounded-full bg-primary dark:bg-emerald-300" /><span><HighlightedResumeText text={line} terms={appliedTerms} rewrittenPhrases={rewrittenPhrases} /></span></li>)}</ul> : null}
+    </div>)}</div>;
+  }
+  const hasBullets = lines.some((line) => hasResumeBullet(line));
+  if (hasBullets) return <ul className="mt-2.5 grid gap-2 text-sm leading-6 text-slate-700 dark:text-slate-200">{groupResumeBulletLines(lines).map((line, index) => <li key={`${line}-${index}`} className="flex gap-2"><span className="mt-2 size-1.5 shrink-0 rounded-full bg-primary dark:bg-emerald-300" /><span><HighlightedResumeText text={line} terms={appliedTerms} rewrittenPhrases={rewrittenPhrases} /></span></li>)}</ul>;
+  return <div className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">{lines.map((line, index) => <p key={`${line}-${index}`} className={index ? "mt-1" : ""}><HighlightedResumeText text={line} terms={appliedTerms} rewrittenPhrases={rewrittenPhrases} /></p>)}</div>;
+}
+
+function getResumeLines(content: string) {
+  return content.split("\n").map((line) => line.trim()).filter(Boolean);
+}
+
+function hasResumeBullet(line: string) {
+  return /^(?:[-•–]|\d+[.)])\s+/.test(line);
+}
+
+function removeResumeBullet(line: string) {
+  return line.replace(/^(?:[-•–]|\d+[.)])\s+/, "").trim();
+}
+
+function joinResumeLines(lines: string[]) {
+  return lines.map(removeResumeBullet).join(" ").replace(/\s{2,}/g, " ").trim();
+}
+
+function isSummaryHeading(heading: string) {
+  return /^(?:professional )?(?:summary|profile)$/i.test(heading.trim());
+}
+
+function isExperienceHeading(heading: string) {
+  return /(?:professional |work )?experience|employment/i.test(heading);
+}
+
+function isDateOrPeriodLine(line: string) {
+  return /\b(?:19|20)\d{2}\b|\bpresent\b|\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\b/i.test(line);
+}
+
+function startsExperienceAchievement(line: string) {
+  return /^(?:achieved|architected|built|collaborated|created|delivered|designed|developed|drove|enhanced|handled|implemented|improved|integrated|led|managed|mentored|optimized|owned|played|reduced|spearheaded|streamlined|supported|worked)\b/i.test(line);
+}
+
+function isPositionHeading(line: string) {
+  return line.includes("|") && /\b(?:developer|engineer|architect|manager|designer|analyst|consultant|intern|specialist|lead|director|officer|associate|founder)\b/i.test(line) && !startsExperienceAchievement(line);
+}
+
+function parseExperienceEntries(lines: string[]) {
+  const cleanLines = lines.map(removeResumeBullet);
+  const positionIndexes = cleanLines.flatMap((line, index) => isPositionHeading(line) ? [index] : []);
+  if (!positionIndexes.length) {
+    const firstAchievementIndex = cleanLines.findIndex(startsExperienceAchievement);
+    const splitAt = firstAchievementIndex >= 0 ? firstAchievementIndex : 0;
+    return [{ title: joinResumeLines(cleanLines.slice(0, splitAt)), period: "", achievements: groupExperienceAchievementLines(cleanLines.slice(splitAt)) }];
+  }
+  return positionIndexes.map((positionIndex, entryIndex) => {
+    const entryLines = cleanLines.slice(positionIndex, positionIndexes[entryIndex + 1] ?? cleanLines.length);
+    const dateIndex = entryLines.findIndex(isDateOrPeriodLine);
+    const firstAchievementIndex = entryLines.findIndex(startsExperienceAchievement);
+    const detailsEnd = dateIndex >= 0 ? dateIndex : firstAchievementIndex >= 0 ? firstAchievementIndex : entryLines.length;
+    const achievementStart = dateIndex >= 0 ? dateIndex + 1 : detailsEnd;
+    return {
+      title: joinResumeLines(entryLines.slice(0, detailsEnd)),
+      period: dateIndex >= 0 ? entryLines[dateIndex] : "",
+      achievements: groupExperienceAchievementLines(entryLines.slice(achievementStart)),
+    };
+  });
+}
+
+function groupExperienceAchievementLines(lines: string[]) {
+  const grouped: string[] = [];
+  lines.forEach((line) => {
+    if (!line) return;
+    if (startsExperienceAchievement(line) || !grouped.length) grouped.push(line);
+    else grouped[grouped.length - 1] = `${grouped[grouped.length - 1]} ${line}`.replace(/\s{2,}/g, " ");
+  });
+  return grouped;
+}
+
+function groupResumeBulletLines(lines: string[]) {
+  const grouped: string[] = [];
+  lines.forEach((line) => {
+    const text = removeResumeBullet(line);
+    if (!text) return;
+    if (hasResumeBullet(line) || !grouped.length) grouped.push(text);
+    else grouped[grouped.length - 1] = `${grouped[grouped.length - 1]} ${text}`.replace(/\s{2,}/g, " ");
+  });
+  return grouped;
+}
+
+function parseProjectEntries(lines: string[]) {
+  const cleanLines = lines.map(removeResumeBullet);
+  const headingIndexes = cleanLines.flatMap((line, index) => line.includes("|") && !startsExperienceAchievement(line) ? [index] : []);
+  if (!headingIndexes.length) return [{ title: "", achievements: groupExperienceAchievementLines(cleanLines) }];
+  return headingIndexes.map((headingIndex, index) => {
+    const projectLines = cleanLines.slice(headingIndex, headingIndexes[index + 1] ?? cleanLines.length);
+    const firstAchievementIndex = projectLines.findIndex(startsExperienceAchievement);
+    const detailsEnd = firstAchievementIndex >= 0 ? firstAchievementIndex : projectLines.length;
+    return { title: joinResumeLines(projectLines.slice(0, detailsEnd)), achievements: groupExperienceAchievementLines(projectLines.slice(detailsEnd)) };
+  });
+}
+
+function HighlightedResumeText({ text, terms, rewrittenPhrases = [] }: { text: string; terms: string[]; rewrittenPhrases?: string[] }) {
+  const highlights = [...rewrittenPhrases.map((value) => ({ value, kind: "rewrite" as const })), ...terms.map((value) => ({ value, kind: "add" as const }))].filter((item) => item.value).sort((left, right) => right.value.length - left.value.length);
+  if (!highlights.length) return <>{text}</>;
+  const expression = new RegExp(`(${highlights.map((item) => escapeRegExp(item.value)).join("|")})`, "gi");
+  return <>{text.split(expression).map((part, index) => {
+    const highlight = highlights.find((item) => item.value.toLowerCase() === part.toLowerCase());
+    if (!highlight) return part;
+    return <mark key={`${part}-${index}`} title={highlight.kind === "rewrite" ? "AI rewritten text" : "Added to resume"} className={`rounded px-1 font-semibold ${highlight.kind === "rewrite" ? "bg-blue-100 text-blue-900 ring-1 ring-blue-200 dark:bg-blue-400/25 dark:text-blue-100" : "bg-emerald-100 text-emerald-900 ring-1 ring-emerald-200 dark:bg-emerald-400/25 dark:text-emerald-100"}`}>{part}</mark>;
+  })}</>;
 }
 
 function splitResumeSections(value: string) {
-  const lines = value.replace(/\r\n?/g, "\n").split("\n").map((line) => line.trim()).filter(Boolean);
-  const headingPattern = /^(professional summary|summary|profile|experience|work experience|employment|projects?|technical skills|core technical skills|skills|education|certifications?|achievements?|contact)$/i;
+  const lines = normalizeResumeBulletText(value).replace(/\r\n?/g, "\n").split("\n").map((line) => line.trim()).filter(Boolean);
+  const headingPattern = /^(professional summary|summary|profile|experience|professional experience|work experience|employment|projects?|selected projects|technical skills|core technical skills|skills|education|certifications?|achievements?|additional strengths|contact)$/i;
   const sections: Array<{ heading: string; content: string }> = [];
   let current = { heading: lines.shift() || "Resume draft", content: "" };
   lines.forEach((line) => {
@@ -1162,6 +1394,10 @@ function splitResumeSections(value: string) {
   });
   sections.push(current);
   return sections.filter((section) => section.heading || section.content);
+}
+
+function normalizeResumeBulletText(value: string) {
+  return value.replace(/[\uF0B7\u25AA\u25CF\u2023]/g, "•").replace(/^•\s*/gm, "• ");
 }
 
 function escapeRegExp(value: string) {
@@ -1250,6 +1486,118 @@ function skillsMatch(left: string, right: string) {
 
 function escapeHtml(value: string) {
   return value.replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" })[char] || char);
+}
+
+function escapeXml(value: string) {
+  return escapeHtml(value).replace(/\r?\n/g, " ");
+}
+
+function resumeExportData(resumeText: string) {
+  const sections = splitResumeSections(resumeText);
+  return { header: sections[0] || { heading: "Your name", content: "" }, sections: sections.slice(1) };
+}
+
+function createImprovedResumeDocxBlob(resumeText: string) {
+  const { header, sections } = resumeExportData(resumeText);
+  const paragraph = (text: string, options: { bold?: boolean; size?: number; color?: string; center?: boolean; before?: number; after?: number; bullet?: boolean } = {}) => {
+    const properties = `<w:pPr>${options.center ? "<w:jc w:val=\"center\"/>" : ""}${options.before ? `<w:spacing w:before=\"${options.before}\"/>` : ""}${options.after ? `<w:spacing w:after=\"${options.after}\"/>` : ""}</w:pPr>`;
+    const run = `<w:r><w:rPr>${options.bold ? "<w:b/>" : ""}${options.size ? `<w:sz w:val=\"${options.size}\"/>` : ""}${options.color ? `<w:color w:val=\"${options.color}\"/>` : ""}</w:rPr><w:t xml:space=\"preserve\">${escapeXml(options.bullet ? `• ${text}` : text)}</w:t></w:r>`;
+    return `<w:p>${properties}${run}</w:p>`;
+  };
+  const renderSection = (section: { heading: string; content: string }) => {
+    const lines = getResumeLines(section.content);
+    const heading = paragraph(section.heading.toUpperCase(), { bold: true, size: 22, color: "164AA8", before: 180, after: 90 });
+    if (isSkillsSectionName(section.heading)) return `${heading}${paragraph(joinResumeLines(lines), { size: 20, after: 80 })}`;
+    if (isSummaryHeading(section.heading)) return `${heading}${paragraph(joinResumeLines(lines), { size: 20, after: 80 })}`;
+    if (isExperienceHeading(section.heading)) return `${heading}${parseExperienceEntries(lines).map((entry) => `${paragraph(entry.title, { bold: true, size: 20, after: 30 })}${entry.period ? paragraph(entry.period, { size: 18, color: "64748B", after: 30 }) : ""}${entry.achievements.map((item) => paragraph(item, { size: 20, bullet: true, after: 25 })).join("")}`).join("")}`;
+    if (/projects?/i.test(section.heading)) return `${heading}${parseProjectEntries(lines).map((project) => `${project.title ? paragraph(project.title, { bold: true, size: 20, after: 30 }) : ""}${project.achievements.map((item) => paragraph(item, { size: 20, bullet: true, after: 25 })).join("")}`).join("")}`;
+    const hasBullets = lines.some(hasResumeBullet);
+    return `${heading}${hasBullets ? groupResumeBulletLines(lines).map((item) => paragraph(item, { size: 20, bullet: true, after: 25 })).join("") : lines.map((item) => paragraph(item, { size: 20, after: 35 })).join("")}`;
+  };
+  const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${paragraph(header.heading, { bold: true, size: 36, color: "0B1830", after: 70 })}${paragraph(joinResumeLines(getResumeLines(header.content)), { size: 19, color: "475569", after: 120 })}${sections.map(renderSection).join("")}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="720" w:right="760" w:bottom="720" w:left="760"/></w:sectPr></w:body></w:document>`;
+  const zip = new JSZip();
+  zip.file("[Content_Types].xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>`);
+  zip.folder("_rels")?.file(".rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`);
+  zip.folder("word")?.file("document.xml", documentXml);
+  zip.folder("word")?.file("styles.xml", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Aptos" w:hAnsi="Aptos"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>`);
+  zip.folder("word")?.folder("_rels")?.file("document.xml.rels", `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"/>`);
+  return zip.generateAsync({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+}
+
+function isSkillsSectionName(heading: string) {
+  return /skills?/i.test(heading);
+}
+
+function pdfSafeText(value: string) {
+  return value.replace(/[–—]/g, "-").replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/[^\x20-\x7E]/g, "").replace(/[\\()]/g, (char) => `\\${char}`);
+}
+
+function wrapPdfText(value: string, size: number, width = 516) {
+  const maxCharacters = Math.max(24, Math.floor(width / (size * 0.52)));
+  const words = pdfSafeText(value).split(/\s+/).filter(Boolean);
+  const lines: string[] = [];
+  let line = "";
+  words.forEach((word) => {
+    const next = line ? `${line} ${word}` : word;
+    if (next.length > maxCharacters && line) { lines.push(line); line = word; } else line = next;
+  });
+  if (line) lines.push(line);
+  return lines;
+}
+
+function createImprovedResumePdfBlob(resumeText: string) {
+  const { header, sections } = resumeExportData(resumeText);
+  const pageWidth = 595;
+  const pageHeight = 842;
+  const horizontalMargin = 48;
+  const pages: string[] = [];
+  let commands: string[] = [];
+  let y = pageHeight - 48;
+  const startPage = () => { commands = []; y = pageHeight - 48; };
+  const finishPage = () => { pages.push(commands.join("\n")); };
+  const line = (text: string, size = 10, bold = false, color = "0.12 0.17 0.25", indent = 0) => {
+    const lines = wrapPdfText(text, size, pageWidth - horizontalMargin * 2 - indent);
+    lines.forEach((part) => {
+      if (y < 54) { finishPage(); startPage(); }
+      commands.push(`${color} rg BT /F${bold ? 2 : 1} ${size} Tf 1 0 0 1 ${horizontalMargin + indent} ${y} Tm (${part}) Tj ET`);
+      y -= size * 1.48;
+    });
+  };
+  const spacer = (points = 6) => { y -= points; if (y < 54) { finishPage(); startPage(); } };
+  startPage();
+  line(header.heading, 22, true, "0.03 0.08 0.16");
+  line(joinResumeLines(getResumeLines(header.content)), 9, false, "0.28 0.35 0.45");
+  spacer(8);
+  sections.forEach((section) => {
+    if (y < 90) { finishPage(); startPage(); }
+    line(section.heading.toUpperCase(), 10, true, "0.09 0.29 0.66");
+    const lines = getResumeLines(section.content);
+    if (isSkillsSectionName(section.heading) || isSummaryHeading(section.heading)) line(joinResumeLines(lines), 9.5);
+    else if (isExperienceHeading(section.heading)) parseExperienceEntries(lines).forEach((entry) => { spacer(2); line(entry.title, 10, true); if (entry.period) line(entry.period, 8.5, false, "0.34 0.4 0.5"); entry.achievements.forEach((item) => line(`- ${item}`, 9, false, "0.12 0.17 0.25", 10)); });
+    else if (/projects?/i.test(section.heading)) parseProjectEntries(lines).forEach((project) => { spacer(2); if (project.title) line(project.title, 10, true); project.achievements.forEach((item) => line(`- ${item}`, 9, false, "0.12 0.17 0.25", 10)); });
+    else if (lines.some(hasResumeBullet)) groupResumeBulletLines(lines).forEach((item) => line(`- ${item}`, 9, false, "0.12 0.17 0.25", 10));
+    else lines.forEach((item) => line(item, 9.5));
+    spacer(7);
+  });
+  finishPage();
+  return new Blob([buildPdfDocument(pages, pageWidth, pageHeight)], { type: "application/pdf" });
+}
+
+function buildPdfDocument(pageStreams: string[], pageWidth: number, pageHeight: number) {
+  const pageIds = pageStreams.map((_, index) => 5 + index * 2);
+  const objects = ["<< /Type /Catalog /Pages 2 0 R >>", `<< /Type /Pages /Kids [${pageIds.map((id) => `${id} 0 R`).join(" ")}] /Count ${pageIds.length} >>`, "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>", "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>"];
+  pageStreams.forEach((stream, index) => {
+    const pageId = 5 + index * 2;
+    const contentId = pageId + 1;
+    objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${contentId} 0 R >>`);
+    objects.push(`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`);
+  });
+  let output = "%PDF-1.4\n";
+  const offsets = [0];
+  objects.forEach((object, index) => { offsets.push(output.length); output += `${index + 1} 0 obj\n${object}\nendobj\n`; });
+  const xref = output.length;
+  output += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n${offsets.slice(1).map((offset) => `${String(offset).padStart(10, "0")} 00000 n \n`).join("")}trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
+  return output;
 }
 
 function createPrintableAtsReport({
@@ -1531,9 +1879,40 @@ function TagCard({ title, items, tone }: { title: string; items: string[]; tone:
   return <div className="rounded-xl border border-blue-950/10 p-4 dark:border-white/10"><div className="flex items-center justify-between gap-2"><h4 className="text-sm font-semibold text-slate-950 dark:text-white">{title}</h4><span className="text-xs font-semibold text-slate-400">{items.length}</span></div><div className="mt-3 flex flex-wrap gap-1.5">{items.length ? items.map((item) => <span key={item} className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${styles}`}>{item}</span>) : <span className="text-xs text-slate-500">Nothing flagged.</span>}</div></div>;
 }
 
-function ActionTagCard({ title, items, tone, onApply, appliedTerms }: { title: string; items: string[]; tone: "warning" | "danger"; onApply: (term: string) => void; appliedTerms: string[] }) {
+function ImprovementShelf({ title, description, items, appliedFixes, onApply, onRemove }: { title: string; description: string; items: ImprovementAction[]; appliedFixes: string[]; onApply: (action: ImprovementAction) => void; onRemove: (action: ImprovementAction) => void }) {
+  const [showAll, setShowAll] = useState(false);
+  const visibleItems = showAll ? items : items.slice(0, 6);
+  return <section className="overflow-hidden rounded-xl border border-blue-950/10 bg-white dark:border-white/10 dark:bg-white/[0.035]">
+    <div className="flex items-start gap-2.5 border-b border-blue-950/8 bg-slate-50/80 px-3 py-2.5 dark:border-white/8 dark:bg-white/[0.035]">
+      <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-blue-100 text-primary dark:bg-white/10 dark:text-emerald-200"><Plus className="size-3.5" aria-hidden="true" /></span>
+      <div><div className="flex items-center gap-2"><h5 className="text-xs font-semibold text-slate-950 dark:text-white">{title}</h5><span className="rounded-full bg-white px-1.5 py-0.5 text-[10px] font-bold text-slate-500 shadow-sm dark:bg-slate-950 dark:text-slate-300">{items.length}</span></div><p className="mt-0.5 text-[11px] leading-4 text-slate-500 dark:text-slate-400">{description}</p></div>
+    </div>
+    <div className="grid gap-px bg-blue-950/8 sm:grid-cols-2 dark:bg-white/8">{visibleItems.map((item) => {
+      const applied = appliedFixes.includes(item.id);
+      return <div key={item.id} className={`flex min-h-[4.5rem] items-center gap-2.5 px-3 py-2.5 ${applied ? "bg-emerald-50/70 dark:bg-emerald-400/[0.06]" : "bg-white dark:bg-slate-950"}`}>
+        <span className={`grid size-7 shrink-0 place-items-center rounded-full ${applied ? "bg-emerald-600 text-white" : "bg-slate-100 text-primary dark:bg-white/10 dark:text-emerald-200"}`}>{applied ? <CheckCircle2 className="size-3.5" aria-hidden="true" /> : <Plus className="size-3.5" aria-hidden="true" />}</span>
+        <div className="min-w-0 flex-1"><p className="truncate text-xs font-semibold text-slate-800 dark:text-slate-100" title={item.replacement}>{item.replacement}</p><p className="mt-0.5 text-[10px] text-slate-500">{applied ? "Added to improved draft" : item.kind === "skill" ? "Skill gap from this review" : "Keyword gap from this review"}</p></div>
+        {!applied ? <span className="rounded-full bg-blue-50 px-1.5 py-0.5 text-[10px] font-bold text-primary dark:bg-white/10 dark:text-emerald-200">Est. +{item.impact} score</span> : null}
+        {applied ? <button type="button" onClick={() => onRemove(item)} aria-label={`Remove ${item.replacement}`} className="grid size-8 shrink-0 cursor-pointer place-items-center rounded-full border border-emerald-300 bg-white text-emerald-800 transition hover:border-rose-300 hover:text-rose-700 dark:border-emerald-300/30 dark:bg-slate-950 dark:text-emerald-200"><RotateCcw className="size-3.5" aria-hidden="true" /></button> : <button type="button" onClick={() => onApply(item)} aria-label={`Add ${item.replacement}`} className="grid size-8 shrink-0 cursor-pointer place-items-center rounded-full bg-[image:var(--button-solid)] text-white shadow-sm transition hover:-translate-y-0.5"><Plus className="size-3.5" aria-hidden="true" /></button>}
+      </div>;
+    })}</div>
+    {items.length > 6 ? <div className="border-t border-blue-950/8 px-3 py-2 text-center dark:border-white/8"><button type="button" onClick={() => setShowAll((value) => !value)} className="inline-flex cursor-pointer items-center gap-1 text-[11px] font-semibold text-primary hover:text-emerald-700 dark:text-emerald-200"><ChevronDown className={`size-3.5 transition ${showAll ? "rotate-180" : ""}`} aria-hidden="true" />{showAll ? "Show fewer" : `Show all ${items.length}`}</button></div> : null}
+  </section>;
+}
+
+function ImprovedResumeDownloadModal({ onClose, onDownload }: { onClose: () => void; onDownload: (format: "pdf" | "doc" | "txt") => void }) {
+  if (typeof document === "undefined") return null;
+  return createPortal(<div className="fixed inset-0 z-[90] grid place-items-center bg-slate-950/55 px-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Download improved resume">
+    <div className="w-full max-w-md rounded-[1.25rem] border border-white/20 bg-white p-5 shadow-2xl shadow-slate-950/25 dark:bg-slate-950">
+      <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary dark:text-emerald-200">Download improved resume</p><h3 className="mt-2 font-heading text-2xl font-semibold text-slate-950 dark:text-white">Choose a format</h3><p className="mt-1 text-xs leading-5 text-slate-500">Your applied changes are included in every export.</p></div><button type="button" onClick={onClose} className="grid size-9 cursor-pointer place-items-center rounded-full border border-blue-950/10 text-slate-500 transition hover:border-rose-300 hover:text-rose-600 dark:border-white/10 dark:text-slate-300" aria-label="Close download options"><X className="size-4" aria-hidden="true" /></button></div>
+      <div className="mt-5 grid gap-3"><button type="button" onClick={() => onDownload("pdf")} className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-left transition hover:border-emerald-400 dark:border-emerald-300/20 dark:bg-emerald-400/10"><span><strong className="block text-slate-950 dark:text-white">PDF</strong><span className="mt-1 block text-sm text-slate-600 dark:text-slate-300">Direct A4 PDF download, ready to attach to applications.</span></span><Download className="size-5 text-emerald-700 dark:text-emerald-200" aria-hidden="true" /></button><button type="button" onClick={() => onDownload("doc")} className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-blue-950/10 bg-white p-4 text-left transition hover:border-primary/35 dark:border-white/10 dark:bg-white/[0.06]"><span><strong className="block text-slate-950 dark:text-white">Word</strong><span className="mt-1 block text-sm text-slate-600 dark:text-slate-300">Editable native .docx with proper headings and bullets.</span></span><FileText className="size-5 text-primary dark:text-emerald-200" aria-hidden="true" /></button><button type="button" onClick={() => onDownload("txt")} className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-blue-950/10 bg-white p-4 text-left transition hover:border-primary/35 dark:border-white/10 dark:bg-white/[0.06]"><span><strong className="block text-slate-950 dark:text-white">Text</strong><span className="mt-1 block text-sm text-slate-600 dark:text-slate-300">For job portals and plain-text application forms.</span></span><Copy className="size-5 text-primary dark:text-emerald-200" aria-hidden="true" /></button></div>
+    </div>
+  </div>, document.body);
+}
+
+function ActionTagCard({ title, items, tone, onApply, onRemove, appliedTerms }: { title: string; items: string[]; tone: "warning" | "danger"; onApply: (term: string) => void; onRemove: (term: string) => void; appliedTerms: string[] }) {
   const styles = tone === "warning" ? "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-300/20 dark:bg-amber-400/10 dark:text-amber-100" : "border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-300/20 dark:bg-rose-400/10 dark:text-rose-100";
-  return <div className="rounded-xl border border-blue-950/10 p-4 dark:border-white/10"><div className="flex items-center justify-between gap-2"><h4 className="text-sm font-semibold text-slate-950 dark:text-white">{title}</h4><span className="text-xs font-semibold text-slate-400">{items.length}</span></div><div className="mt-3 grid gap-2">{items.length ? items.map((item) => { const applied = appliedTerms.some((term) => term.toLowerCase() === item.toLowerCase()); return <div key={item} className={`flex items-center justify-between gap-2 rounded-lg border px-2.5 py-2 ${styles}`}><span className="min-w-0 text-xs font-semibold">{item}</span><button type="button" disabled={applied} onClick={() => onApply(item)} className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-bold ${applied ? "bg-emerald-600 text-white" : "bg-white text-slate-700 shadow-sm"}`}>{applied ? "Added" : "Add"}</button></div>; }) : <span className="text-xs text-slate-500">Nothing flagged.</span>}</div><p className="mt-2 text-[10px] leading-4 text-slate-500">Add only terms you can support with real work, study, or a project.</p></div>;
+  return <div className="rounded-xl border border-blue-950/10 p-4 dark:border-white/10"><div className="flex items-center justify-between gap-2"><h4 className="text-sm font-semibold text-slate-950 dark:text-white">{title}</h4><span className="text-xs font-semibold text-slate-400">{items.length}</span></div><div className="mt-3 grid gap-2">{items.length ? items.map((item) => { const applied = appliedTerms.some((term) => term.toLowerCase() === item.toLowerCase()); return <div key={item} className={`flex items-center justify-between gap-2 rounded-lg border px-2.5 py-2 ${styles}`}><span className="min-w-0 text-xs font-semibold">{item}</span>{applied ? <button type="button" aria-label={`Remove ${item} from improved resume`} onClick={() => onRemove(item)} className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white px-2 py-1 text-[10px] font-bold text-rose-700 shadow-sm"><RotateCcw className="size-3" aria-hidden="true" />Remove</button> : <button type="button" aria-label={`Add ${item} to improved resume`} onClick={() => onApply(item)} className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white px-2 py-1 text-[10px] font-bold text-slate-700 shadow-sm"><Plus className="size-3" aria-hidden="true" />Add</button>}</div>; }) : <span className="text-xs text-slate-500">Nothing flagged.</span>}</div><p className="mt-2 text-[10px] leading-4 text-slate-500">Add only terms you can support with real work, study, or a project.</p></div>;
 }
 
 function RoadmapCard({ roadmap }: { roadmap: ResumeAnalysis["roadmap"] }) {
@@ -1587,12 +1966,12 @@ function trackAts(event: string, properties: Record<string, string | boolean> = 
   analyticsWindow.dataLayer?.push({ event: `ats_${event}`, tool: "resume_checker", ...properties });
 }
 
-function SuggestionCard({ title, items, onApply, appliedItems }: { title: string; items: { original: string; suggestion: string; reason: string }[]; onApply?: (item: { original: string; suggestion: string; reason: string }) => void; appliedItems?: ImprovementAction[] }) {
+function SuggestionCard({ title, items, onApply, onRemove, appliedItems }: { title: string; items: { original: string; suggestion: string; reason: string }[]; onApply?: (item: { original: string; suggestion: string; reason: string }) => void; onRemove?: (item: { original: string; suggestion: string; reason: string }) => void; appliedItems?: ImprovementAction[] }) {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [copyError, setCopyError] = useState(false);
   return <section className="rounded-xl border border-blue-950/10 p-4 dark:border-white/10">
     <div className="flex items-center justify-between gap-2"><h4 className="text-sm font-semibold">{title}</h4><span className="text-xs font-semibold text-slate-400">{items.length}</span></div>
-    {!items.length ? <p className="mt-2 text-xs text-slate-500">No specific changes suggested in this review.</p> : <div className="mt-2.5 grid gap-2">{items.map((item, index) => { const applied = appliedItems?.some((action) => action.original === item.original && action.replacement === item.suggestion); return <details key={index} className="rounded-lg bg-slate-50 px-3 py-2 dark:bg-white/[0.05]"><summary className="cursor-pointer text-xs font-semibold leading-5 text-slate-800 dark:text-slate-100">{item.original}</summary><div className="mt-2 border-t border-blue-950/10 pt-2 dark:border-white/10"><p className="text-xs leading-5 text-emerald-800 dark:text-emerald-200">{item.suggestion}</p><p className="mt-1 text-[11px] leading-4 text-slate-500">{item.reason}</p><div className="mt-2 flex flex-wrap gap-2">{onApply ? <button type="button" disabled={applied} className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${applied ? "bg-emerald-600 text-white" : "bg-[image:var(--button-solid)] text-white"}`} onClick={() => onApply(item)}>{applied ? "Applied" : "Apply to improved draft"}</button> : null}<button type="button" className="rounded-full border border-blue-950/15 px-2.5 py-1 text-[10px] font-semibold dark:border-white/20" onClick={async () => { try { await navigator.clipboard.writeText(item.suggestion); setCopiedIndex(index); setCopyError(false); trackAts("suggestion_copied"); } catch { setCopyError(true); } }}>{copiedIndex === index ? "Copied" : "Copy suggestion"}</button></div></div></details>; })}</div>}
+    {!items.length ? <p className="mt-2 text-xs text-slate-500">No specific changes suggested in this review.</p> : <div className="mt-2.5 grid gap-2">{items.map((item, index) => { const applied = appliedItems?.some((action) => action.original === item.original && action.replacement === item.suggestion); return <details key={index} className="rounded-lg bg-slate-50 px-3 py-2 dark:bg-white/[0.05]"><summary className="cursor-pointer text-xs font-semibold leading-5 text-slate-800 dark:text-slate-100">{normalizeResumeBulletText(item.original)}</summary><div className="mt-2 border-t border-blue-950/10 pt-2 dark:border-white/10"><p className="text-xs leading-5 text-emerald-800 dark:text-emerald-200">{item.suggestion}</p><p className="mt-1 text-[11px] leading-4 text-slate-500">{item.reason}</p><div className="mt-2 flex flex-wrap gap-2">{applied && onRemove ? <button type="button" className="inline-flex items-center gap-1 rounded-full border border-rose-200 bg-white px-2.5 py-1 text-[10px] font-semibold text-rose-700 dark:border-rose-300/25 dark:bg-slate-950 dark:text-rose-200" onClick={() => onRemove(item)}><RotateCcw className="size-3" aria-hidden="true" />Remove</button> : onApply ? <button type="button" className="rounded-full bg-[image:var(--button-solid)] px-2.5 py-1 text-[10px] font-semibold text-white" onClick={() => onApply(item)}>Apply to improved draft</button> : null}<button type="button" className="rounded-full border border-blue-950/15 px-2.5 py-1 text-[10px] font-semibold dark:border-white/20" onClick={async () => { try { await navigator.clipboard.writeText(item.suggestion); setCopiedIndex(index); setCopyError(false); trackAts("suggestion_copied"); } catch { setCopyError(true); } }}>{copiedIndex === index ? "Copied" : "Copy suggestion"}</button></div></div></details>; })}</div>}
     <p role="status" className="mt-2 text-xs text-slate-500">{copyError ? "Copy was blocked. Select and copy the suggestion above." : copiedIndex !== null ? "Suggestion copied. Check that it reflects your actual experience." : ""}</p>
   </section>;
 }
