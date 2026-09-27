@@ -27,3 +27,16 @@ export const publicLoginSchema = z.object({
   password: z.string().min(1).max(120),
   callbackUrl: z.string().trim().optional(),
 });
+
+export const passwordResetRequestSchema = z.object({
+  email: z.string().trim().email().max(120),
+});
+
+export const passwordResetSchema = z.object({
+  token: z.string().min(32).max(200),
+  password: z.string().min(8).max(120),
+  confirmPassword: z.string().min(8).max(120),
+}).refine((value) => value.password === value.confirmPassword, {
+  message: "Passwords do not match.",
+  path: ["confirmPassword"],
+});

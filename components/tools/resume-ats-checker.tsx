@@ -480,6 +480,7 @@ export function ResumeAtsChecker() {
           fileData: attachFile ? uploadedResume?.data : undefined,
           fileMimeType: attachFile ? uploadedResume?.mimeType : undefined,
           fileName: uploadedResume?.name,
+          candidateName,
           targetRole,
           roleFamily,
           yearsExperience,

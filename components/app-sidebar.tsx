@@ -6,6 +6,7 @@ import Link from "next/link";
 import {
   FileTextIcon,
   FileQuestionIcon,
+  ChartNoAxesCombinedIcon,
   KeyRoundIcon,
   LayoutDashboardIcon,
   PackageIcon,
@@ -75,6 +76,11 @@ export function AppSidebar({
               title: "Leads",
               url: "/admin/leads",
               icon: <UsersIcon />,
+            },
+            {
+              title: "ATS analytics",
+              url: "/admin/ats-checker",
+              icon: <ChartNoAxesCombinedIcon />,
             },
             {
               title: "Licenses",

@@ -35,11 +35,16 @@ export function ArticleCoverUpload({
         body,
       });
       const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error || "Image upload failed.");
+      if (!response.ok)
+        throw new Error(payload.error || "Image upload failed.");
       setUrl(payload.url);
-      toast.success(articleId ? "Cover image uploaded and saved" : "Image uploaded");
+      toast.success(
+        articleId ? "Cover image uploaded and saved" : "Image uploaded",
+      );
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Image upload failed");
+      toast.error(
+        error instanceof Error ? error.message : "Image upload failed",
+      );
     } finally {
       setUploading(false);
     }
@@ -52,13 +57,21 @@ export function ArticleCoverUpload({
         {url ? (
           // Dynamic upload URLs can be local or point at a configured S3-compatible host.
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={url} alt={altText || title} className="aspect-video w-full object-cover" />
+          <img
+            src={url}
+            alt={altText || title}
+            className="aspect-video w-full object-cover"
+          />
         ) : (
           <div className="grid aspect-video place-items-center bg-blue-50 text-center">
             <div>
               <ImageIcon className="mx-auto size-8 text-primary" />
-              <p className="mt-2 text-sm font-semibold text-primary">No cover image</p>
-              <p className="mt-1 text-xs text-slate-500">Upload a cover image for listing cards and sharing.</p>
+              <p className="mt-2 text-sm font-semibold text-primary">
+                No cover image
+              </p>
+              <p className="mt-1 text-xs text-slate-500">
+                Upload a cover image for listing cards and sharing.
+              </p>
             </div>
           </div>
         )}

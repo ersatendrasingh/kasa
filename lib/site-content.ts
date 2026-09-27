@@ -792,3 +792,146 @@ export const allSeoPages = [
   ...comparisonPages.map((page) => ({ ...page, href: `/compare/${page.slug}`, group: "Compare" })),
   ...resourcePages.map((page) => ({ ...page, href: `/resources/${page.slug}`, group: "Resources" })),
 ];
+
+type SeoPage = (typeof allSeoPages)[number];
+
+const relatedPageStopWords = new Set([
+  "academy",
+  "and",
+  "best",
+  "build",
+  "business",
+  "coaching",
+  "course",
+  "for",
+  "from",
+  "guide",
+  "help",
+  "india",
+  "institute",
+  "kasa",
+  "learning",
+  "lms",
+  "management",
+  "online",
+  "platform",
+  "software",
+  "support",
+  "system",
+  "team",
+  "that",
+  "the",
+  "their",
+  "this",
+  "through",
+  "with",
+  "your",
+]);
+
+const relatedPageAliases: Record<string, string> = {
+  assignment: "assessment",
+  checkout: "commerce",
+  exam: "assessment",
+  fee: "commerce",
+  invoice: "commerce",
+  learner: "student",
+  order: "commerce",
+  payment: "commerce",
+  pricing: "commerce",
+  quiz: "assessment",
+  replay: "recorded",
+  revenue: "commerce",
+  teacher: "faculty",
+  test: "assessment",
+  trainer: "faculty",
+};
+
+function relatedPageTokens(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .split(/\s+/)
+    .filter((token) => token.length > 2)
+    .map((token) => {
+      if (token.endsWith("ies") && token.length > 5) return `${token.slice(0, -3)}y`;
+      if (token.endsWith("s") && !token.endsWith("ss") && token.length > 4) {
+        return token.slice(0, -1);
+      }
+      return token;
+    })
+    .filter((token) => !relatedPageStopWords.has(token))
+    .map((token) => relatedPageAliases[token] ?? token);
+}
+
+function relatedPageTerms(page: PageSummary) {
+  const terms = new Map<string, number>();
+  const add = (values: string[], weight: number) => {
+    relatedPageTokens(values.join(" ")).forEach((token) => {
+      terms.set(token, Math.max(terms.get(token) ?? 0, weight));
+    });
+  };
+
+  add(page.keywords, 5);
+  add([page.title, page.eyebrow], 4);
+  add(page.heroPoints, 3);
+  add(
+    page.sections.flatMap((section) => [section.title, section.body, ...section.points]),
+    2,
+  );
+  add([page.description, ...page.outcomes], 1);
+
+  return terms;
+}
+
+function relatedPageScore(source: SeoPage, candidate: SeoPage) {
+  const sourceTerms = relatedPageTerms(source);
+  const candidateTerms = relatedPageTerms(candidate);
+  let score = source.group === candidate.group ? 0 : 2;
+
+  sourceTerms.forEach((sourceWeight, term) => {
+    const candidateWeight = candidateTerms.get(term);
+    if (candidateWeight) score += Math.min(sourceWeight, candidateWeight);
+  });
+
+  return score;
+}
+
+export function getRelatedSeoPages(page: PageSummary, limit = 6) {
+  const source = allSeoPages.find((candidate) => candidate.slug === page.slug);
+  if (!source) return [];
+
+  const ranked = allSeoPages
+    .filter((candidate) => candidate.slug !== page.slug)
+    .map((candidate) => ({
+      candidate,
+      score: relatedPageScore(source, candidate),
+    }))
+    .sort((left, right) =>
+      right.score - left.score || left.candidate.title.localeCompare(right.candidate.title),
+    );
+
+  const selected: SeoPage[] = [];
+  const groupCounts = new Map<string, number>();
+  const canAdd = (candidate: SeoPage) => {
+    const groupLimit = candidate.group === source.group ? 1 : 2;
+    return (groupCounts.get(candidate.group) ?? 0) < groupLimit;
+  };
+  const add = (candidate: SeoPage) => {
+    if (selected.some((item) => item.slug === candidate.slug)) return;
+    selected.push(candidate);
+    groupCounts.set(candidate.group, (groupCounts.get(candidate.group) ?? 0) + 1);
+  };
+
+  ranked.forEach(({ candidate, score }) => {
+    if (selected.length < limit && score > 2 && canAdd(candidate)) add(candidate);
+  });
+  ranked.forEach(({ candidate }) => {
+    if (selected.length < limit && canAdd(candidate)) add(candidate);
+  });
+  ranked.forEach(({ candidate }) => {
+    if (selected.length < limit) add(candidate);
+  });
+
+  return selected.slice(0, limit);
+}

@@ -21,6 +21,10 @@ const sections = [
     body: "Data is used to provide LMS access, course delivery, live class workflows, email communication, push notifications, payment status visibility, certificates, support, product improvement, and security monitoring.",
   },
   {
+    title: "Free resume tool analytics",
+    body: "When you use the ATS Resume Checker, KASA records a secure browser identifier, one-way document fingerprint, file type, selected role, check outcome, and score history to improve the tool and diagnose unreadable uploads. Name, email address, and phone number detected in a resume may be securely encrypted for the private KASA admin dashboard. We do not retain the uploaded resume file, full resume text, or job description in this analytics history.",
+  },
+  {
     title: "Infrastructure and providers",
     body: "KASA may use trusted infrastructure and service providers for hosting, PostgreSQL database operations, media storage, transactional email, live classes, payment gateway workflows, and notifications.",
   },

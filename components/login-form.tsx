@@ -94,8 +94,13 @@ export function LoginForm({
               <Field>
                 <div className="flex items-center">
                   <FieldLabel htmlFor="password">Password</FieldLabel>
+                  {!isSetup && !isSignup ? (
+                    <Link href="/auth/forgot-password" className="ml-auto text-sm font-semibold text-primary hover:underline">
+                      Forgot password?
+                    </Link>
+                  ) : null}
                   {!isSetup && !isPublic ? (
-                    <span className="ml-auto text-sm text-muted-foreground">
+                    <span className="ml-3 text-sm text-muted-foreground">
                       Admin access
                     </span>
                   ) : null}

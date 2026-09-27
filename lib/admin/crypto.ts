@@ -67,3 +67,26 @@ export function decryptLicenseKey(payload: string | null | undefined) {
     return null;
   }
 }
+
+export function encryptPrivateValue(value: string | null | undefined) {
+  const clean = value?.trim();
+  if (!clean) return null;
+  const iv = randomBytes(12);
+  const cipher = createCipheriv("aes-256-gcm", getEncryptionKey(), iv);
+  const encrypted = Buffer.concat([cipher.update(clean, "utf8"), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  return [iv, tag, encrypted].map((part) => part.toString("base64url")).join(".");
+}
+
+export function decryptPrivateValue(payload: string | null | undefined) {
+  if (!payload) return null;
+  try {
+    const [ivValue, tagValue, encryptedValue] = payload.split(".");
+    if (!ivValue || !tagValue || !encryptedValue) return null;
+    const decipher = createDecipheriv("aes-256-gcm", getEncryptionKey(), Buffer.from(ivValue, "base64url"));
+    decipher.setAuthTag(Buffer.from(tagValue, "base64url"));
+    return Buffer.concat([decipher.update(Buffer.from(encryptedValue, "base64url")), decipher.final()]).toString("utf8");
+  } catch {
+    return null;
+  }
+}

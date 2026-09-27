@@ -5,9 +5,10 @@ import { ProductStatus, UserRole } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { signIn } from "@/auth";
 import { hasAdminUser, hashPassword } from "@/lib/admin/auth";
+import { createPasswordReset, resetPassword } from "@/lib/auth/password-reset";
 import { prisma } from "@/lib/admin/prisma";
 import { safeRelativePath } from "@/lib/auth/redirects";
-import { loginSchema, publicLoginSchema, publicSignupSchema, setupAdminSchema } from "@/schemas/auth";
+import { loginSchema, passwordResetRequestSchema, passwordResetSchema, publicLoginSchema, publicSignupSchema, setupAdminSchema } from "@/schemas/auth";
 
 function formObject(formData: FormData) {
   return Object.fromEntries(formData.entries());
@@ -119,4 +120,19 @@ export async function publicSignupAction(formData: FormData) {
     password: parsed.password,
     redirectTo,
   });
+}
+
+export async function requestPasswordResetAction(formData: FormData) {
+  const parsed = passwordResetRequestSchema.safeParse(formObject(formData));
+  if (!parsed.success) redirect("/auth/forgot-password?error=invalid-email");
+  const result = await createPasswordReset(parsed.data.email);
+  redirect(`/auth/forgot-password?sent=1${result.delivered ? "" : "&delivery=local"}`);
+}
+
+export async function resetPasswordAction(formData: FormData) {
+  const parsed = passwordResetSchema.safeParse(formObject(formData));
+  if (!parsed.success) redirect("/auth/reset-password?error=invalid-password");
+  const didReset = await resetPassword(parsed.data.token, await hashPassword(parsed.data.password));
+  if (!didReset) redirect("/auth/forgot-password?error=expired");
+  redirect("/auth/login?reset=success");
 }

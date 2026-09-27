@@ -20,9 +20,10 @@ export function pageMetadata(page: PageSummary, pathname: string): Metadata {
   const enriched = enrichedPages[page.slug];
   const image = enriched?.image ?? "/kasa-hero.png";
   const imageAlt = enriched?.imageAlt ?? page.title;
+  const searchTitle = sentenceCase(page.keywords[0] ?? page.eyebrow);
 
   return {
-    title: page.title,
+    title: searchTitle,
     description: page.description,
     alternates: {
       canonical: pathname,
@@ -30,7 +31,7 @@ export function pageMetadata(page: PageSummary, pathname: string): Metadata {
     openGraph: {
       type: "website",
       url,
-      title: page.title,
+      title: searchTitle,
       description: page.description,
       siteName: "KASA",
       images: [
@@ -44,9 +45,13 @@ export function pageMetadata(page: PageSummary, pathname: string): Metadata {
     },
     twitter: {
       card: "summary_large_image",
-      title: page.title,
+      title: searchTitle,
       description: page.description,
       images: [image],
     },
   };
+}
+
+function sentenceCase(value: string) {
+  return value ? `${value[0].toUpperCase()}${value.slice(1)}` : value;
 }

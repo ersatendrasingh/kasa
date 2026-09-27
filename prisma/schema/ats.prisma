@@ -1,0 +1,58 @@
+model AtsResumeVisitor {
+  id             String           @id @default(cuid())
+  visitorKey     String           @unique
+  candidateNameEncrypted String?
+  emailEncrypted String?
+  phoneEncrypted String?
+  firstSeenAt    DateTime         @default(now())
+  lastSeenAt     DateTime         @default(now())
+  totalChecks    Int              @default(0)
+  completedChecks Int             @default(0)
+  failedChecks   Int              @default(0)
+  documents      AtsResumeDocument[]
+  checks         AtsResumeCheck[]
+
+  @@index([lastSeenAt])
+  @@index([totalChecks])
+}
+
+model AtsResumeDocument {
+  id             String           @id @default(cuid())
+  visitorId      String
+  visitor        AtsResumeVisitor @relation(fields: [visitorId], references: [id], onDelete: Cascade)
+  fingerprint    String
+  sourceType     String           @default("text")
+  fileExtension  String?
+  fileSizeBytes  Int?
+  firstSeenAt    DateTime         @default(now())
+  lastSeenAt     DateTime         @default(now())
+  checks         AtsResumeCheck[]
+
+  @@unique([visitorId, fingerprint])
+  @@index([sourceType])
+  @@index([lastSeenAt])
+}
+
+model AtsResumeCheck {
+  id                String           @id @default(cuid())
+  visitorId         String
+  visitor           AtsResumeVisitor @relation(fields: [visitorId], references: [id], onDelete: Cascade)
+  documentId        String?
+  document          AtsResumeDocument? @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  status            AtsCheckStatus
+  atsScore          Int?
+  jobMatchScore     Int?
+  targetRole        String?
+  roleFamily        String?
+  experienceLevel   String?
+  hasJobDescription Boolean          @default(false)
+  fileExtension     String?
+  errorCode         String?
+  createdAt         DateTime         @default(now())
+
+  @@index([createdAt])
+  @@index([status, createdAt])
+  @@index([visitorId, createdAt])
+  @@index([documentId, createdAt])
+  @@index([targetRole])
+}

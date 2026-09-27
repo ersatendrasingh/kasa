@@ -21,7 +21,11 @@ import {
   WebPageStructuredData,
 } from "@/components/site/structured-data";
 import { industrySeoPageContent } from "@/lib/industry-page-content";
-import { allSeoPages, type PageSummary } from "@/lib/site-content";
+import {
+  allSeoPages,
+  getRelatedSeoPages,
+  type PageSummary,
+} from "@/lib/site-content";
 import seoPageContent from "@/lib/seo-page-content.json";
 
 type SeoPageTemplateProps = {
@@ -111,13 +115,7 @@ export function SeoPageTemplate({ page }: SeoPageTemplateProps) {
   const content = enrichedPages[page.slug];
   const copy = templateCopy[content?.template ?? variant];
   const playbook = getPagePlaybook(page, content?.template ?? variant);
-  const relatedPages = allSeoPages
-    .filter((item) => item.slug !== page.slug)
-    .filter((item) =>
-      item.keywords.some((keyword) => page.keywords.includes(keyword)) ||
-      item.group === "Features",
-    )
-    .slice(0, 6);
+  const relatedPages = getRelatedSeoPages(page);
 
   return (
     <>
