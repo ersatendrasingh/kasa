@@ -3,6 +3,7 @@
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertCircle,
+  ArrowRight,
   BarChart3,
   BriefcaseBusiness,
   ChevronDown,
@@ -11,12 +12,16 @@ import {
   Download,
   FileText,
   LoaderCircle,
+  PenLine,
+  Plus,
   Printer,
+  RefreshCw,
   RotateCcw,
   Search,
   Share2,
   Sparkles,
   UploadCloud,
+  Undo2,
   X,
 } from "lucide-react";
 import { createResumeAtsPdf, needsUnicodePrint } from "@/lib/resume/report-pdf";
@@ -443,10 +448,13 @@ export function ResumeAtsChecker() {
     setActionMessage("Upload a PDF, DOCX or TXT resume, or paste resume text to begin.");
   };
 
-  const generateAnalysis = async () => {
+  const generateAnalysis = async (editedResumeText?: string) => {
     if (isGenerating || isReadingFile || isDetectingProfile) return;
-    const effectiveResumeText = resumeText.trim() || uploadedResume?.text || "";
-    const attachFile = shouldAttachResumeFile(uploadedResume);
+    const isWorkspaceRecheck = typeof editedResumeText === "string";
+    const effectiveResumeText = isWorkspaceRecheck
+      ? editedResumeText.trim()
+      : resumeText.trim() || uploadedResume?.text || "";
+    const attachFile = !isWorkspaceRecheck && shouldAttachResumeFile(uploadedResume);
     if (!uploadedResume && effectiveResumeText.length < 300) {
       setActionMessage("Upload a resume file or paste at least 300 characters from your resume.");
       notify("error", "Resume needed", "Upload a resume file or paste at least 300 characters from your resume.");
@@ -457,6 +465,10 @@ export function ResumeAtsChecker() {
     setActionMessage("Reviewing your resume and prioritizing useful fixes...");
     trackAts("analysis_started", { has_job_description: Boolean(jobDescription.trim()) });
     try {
+      if (isWorkspaceRecheck) {
+        setResumeText(effectiveResumeText);
+        setUploadedResume(null);
+      }
       const response = await fetch("/api/tools/resume-ats", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -605,12 +617,12 @@ export function ResumeAtsChecker() {
     }
   };
 
-  const buildResumeFromReport = () => {
+  const buildResumeFromReport = (editedResumeText = resumeText) => {
     if (!analysis) return;
     window.localStorage.setItem(
       resumeBuilderDraftKey,
       JSON.stringify({
-        resumeText,
+        resumeText: editedResumeText,
         uploadedResume,
         targetRole,
         roleFamily,
@@ -745,7 +757,7 @@ export function ResumeAtsChecker() {
               <div className="min-w-0">
                 <p role="status" className="truncate text-xs font-medium text-slate-600 dark:text-slate-300">{actionMessage}</p>
               </div>
-              <button type="button" disabled={isGenerating || isReadingFile || isDetectingProfile} onClick={generateAnalysis} className="inline-flex h-11 w-full shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full bg-[image:var(--button-solid)] px-7 text-sm font-semibold !text-white shadow-lg shadow-primary/20 transition hover:-translate-y-0.5 disabled:cursor-not-allowed sm:w-auto sm:min-w-56">
+              <button type="button" disabled={isGenerating || isReadingFile || isDetectingProfile} onClick={() => void generateAnalysis()} className="inline-flex h-11 w-full shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full bg-[image:var(--button-solid)] px-7 text-sm font-semibold !text-white shadow-lg shadow-primary/20 transition hover:-translate-y-0.5 disabled:cursor-not-allowed sm:w-auto sm:min-w-56">
                 <Sparkles className="size-4 animate-pulse" aria-hidden="true" />
                 {isGenerating ? "Reviewing…" : isReadingFile ? "Reading resume…" : "Check my resume"}
               </button>
@@ -754,6 +766,7 @@ export function ResumeAtsChecker() {
         </div>
 
         {analysis ? <ResultPanel
+          key={`${analysis.atsScore}-${analysis.editableResumeText.slice(0, 80)}`}
           ref={resultPanelRef}
           analysis={analysis}
           readiness={readiness}
@@ -763,6 +776,8 @@ export function ResumeAtsChecker() {
           onPrint={printReport}
           onShare={shareReport}
           onBuildResume={buildResumeFromReport}
+          onRecheck={(nextResumeText) => void generateAnalysis(nextResumeText)}
+          sourceResumeText={resumeText}
         /> : null}
       </div>
 
@@ -774,19 +789,34 @@ export function ResumeAtsChecker() {
 
 type ResultPanelProps = {
   analysis: ResumeAnalysis | null;
+  sourceResumeText: string;
   readiness: { label: string; tone: string };
   actionMessage: string;
   onCopy: () => void;
   onDownload: () => void;
   onPrint: () => void;
   onShare: () => void;
-  onBuildResume: () => void;
+  onBuildResume: (resumeText?: string) => void;
+  onRecheck: (resumeText: string) => void;
 };
 
-type ResultTab = "overview" | "keywords" | "writing" | "plan";
+type ResultTab = "overview" | "improve" | "keywords" | "writing" | "plan";
+
+type ImprovementAction = {
+  id: string;
+  kind: "replace" | "skill" | "keyword";
+  title: string;
+  original?: string;
+  replacement: string;
+  reason: string;
+  component: "Keywords" | "Skills" | "Impact" | "Clarity";
+  impact: number;
+  requiresTruth: boolean;
+};
 
 const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(function ResultPanel({
   analysis,
+  sourceResumeText,
   readiness,
   actionMessage,
   onCopy,
@@ -794,16 +824,93 @@ const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(function Result
   onPrint,
   onShare,
   onBuildResume,
+  onRecheck,
 }, ref) {
   const [activeResultTab, setActiveResultTab] = useState<ResultTab>("overview");
+  const [workspaceText, setWorkspaceText] = useState(() => {
+    const extractedText = analysis?.editableResumeText?.trim();
+    return extractedText && !extractedText.startsWith("Resume text could not be extracted") ? extractedText : sourceResumeText;
+  });
+  const [appliedFixes, setAppliedFixes] = useState<string[]>([]);
+  const [undoStack, setUndoStack] = useState<Array<{ text: string; appliedFixes: string[] }>>([]);
+  const [workspaceMessage, setWorkspaceMessage] = useState("");
+
   if (!analysis) return null;
+
+  const improvementActions = buildImprovementActions(analysis);
+  const appliedActions = improvementActions.filter((item) => appliedFixes.includes(item.id));
+  const projectedGain = appliedActions.reduce((total, item) => total + item.impact, 0);
+  const projectedScore = clamp(analysis.atsScore + projectedGain, 0, 100);
 
   const resultTabs = [
     { id: "overview" as const, label: "Overview", hint: "Main findings", icon: BarChart3 },
+    { id: "improve" as const, label: "Improve resume", hint: "Apply fixes and recheck", count: improvementActions.length - appliedFixes.length, icon: PenLine },
     { id: "keywords" as const, label: "Keywords & skills", hint: "Matched and missing", count: analysis.missingKeywords.length + analysis.missingSkills.length, icon: Search },
     { id: "writing" as const, label: "Writing & format", hint: "Fixes and rewrites", count: analysis.grammarIssues.length + analysis.formattingIssues.length + analysis.bulletSuggestions.length, icon: FileText },
     { id: "plan" as const, label: "Recruiter plan", hint: "Prepare and improve", count: analysis.recruiterChecklist.length, icon: BriefcaseBusiness },
   ];
+
+  const applyFix = (action: ImprovementAction) => {
+    if (appliedFixes.includes(action.id)) return;
+    const nextText = applyImprovementToResume(workspaceText, action);
+    if (nextText === workspaceText) {
+      setWorkspaceMessage("This exact line was not found in the editable copy. Edit it manually below, then recheck.");
+      return;
+    }
+    setUndoStack((items) => [...items, { text: workspaceText, appliedFixes }].slice(-20));
+    setWorkspaceText(nextText);
+    setAppliedFixes((items) => [...items, action.id]);
+    setWorkspaceMessage(`${action.title} applied. Recheck to confirm the actual score.`);
+    trackAts("improvement_applied", { category: action.component.toLowerCase() });
+  };
+
+  const applySafeFixes = () => {
+    const safeActions = improvementActions.filter((item) => item.kind === "replace" && !appliedFixes.includes(item.id));
+    if (!safeActions.length) {
+      setWorkspaceMessage("All one-click writing fixes are already applied.");
+      return;
+    }
+    let nextText = workspaceText;
+    const appliedIds: string[] = [];
+    safeActions.forEach((action) => {
+      const candidate = applyImprovementToResume(nextText, action);
+      if (candidate !== nextText) {
+        nextText = candidate;
+        appliedIds.push(action.id);
+      }
+    });
+    if (!appliedIds.length) {
+      setWorkspaceMessage("The suggested original lines were not found. Use the editor for manual changes.");
+      return;
+    }
+    setUndoStack((items) => [...items, { text: workspaceText, appliedFixes }].slice(-20));
+    setWorkspaceText(nextText);
+    setAppliedFixes((items) => [...items, ...appliedIds]);
+    setWorkspaceMessage(`${appliedIds.length} safe writing fixes applied. Review the text, then recheck.`);
+    trackAts("safe_fixes_applied");
+  };
+
+  const undoLastFix = () => {
+    const previous = undoStack.at(-1);
+    if (!previous) return;
+    setWorkspaceText(previous.text);
+    setAppliedFixes(previous.appliedFixes);
+    setUndoStack((items) => items.slice(0, -1));
+    setWorkspaceMessage("Last AI change undone.");
+  };
+
+  const downloadImprovedText = () => {
+    const blob = new Blob([workspaceText], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "improved-resume.txt";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setWorkspaceMessage("Editable resume downloaded.");
+  };
 
   return (
     <div ref={ref} className="scroll-mt-24 overflow-hidden rounded-[1.35rem] border border-blue-950/10 bg-white/95 shadow-[0_24px_70px_-34px_rgba(15,53,104,0.42)] backdrop-blur dark:border-white/10 dark:bg-surface/92">
@@ -821,7 +928,7 @@ const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(function Result
           <p className="mt-1.5 max-w-4xl text-sm leading-5 text-slate-600 dark:text-slate-300">{analysis.summary}</p>
           <p className="mt-2 line-clamp-2 text-xs font-medium leading-5 text-emerald-900 dark:text-emerald-100">{analysis.verdict}</p>
         </div>
-        <button type="button" onClick={onBuildResume} className="inline-flex h-10 w-full shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full bg-[image:var(--button-solid)] px-5 text-sm font-semibold !text-white shadow-lg shadow-primary/20 transition hover:-translate-y-0.5 lg:w-auto">
+        <button type="button" onClick={() => onBuildResume(workspaceText)} className="inline-flex h-10 w-full shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full bg-[image:var(--button-solid)] px-5 text-sm font-semibold !text-white shadow-lg shadow-primary/20 transition hover:-translate-y-0.5 lg:w-auto">
           <FileText className="size-4" aria-hidden="true" />Build improved resume
         </button>
       </div>
@@ -834,9 +941,9 @@ const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(function Result
         <div className="rounded-2xl border border-blue-950/10 bg-slate-50/90 p-2.5 dark:border-white/10 dark:bg-white/[0.035]">
           <div className="mb-2 flex items-end justify-between gap-3 px-1">
             <div><h4 className="text-xs font-bold uppercase tracking-[0.12em] text-slate-700 dark:text-slate-200">Explore your report</h4><p className="mt-0.5 text-[11px] text-slate-500">Choose a section to see its details</p></div>
-            <span className="hidden text-[10px] font-semibold text-slate-400 sm:inline">4 report sections</span>
+            <span className="hidden text-[10px] font-semibold text-slate-400 sm:inline">5 report sections</span>
           </div>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4" role="tablist" aria-label="ATS report sections">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-5" role="tablist" aria-label="ATS report sections">
             {resultTabs.map((tab) => {
               const active = activeResultTab === tab.id;
               const Icon = tab.icon;
@@ -857,6 +964,41 @@ const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(function Result
               <CompactList title="Strengths" items={analysis.strengths} tone="positive" />
               <CompactList title="Weak areas" items={analysis.weakAreas} tone="warning" />
               <details className="rounded-xl border border-blue-950/10 px-3.5 py-3 text-xs leading-5 dark:border-white/10 lg:col-span-3"><summary className="cursor-pointer font-semibold text-slate-800 dark:text-slate-100">How this score was calculated</summary><p className="mt-2 text-slate-500 dark:text-slate-400">AI-assisted readiness estimate: Keywords 20%, Skills 20%, Projects 15%, Impact 20%, Structure 10%, Clarity 15%.</p><div className="mt-2 grid gap-x-5 gap-y-1 sm:grid-cols-2">{analysis.componentScores.map((item) => <p key={item.label}><strong>{item.label}:</strong> {item.reason}</p>)}</div></details>
+            </div>
+          ) : null}
+
+          {activeResultTab === "improve" ? (
+            <div className="grid gap-3">
+              <div className="grid gap-3 rounded-2xl border border-emerald-200 bg-[linear-gradient(135deg,rgba(236,253,244,.96),rgba(239,248,255,.92))] p-4 dark:border-emerald-300/15 dark:bg-white/[0.05] lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2"><span className="rounded-full bg-emerald-600 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white">Live improvement workspace</span><span className="text-xs font-semibold text-emerald-800 dark:text-emerald-200">{appliedFixes.length} change{appliedFixes.length === 1 ? "" : "s"} applied</span></div>
+                  <h4 className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">Improve the resume here, then confirm the new score.</h4>
+                  <p className="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-300">The projected score is a guide based on selected improvements. Only a fresh AI check confirms the actual result.</p>
+                </div>
+                <div className="rounded-2xl bg-white px-4 py-3 text-center shadow-sm dark:bg-slate-950"><div className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Projected ATS score</div><div className="mt-1 font-heading text-3xl font-semibold text-emerald-700 dark:text-emerald-300">{projectedScore}<span className="ml-1 text-sm text-slate-400">/100</span></div><div className="mt-1 text-xs font-semibold text-emerald-700 dark:text-emerald-200">{projectedGain ? `+${projectedGain} potential` : "Choose a fix below"}</div></div>
+              </div>
+
+              <div className="grid gap-3 xl:grid-cols-[0.95fr_1.05fr]">
+                <section className="rounded-xl border border-blue-950/10 p-4 dark:border-white/10">
+                  <div className="flex flex-wrap items-center justify-between gap-2"><div><h4 className="text-sm font-semibold text-slate-950 dark:text-white">Suggested improvements</h4><p className="mt-1 text-xs text-slate-500">Apply only facts you can stand behind.</p></div><button type="button" onClick={applySafeFixes} className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-full border border-primary/20 bg-blue-50 px-3 text-xs font-semibold text-primary transition hover:border-primary/45 dark:bg-white/8 dark:text-emerald-200"><Sparkles className="size-3.5" aria-hidden="true" />Apply writing fixes</button></div>
+                  <div className="mt-3 grid gap-2">
+                    {improvementActions.length ? improvementActions.map((item) => {
+                      const isApplied = appliedFixes.includes(item.id);
+                      return <article key={item.id} className={`rounded-xl border p-3 transition ${isApplied ? "border-emerald-200 bg-emerald-50/70 dark:border-emerald-300/20 dark:bg-emerald-400/10" : "border-blue-950/10 bg-slate-50/70 dark:border-white/10 dark:bg-white/[0.035]"}`}>
+                        <div className="flex gap-3"><span className={`grid size-8 shrink-0 place-items-center rounded-lg ${isApplied ? "bg-emerald-600 text-white" : "bg-blue-100 text-primary dark:bg-white/10 dark:text-emerald-200"}`}>{isApplied ? <CheckCircle2 className="size-4" aria-hidden="true" /> : item.kind === "replace" ? <PenLine className="size-4" aria-hidden="true" /> : <Plus className="size-4" aria-hidden="true" />}</span><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h5 className="text-xs font-semibold text-slate-950 dark:text-white">{item.title}</h5><span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-emerald-700 shadow-sm dark:bg-slate-950 dark:text-emerald-200">+{item.impact} {item.component}</span></div><p className="mt-1 text-[11px] leading-4 text-slate-500 dark:text-slate-400">{item.reason}</p>{item.original ? <p className="mt-2 rounded-lg bg-white/80 px-2 py-1.5 text-[11px] leading-4 text-slate-500 line-through dark:bg-white/[0.05]">{item.original}</p> : null}<p className="mt-1.5 text-xs leading-5 text-slate-700 dark:text-slate-200">{item.replacement}</p>{item.requiresTruth ? <p className="mt-1.5 text-[10px] font-semibold text-amber-700 dark:text-amber-200">Add this only if you genuinely have it.</p> : null}</div></div>
+                        <div className="mt-3 flex justify-end"><button type="button" disabled={isApplied} onClick={() => applyFix(item)} className={`inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full px-3 text-[11px] font-semibold transition disabled:cursor-default ${isApplied ? "bg-emerald-600 text-white" : "bg-[image:var(--button-solid)] text-white hover:-translate-y-0.5"}`}>{isApplied ? "Applied" : item.requiresTruth ? "I have this skill" : "Apply to resume"}{!isApplied ? <ArrowRight className="size-3" aria-hidden="true" /> : null}</button></div>
+                      </article>;
+                    }) : <p className="rounded-xl bg-slate-50 px-3 py-4 text-xs text-slate-500 dark:bg-white/[0.05]">No direct edits were generated. Use the editor to strengthen factual outcomes, then recheck.</p>}
+                  </div>
+                </section>
+
+                <section className="rounded-xl border border-blue-950/10 p-4 dark:border-white/10">
+                  <div className="flex flex-wrap items-center justify-between gap-2"><div><h4 className="text-sm font-semibold text-slate-950 dark:text-white">Your editable resume</h4><p className="mt-1 text-xs text-slate-500">Review every AI change before using it.</p></div><div className="flex gap-2"><button type="button" disabled={!undoStack.length} onClick={undoLastFix} className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full border border-blue-950/10 bg-white px-3 text-[11px] font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200"><Undo2 className="size-3.5" aria-hidden="true" />Undo</button><button type="button" onClick={downloadImprovedText} className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full border border-blue-950/10 bg-white px-3 text-[11px] font-semibold text-slate-700 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200"><Download className="size-3.5" aria-hidden="true" />Text</button></div></div>
+                  <textarea value={workspaceText} onChange={(event) => { setWorkspaceText(event.target.value); setWorkspaceMessage("Manual edit added. Recheck to measure its effect."); }} className="mt-3 min-h-[25rem] w-full resize-y rounded-xl border border-blue-950/10 bg-slate-50 p-3 font-mono text-xs leading-5 text-slate-800 outline-none transition focus:border-primary/50 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-100" aria-label="Editable resume text" />
+                  <p role="status" className="mt-2 min-h-5 text-xs text-slate-500 dark:text-slate-400">{workspaceMessage || "Use the one-click fixes or type changes directly here."}</p>
+                  <div className="mt-3 flex flex-col gap-2 border-t border-blue-950/10 pt-3 dark:border-white/10 sm:flex-row"><button type="button" onClick={() => onRecheck(workspaceText)} disabled={workspaceText.trim().length < 300} className="inline-flex h-10 flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-[image:var(--button-solid)] px-4 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-45"><RefreshCw className="size-4" aria-hidden="true" />Recheck improved resume</button><button type="button" onClick={() => onBuildResume(workspaceText)} className="inline-flex h-10 flex-1 cursor-pointer items-center justify-center gap-2 rounded-full border border-blue-950/15 bg-white px-4 text-sm font-semibold text-primary transition hover:border-primary/40 dark:border-white/15 dark:bg-white/[0.06] dark:text-emerald-200"><FileText className="size-4" aria-hidden="true" />Open visual resume builder</button></div>
+                </section>
+              </div>
             </div>
           ) : null}
 
@@ -904,6 +1046,81 @@ const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(function Result
     </div>
   );
 });
+
+function buildImprovementActions(analysis: ResumeAnalysis): ImprovementAction[] {
+  const actions: ImprovementAction[] = [];
+  const addReplaceAction = (item: { original: string; suggestion: string; reason: string }, component: ImprovementAction["component"], impact: number, label: string) => {
+    const original = item.original.trim();
+    const replacement = item.suggestion.trim();
+    if (!original || !replacement || original.toLowerCase() === replacement.toLowerCase()) return;
+    actions.push({
+      id: `${component}-${original.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 48)}`,
+      kind: "replace",
+      title: label,
+      original,
+      replacement,
+      reason: item.reason,
+      component,
+      impact,
+      requiresTruth: false,
+    });
+  };
+  analysis.grammarIssues.slice(0, 3).forEach((item) => addReplaceAction(item, "Clarity", 2, "Improve writing"));
+  analysis.bulletSuggestions.slice(0, 4).forEach((item) => addReplaceAction(item, "Impact", 3, "Strengthen a bullet"));
+
+  const knownTerms = new Set([...analysis.missingSkills, ...analysis.missingKeywords].map((item) => item.toLowerCase()));
+  analysis.missingSkills.slice(0, 4).forEach((skill) => {
+    const cleanSkill = skill.trim();
+    if (!cleanSkill) return;
+    actions.push({
+      id: `skill-${cleanSkill.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 48)}`,
+      kind: "skill",
+      title: `Add ${cleanSkill}`,
+      replacement: cleanSkill,
+      reason: "Add it to the Skills section only if you have used it and can discuss it in an interview.",
+      component: "Skills",
+      impact: 2,
+      requiresTruth: true,
+    });
+  });
+  analysis.missingKeywords.filter((keyword) => !knownTerms.has(keyword.toLowerCase()) || !analysis.missingSkills.some((skill) => skill.toLowerCase() === keyword.toLowerCase())).slice(0, 4).forEach((keyword) => {
+    const cleanKeyword = keyword.trim();
+    if (!cleanKeyword) return;
+    actions.push({
+      id: `keyword-${cleanKeyword.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 48)}`,
+      kind: "keyword",
+      title: `Add keyword: ${cleanKeyword}`,
+      replacement: cleanKeyword,
+      reason: "Use this only where it accurately describes your actual work, project, coursework, or certification.",
+      component: "Keywords",
+      impact: 1,
+      requiresTruth: true,
+    });
+  });
+  return actions.filter((item, index, all) => all.findIndex((candidate) => candidate.id === item.id) === index).slice(0, 10);
+}
+
+function applyImprovementToResume(resumeText: string, action: ImprovementAction) {
+  if (action.kind === "replace" && action.original) {
+    const position = resumeText.toLowerCase().indexOf(action.original.toLowerCase());
+    if (position < 0) return resumeText;
+    return `${resumeText.slice(0, position)}${action.replacement}${resumeText.slice(position + action.original.length)}`;
+  }
+  const normalizedText = resumeText.toLowerCase();
+  if (normalizedText.includes(action.replacement.toLowerCase())) return resumeText;
+  const skillsHeading = /(^|\n)\s*(technical\s+)?skills?\s*:?\s*/i.exec(resumeText);
+  if (skillsHeading) {
+    const insertAt = skillsHeading.index + skillsHeading[0].length;
+    const rest = resumeText.slice(insertAt);
+    const firstLineEnd = rest.indexOf("\n");
+    if (firstLineEnd >= 0) {
+      const existingSkills = rest.slice(0, firstLineEnd).trim();
+      const separator = existingSkills && !/[,:;]$/.test(existingSkills) ? ", " : " ";
+      return `${resumeText.slice(0, insertAt)}${existingSkills}${separator}${action.replacement}${rest.slice(firstLineEnd)}`;
+    }
+  }
+  return `${resumeText.trim()}\n\nSkills\n${action.replacement}\n`;
+}
 
 function getSupportedMimeType(file: File) {
   const name = file.name.toLowerCase();

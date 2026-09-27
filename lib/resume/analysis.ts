@@ -7,6 +7,7 @@ const shortText = z.string().trim().min(1).max(100);
 const list = z.array(text).max(20);
 export const analysisSchema = z.object({
   atsScore: score,
+  editableResumeText: z.string().trim().min(1).max(30000),
   roleFit: shortText, verdict: text, summary: text,
   missingKeywords: list, missingSkills: list, strengths: list, weakAreas: list,
   improvedBullets: list, projectsToAdd: list, interviewQuestions: list,
@@ -33,6 +34,14 @@ export function validateAnalysis(input: unknown, hasJobDescription: boolean): Re
   const cleanText = (value: unknown, fallback: string, max = 1600) => {
     const next = String(value ?? "").replace(/\s+/g, " ").trim();
     return (next || fallback).slice(0, max);
+  };
+  const cleanResumeText = (value: unknown) => {
+    const next = String(value ?? "")
+      .replace(/\r\n?/g, "\n")
+      .replace(/[ \t]+/g, " ")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+    return (next || "Resume text could not be extracted. Paste the resume text to use the improvement workspace.").slice(0, 30000);
   };
   const cleanList = (value: unknown, max = 20) => Array.isArray(value)
     ? value.map((item) => cleanText(item, "", 1600)).filter(Boolean).slice(0, max)
@@ -83,6 +92,7 @@ export function validateAnalysis(input: unknown, hasJobDescription: boolean): Re
 
   const parsed = analysisSchema.parse({
     atsScore: cleanScore(source.atsScore),
+    editableResumeText: cleanResumeText(source.editableResumeText),
     roleFit: cleanText(source.roleFit, "General resume review", 100),
     verdict: cleanText(source.verdict, "Review the priority fixes below before applying."),
     summary: cleanText(source.summary, "Your resume was reviewed for role relevance, evidence, clarity, and ATS readability."),
