@@ -47,6 +47,8 @@ const poppins = localFont({
 });
 
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID ?? "GTM-WCLQ27XF";
+const ADSENSE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_CLIENT_ID?.trim();
+const hasValidAdsenseClientId = /^ca-pub-\d{10,}$/.test(ADSENSE_CLIENT_ID ?? "");
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.getkasa.in"),
@@ -122,6 +124,15 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col font-sans">
+        {hasValidAdsenseClientId ? (
+          <Script
+            id="google-adsense"
+            async
+            strategy="beforeInteractive"
+            crossOrigin="anonymous"
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
+          />
+        ) : null}
         <Script id="gtm" strategy="lazyOnload">
           {`
             window.dataLayer = window.dataLayer || [];
