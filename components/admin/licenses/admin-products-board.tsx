@@ -139,14 +139,14 @@ function PricingDrawer({
   return (
     <Drawer direction="right">
       <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-      <DrawerContent className="h-full max-h-none overflow-y-auto rounded-l-2xl data-[vaul-drawer-direction=right]:w-[min(860px,calc(100vw-18px))] data-[vaul-drawer-direction=right]:sm:max-w-none">
+      <DrawerContent className="h-full max-h-none overflow-hidden rounded-l-2xl data-[vaul-drawer-direction=right]:w-[min(860px,calc(100vw-18px))] data-[vaul-drawer-direction=right]:sm:max-w-none">
         <DrawerHeader className="text-left">
           <DrawerTitle>{price ? `Edit ${friendlyLabel(price.edition)} pricing` : "Add pricing"}</DrawerTitle>
           <DrawerDescription>
             Pricing controls edition, billing term, amount, installation limits, LMS modules, and Envato mapping.
           </DrawerDescription>
         </DrawerHeader>
-        <div className="w-full">
+        <div className="flex min-h-0 w-full flex-1 flex-col">
           <ProductPriceForm
             action={price ? updateProductPriceAction : createProductPriceAction}
             products={products}

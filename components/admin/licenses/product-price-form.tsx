@@ -1,5 +1,7 @@
 "use client";
 
+import { startTransition, useActionState, useState } from "react";
+import type { PricingActionResult } from "@/actions/admin/products";
 import type { KasaEdition, PlanType } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -50,17 +52,34 @@ export function ProductPriceForm({
   price,
   submitLabel,
 }: {
-  action: (formData: FormData) => void | Promise<void>;
+  action: (formData: FormData) => Promise<PricingActionResult>;
   products: ProductOption[];
   price?: PriceFormValue;
   submitLabel: string;
 }) {
-  const edition = price?.edition ?? "STARTER";
+  const [edition, setEdition] = useState<KasaEdition>(price?.edition ?? "STARTER");
+  const [state, formAction, pending] = useActionState(
+    async (_previous: PricingActionResult, formData: FormData) => {
+      try {
+        return await action(formData);
+      } catch {
+        return { success: false, message: "Unable to save pricing. Check your connection and try again." };
+      }
+    },
+    { success: false, message: "" },
+  );
   const featureDefaults = normalizeFeatures(price?.features, edition);
   const ruleDefaults = normalizeRules(price?.rules, edition);
 
   return (
-    <form action={action} className="grid gap-5 px-5 pb-6 md:px-6">
+    <form
+      action={formAction}
+      onSubmit={(event) => {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+        startTransition(() => formAction(formData));
+      }}
+      className="grid min-h-0 flex-1 gap-5 overflow-y-auto px-5 pb-0 md:px-6">
       {price ? <input type="hidden" name="productPriceId" value={price.id} /> : null}
       <div className="grid gap-4 rounded-xl border border-border/75 bg-background/55 p-4">
         <div>
@@ -90,7 +109,8 @@ export function ProductPriceForm({
             <select
               id={price ? `edition-${price.id}` : "edition"}
               name="edition"
-              defaultValue={edition}
+              value={edition}
+              onChange={(event) => setEdition(event.target.value as KasaEdition)}
               className="h-9 rounded-lg border border-input bg-background px-3 text-sm"
             >
               {editions.map((item) => (
@@ -137,8 +157,13 @@ export function ProductPriceForm({
               name="amount"
               type="number"
               min={0}
-              defaultValue={price?.amount ?? 0}
+              step="0.01"
+              required
+              defaultValue={price?.amount ?? 999}
             />
+            <p className="text-xs text-muted-foreground">
+              {edition === "ENTERPRISE" ? "The website shows Custom pricing for Enterprise; this amount is for internal use." : "Enter 0 to display Custom pricing on the website."}
+            </p>
           </div>
         </div>
       </div>
@@ -155,6 +180,8 @@ export function ProductPriceForm({
               name="maxActivations"
               type="number"
               min={1}
+              max={50}
+              required
               defaultValue={price?.maxActivations ?? 1}
             />
           </div>
@@ -236,8 +263,15 @@ export function ProductPriceForm({
           </div>
         </div>
       </div>
-      <div>
-        <Button type="submit" size="lg">{submitLabel}</Button>
+      <div className="sticky bottom-0 z-10 -mx-5 border-t bg-popover px-5 py-4 md:-mx-6 md:px-6">
+        {state.message ? (
+          <p role={state.success ? "status" : "alert"} className={`mb-3 text-sm ${state.success ? "text-green-600" : "text-destructive"}`}>
+            {state.message}
+          </p>
+        ) : null}
+        <Button type="submit" size="lg" disabled={pending}>
+          {pending ? "Saving pricing…" : submitLabel}
+        </Button>
       </div>
     </form>
   );

@@ -1,6 +1,7 @@
 "use server";
 
 import { KasaEdition, PlanType, ProductStatus } from "@prisma/client";
+import { revalidatePath } from "next/cache";
 import type { Prisma } from "@prisma/client";
 import { requireAdmin } from "@/lib/admin/auth";
 import {
@@ -20,6 +21,14 @@ import {
   updateProductSchema,
 } from "@/schemas/admin/products";
 import { formObject, revalidateAdminLicensePaths } from "@/actions/admin/action-utils";
+
+export type PricingActionResult = { success: boolean; message: string };
+
+function revalidateProductPaths() {
+  revalidateAdminLicensePaths();
+  revalidatePath("/");
+  revalidatePath("/pricing");
+}
 
 function optionalLimit(value: number | undefined) {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
@@ -87,7 +96,7 @@ export async function createProductAction(formData: FormData) {
     },
   });
 
-  revalidateAdminLicensePaths();
+  revalidateProductPaths();
 }
 
 export async function updateProductAction(formData: FormData) {
@@ -110,7 +119,7 @@ export async function updateProductAction(formData: FormData) {
     },
   });
 
-  revalidateAdminLicensePaths();
+  revalidateProductPaths();
 }
 
 export async function deleteProductAction(formData: FormData) {
@@ -124,7 +133,7 @@ export async function deleteProductAction(formData: FormData) {
   if (!product || product._count.licenses > 0) return;
 
   await prisma.product.delete({ where: { id: product.id } });
-  revalidateAdminLicensePaths();
+  revalidateProductPaths();
 }
 
 export async function toggleProductStatusAction(formData: FormData) {
@@ -138,110 +147,130 @@ export async function toggleProductStatusAction(formData: FormData) {
     data: { status },
   });
 
-  revalidateAdminLicensePaths();
+  revalidateProductPaths();
 }
 
-export async function createProductPriceAction(formData: FormData) {
+export async function createProductPriceAction(formData: FormData): Promise<PricingActionResult> {
   await requireAdmin();
-  const parsed = productPriceSchema.parse({
+  const validation = productPriceSchema.safeParse({
     ...formObject(formData),
     features: formData.getAll("features"),
     allowedCourseModes: formData.getAll("allowedCourseModes"),
   });
 
-  const product = await prisma.product.findUnique({
-    where: { id: parsed.productId },
-    select: { id: true },
-  });
-  if (!product) return;
-  const entitlementData = getProductPriceEntitlementData(parsed);
+  if (!validation.success) {
+    return { success: false, message: validation.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`).join("; ") };
+  }
+  const parsed = validation.data;
 
-  await prisma.productPrice.upsert({
-    where: {
-      productId_edition_plan_currency: {
+  try {
+    const product = await prisma.product.findUnique({
+      where: { id: parsed.productId },
+      select: { id: true },
+    });
+    if (!product) return { success: false, message: "Product not found. Refresh and try again." };
+    const entitlementData = getProductPriceEntitlementData(parsed);
+
+    await prisma.productPrice.upsert({
+      where: {
+        productId_edition_plan_currency: {
+          productId: parsed.productId,
+          edition: parsed.edition as KasaEdition,
+          plan: parsed.plan as PlanType,
+          currency: parsed.currency.toUpperCase(),
+        },
+      },
+      update: {
+        amount: parsed.amount,
+        maxActivations: parsed.maxActivations,
+        userLimit: optionalLimit(parsed.userLimit),
+        courseLimit: optionalLimit(parsed.courseLimit),
+        facultyLimit: optionalLimit(parsed.facultyLimit),
+        features: entitlementData.features,
+        rules: entitlementData.rules,
+        envatoItemId: parsed.envatoItemId?.trim() || null,
+        isActive: true,
+      },
+      create: {
+        productId: parsed.productId,
+        edition: parsed.edition as KasaEdition,
+        plan: parsed.plan as PlanType,
+        currency: parsed.currency.toUpperCase(),
+        amount: parsed.amount,
+        maxActivations: parsed.maxActivations,
+        userLimit: optionalLimit(parsed.userLimit),
+        courseLimit: optionalLimit(parsed.courseLimit),
+        facultyLimit: optionalLimit(parsed.facultyLimit),
+        features: entitlementData.features,
+        rules: entitlementData.rules,
+        envatoItemId: parsed.envatoItemId?.trim() || null,
+      },
+    });
+  } catch (error) {
+    console.error("Unable to save product pricing", error);
+    return { success: false, message: "Pricing could not be saved. Please try again." };
+  }
+  revalidateProductPaths();
+  return { success: true, message: "Pricing saved. Active prices are updated on the website." };
+}
+
+export async function updateProductPriceAction(formData: FormData): Promise<PricingActionResult> {
+  await requireAdmin();
+  const validation = updateProductPriceSchema.safeParse({
+    ...formObject(formData),
+    features: formData.getAll("features"),
+    allowedCourseModes: formData.getAll("allowedCourseModes"),
+  });
+
+  if (!validation.success) {
+    return { success: false, message: validation.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`).join("; ") };
+  }
+  const parsed = validation.data;
+
+  try {
+    const existing = await prisma.productPrice.findUnique({
+      where: { id: parsed.productPriceId },
+      select: { id: true },
+    });
+    if (!existing) return { success: false, message: "Pricing row not found. Refresh and try again." };
+
+    const duplicate = await prisma.productPrice.findFirst({
+      where: {
+        id: { not: parsed.productPriceId },
         productId: parsed.productId,
         edition: parsed.edition as KasaEdition,
         plan: parsed.plan as PlanType,
         currency: parsed.currency.toUpperCase(),
       },
-    },
-    update: {
-      amount: parsed.amount,
-      maxActivations: parsed.maxActivations,
-      userLimit: optionalLimit(parsed.userLimit),
-      courseLimit: optionalLimit(parsed.courseLimit),
-      facultyLimit: optionalLimit(parsed.facultyLimit),
-      features: entitlementData.features,
-      rules: entitlementData.rules,
-      envatoItemId: parsed.envatoItemId?.trim() || null,
-      isActive: true,
-    },
-    create: {
-      productId: parsed.productId,
-      edition: parsed.edition as KasaEdition,
-      plan: parsed.plan as PlanType,
-      currency: parsed.currency.toUpperCase(),
-      amount: parsed.amount,
-      maxActivations: parsed.maxActivations,
-      userLimit: optionalLimit(parsed.userLimit),
-      courseLimit: optionalLimit(parsed.courseLimit),
-      facultyLimit: optionalLimit(parsed.facultyLimit),
-      features: entitlementData.features,
-      rules: entitlementData.rules,
-      envatoItemId: parsed.envatoItemId?.trim() || null,
-    },
-  });
+      select: { id: true },
+    });
+    if (duplicate) return { success: false, message: "This product already has pricing for that edition, billing term, and currency. Edit the existing row instead." };
 
-  revalidateAdminLicensePaths();
-}
+    const entitlementData = getProductPriceEntitlementData(parsed);
 
-export async function updateProductPriceAction(formData: FormData) {
-  await requireAdmin();
-  const parsed = updateProductPriceSchema.parse({
-    ...formObject(formData),
-    features: formData.getAll("features"),
-    allowedCourseModes: formData.getAll("allowedCourseModes"),
-  });
-
-  const existing = await prisma.productPrice.findUnique({
-    where: { id: parsed.productPriceId },
-    select: { id: true },
-  });
-  if (!existing) return;
-
-  const duplicate = await prisma.productPrice.findFirst({
-    where: {
-      id: { not: parsed.productPriceId },
-      productId: parsed.productId,
-      edition: parsed.edition as KasaEdition,
-      plan: parsed.plan as PlanType,
-      currency: parsed.currency.toUpperCase(),
-    },
-    select: { id: true },
-  });
-  if (duplicate) return;
-
-  const entitlementData = getProductPriceEntitlementData(parsed);
-
-  await prisma.productPrice.update({
-    where: { id: parsed.productPriceId },
-    data: {
-      productId: parsed.productId,
-      edition: parsed.edition as KasaEdition,
-      plan: parsed.plan as PlanType,
-      currency: parsed.currency.toUpperCase(),
-      amount: parsed.amount,
-      maxActivations: parsed.maxActivations,
-      userLimit: optionalLimit(parsed.userLimit),
-      courseLimit: optionalLimit(parsed.courseLimit),
-      facultyLimit: optionalLimit(parsed.facultyLimit),
-      features: entitlementData.features,
-      rules: entitlementData.rules,
-      envatoItemId: parsed.envatoItemId?.trim() || null,
-    },
-  });
-
-  revalidateAdminLicensePaths();
+    await prisma.productPrice.update({
+      where: { id: parsed.productPriceId },
+      data: {
+        productId: parsed.productId,
+        edition: parsed.edition as KasaEdition,
+        plan: parsed.plan as PlanType,
+        currency: parsed.currency.toUpperCase(),
+        amount: parsed.amount,
+        maxActivations: parsed.maxActivations,
+        userLimit: optionalLimit(parsed.userLimit),
+        courseLimit: optionalLimit(parsed.courseLimit),
+        facultyLimit: optionalLimit(parsed.facultyLimit),
+        features: entitlementData.features,
+        rules: entitlementData.rules,
+        envatoItemId: parsed.envatoItemId?.trim() || null,
+      },
+    });
+  } catch (error) {
+    console.error("Unable to save product pricing", error);
+    return { success: false, message: "Pricing could not be saved. Please try again." };
+  }
+  revalidateProductPaths();
+  return { success: true, message: "Pricing saved. Active prices are updated on the website." };
 }
 
 export async function deleteProductPriceAction(formData: FormData) {
@@ -256,7 +285,7 @@ export async function deleteProductPriceAction(formData: FormData) {
     where: { id: parsed.productPriceId },
   });
 
-  revalidateAdminLicensePaths();
+  revalidateProductPaths();
 }
 
 export async function toggleProductPriceStatusAction(formData: FormData) {
@@ -268,5 +297,5 @@ export async function toggleProductPriceStatusAction(formData: FormData) {
     data: { isActive: parsed.isActive === "true" },
   });
 
-  revalidateAdminLicensePaths();
+  revalidateProductPaths();
 }

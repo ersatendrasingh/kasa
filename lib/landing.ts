@@ -222,7 +222,7 @@ export const howItWorks = [
 export const pricing = [
   {
     name: "Starter",
-    price: "$49/mo",
+    price: "₹999",
     note: "For new academies getting their first branded setup live.",
     features: [
       "Branded academy storefront",
@@ -235,7 +235,7 @@ export const pricing = [
   },
   {
     name: "Plus",
-    price: "$129/mo",
+    price: "₹1,999",
     note: "The best fit for active institutes running live and hybrid delivery.",
     features: [
       "Everything in Starter",
@@ -250,7 +250,7 @@ export const pricing = [
   },
   {
     name: "Enterprise",
-    price: "Custom",
+    price: "Custom pricing",
     note: "For larger teams, multi-brand operations, and custom rollout needs.",
     features: [
       "Everything in Plus",

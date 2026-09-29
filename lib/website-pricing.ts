@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { KasaEdition, PlanType } from "@prisma/client";
 import { prisma } from "@/lib/admin/prisma";
 import { normalizeFeatures, normalizeRules } from "@/lib/admin/kasa-modules";
@@ -138,6 +139,8 @@ function fallbackPlans(): WebsitePricingPlan[] {
 }
 
 export async function getWebsitePricingPlans(): Promise<WebsitePricingPlan[]> {
+  // Pricing must reflect admin edits and migrations, not a build-time snapshot.
+  await connection();
   const rows = await prisma.productPrice.findMany({
     where: {
       isActive: true,
@@ -157,12 +160,18 @@ export async function getWebsitePricingPlans(): Promise<WebsitePricingPlan[]> {
       continue;
     }
 
+    // Prefer the INR website price before comparing billing terms or amounts.
+    if (existing.currency !== row.currency) {
+      if (row.currency === "INR") bestByEdition.set(row.edition, row);
+      if (existing.currency === "INR" || row.currency === "INR") continue;
+    }
+
     if (existing.plan !== "LIFETIME" && row.plan === "LIFETIME") {
       bestByEdition.set(row.edition, row);
       continue;
     }
 
-    if (Number(row.amount) < Number(existing.amount)) {
+    if (existing.plan !== "LIFETIME" && Number(row.amount) < Number(existing.amount)) {
       bestByEdition.set(row.edition, row);
     }
   }
@@ -179,9 +188,11 @@ export async function getWebsitePricingPlans(): Promise<WebsitePricingPlan[]> {
         name,
         eyebrow: `${name} ${formatPlanType(row.plan)}`,
         price:
-          row.plan === "LIFETIME" && price !== "Custom"
-            ? `${price} lifetime`
-            : `${price} / ${formatPlanType(row.plan)}`,
+          row.edition === "ENTERPRISE" || price === "Custom"
+            ? "Custom pricing"
+            : row.plan === "LIFETIME"
+              ? `${price} lifetime`
+              : `${price} / ${formatPlanType(row.plan)}`,
         note: row.product.description || editionNotes[row.edition],
         features: publicPlanFeatures(row.edition, row, features, rules),
         highlighted: row.edition === "PLUS",
