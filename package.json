@@ -6,6 +6,8 @@
     "dev": "next dev",
     "prebuild": "prisma generate",
     "build": "next build",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "vercel-build": "npm run db:migrate:deploy && npm run build",
     "start": "next start",
     "lint": "eslint"
   },
