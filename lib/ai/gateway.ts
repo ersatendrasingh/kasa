@@ -19,6 +19,8 @@ type AiFailure = {
   message: string;
   model: string;
   provider: AiProvider;
+  code?: string;
+  requestId?: string;
 };
 
 type GeminiBody = {
@@ -40,7 +42,7 @@ type OpenAiResponse = {
   output?: Array<{
     content?: Array<{ type?: string; text?: string }>;
   }>;
-  error?: { message?: string; code?: string };
+  error?: { message?: string; code?: string; type?: string };
 };
 
 const OPENAI_API_URL = "https://api.openai.com/v1/responses";
@@ -65,11 +67,33 @@ async function readJson(response: Response) {
   }
 }
 
-function providerError(provider: AiProvider, status: number, message?: string) {
+const OPENAI_LIMIT_CODES = new Set([
+  "credit_balance_exhausted",
+  "organization_spend_limit_exceeded",
+  "project_spend_limit_exceeded",
+  "organization_usage_limit_exceeded",
+  "insufficient_quota",
+]);
+
+function providerError(provider: AiProvider, status: number, message?: string, code?: string) {
+  if (status === 429 && code && OPENAI_LIMIT_CODES.has(code)) {
+    return "AI capacity is temporarily unavailable. Please try again shortly.";
+  }
   if (status === 429) return `${provider === "openai" ? "OpenAI" : "Gemini"} is busy right now. Please try again shortly.`;
   if (status === 401 || status === 403) return `${provider === "openai" ? "OpenAI" : "Gemini"} is not authorized. Please check the server API key and billing access.`;
   if (status >= 500) return "AI generation is temporarily unavailable. Please try again in a few minutes.";
   return message?.trim() || "AI generation failed. Please check the input and try again.";
+}
+
+function logProviderFailure(failure: AiFailure, stage: "primary" | "fallback") {
+  console.warn("AI provider request failed", {
+    stage,
+    provider: failure.provider,
+    model: failure.model,
+    status: failure.status,
+    code: failure.code || "unknown",
+    requestId: failure.requestId || "unknown",
+  });
 }
 
 async function generateWithGemini(body: GeminiBody): Promise<AiSuccess | AiFailure> {
@@ -97,8 +121,15 @@ async function generateWithGemini(body: GeminiBody): Promise<AiSuccess | AiFailu
       const data = await readJson(response);
       if (response.ok) return { ok: true, data: (data || {}) as GeneratedContentData, model, provider: "gemini" };
 
-      const providerMessage = (data as { error?: { message?: string } } | null)?.error?.message;
-      lastFailure = { ok: false, status: response.status, message: providerError("gemini", response.status, providerMessage), model, provider: "gemini" };
+      const providerErrorData = (data as { error?: { message?: string; status?: string } } | null)?.error;
+      lastFailure = {
+        ok: false,
+        status: response.status,
+        message: providerError("gemini", response.status, providerErrorData?.message, providerErrorData?.status),
+        model,
+        provider: "gemini",
+        code: providerErrorData?.status,
+      };
       if (!TRANSIENT_STATUSES.has(response.status)) return lastFailure;
     } catch {
       lastFailure = { ok: false, status: 502, message: "Gemini could not be reached. Please try again shortly.", model, provider: "gemini" };
@@ -190,7 +221,17 @@ async function generateWithOpenAi(body: GeminiBody): Promise<AiSuccess | AiFailu
       }
 
       const status = response.status;
-      lastFailure = { ok: false, status, message: providerError("openai", status, data?.error?.message), model, provider: "openai" };
+      const code = data?.error?.code || data?.error?.type;
+      lastFailure = {
+        ok: false,
+        status,
+        message: providerError("openai", status, data?.error?.message, code),
+        model,
+        provider: "openai",
+        code,
+        requestId: response.headers.get("x-request-id") || undefined,
+      };
+      if (status === 429 && code && OPENAI_LIMIT_CODES.has(code)) return lastFailure;
       if (!TRANSIENT_STATUSES.has(status)) return lastFailure;
     } catch {
       lastFailure = { ok: false, status: 502, message: "OpenAI could not be reached. Please try again shortly.", model, provider: "openai" };
@@ -202,7 +243,34 @@ async function generateWithOpenAi(body: GeminiBody): Promise<AiSuccess | AiFailu
 
 export async function generateAiContent(body: GeminiBody): Promise<AiSuccess | AiFailure> {
   const { provider } = await getAiProviderSettings();
-  return provider === "openai" ? generateWithOpenAi(body) : generateWithGemini(body);
+  const environment = getAiProviderEnvironmentStatus();
+  const primary = provider === "openai" ? generateWithOpenAi : generateWithGemini;
+  const fallbackProvider: AiProvider = provider === "openai" ? "gemini" : "openai";
+  const fallbackConfigured = fallbackProvider === "openai" ? environment.openai : environment.gemini;
+
+  const primaryResult = await primary(body);
+  if (primaryResult.ok) return primaryResult;
+  logProviderFailure(primaryResult, "primary");
+
+  if (!fallbackConfigured) return primaryResult;
+
+  const fallback = fallbackProvider === "openai" ? generateWithOpenAi : generateWithGemini;
+  const fallbackResult = await fallback(body);
+  if (fallbackResult.ok) {
+    console.info("AI provider fallback succeeded", {
+      primaryProvider: provider,
+      fallbackProvider,
+      fallbackModel: fallbackResult.model,
+    });
+    return fallbackResult;
+  }
+
+  logProviderFailure(fallbackResult, "fallback");
+  return {
+    ...fallbackResult,
+    status: fallbackResult.status >= 500 ? fallbackResult.status : 503,
+    message: "AI services are temporarily unavailable. Please try again shortly.",
+  };
 }
 
 export async function getAiRuntimeStatus() {

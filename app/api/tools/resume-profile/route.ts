@@ -123,6 +123,7 @@ export async function POST(request: NextRequest) {
     contents: [{ parts }],
     generationConfig: {
       temperature: 0.2,
+      maxOutputTokens: 1_200,
       responseMimeType: "application/json",
       responseSchema: {
         type: "OBJECT",

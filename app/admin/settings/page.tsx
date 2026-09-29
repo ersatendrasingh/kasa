@@ -80,7 +80,7 @@ export default async function AdminSettingsPage({ searchParams }: SettingsPagePr
                     {aiSettings.provider === "openai" ? "OpenAI active" : "Gemini active"}
                   </span>
                 </div>
-                <p className="mt-1 text-sm text-muted-foreground">One selection controls all 14 public AI tools.</p>
+                <p className="mt-1 text-sm text-muted-foreground">This is the primary engine for all 14 public AI tools. If it is temporarily unavailable, KASA automatically tries the other configured provider.</p>
               </div>
             </div>
           </div>
