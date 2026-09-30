@@ -174,9 +174,9 @@ const primaryNav: NavItem[] = [
         description: "Create a role-wise plan with skills, projects, weekly tasks, and interview prep.",
       },
       {
-        label: "Attendance calculator",
-        href: "/tools/attendance-calculator",
-        description: "Calculate attendance percentage, safe bunks, and classes needed for 75%.",
+        label: "PDF tools",
+        href: "/pdf-tools",
+        description: "Merge, split, compress, convert, protect, and edit PDFs privately in your browser.",
       },
       {
         label: "All tools",
@@ -558,7 +558,7 @@ export default function SiteHeader() {
                     </Link>
                     {hasChildren(item) ? (
                       <div className="mt-1 space-y-1 border-t border-blue-950/8 px-2 pt-2 dark:border-white/10">
-                        {item.items.slice(0, 4).map((child) => (
+                        {(item.label === "Tools" ? item.items : item.items.slice(0, 4)).map((child) => (
                           <Link
                             key={child.href}
                             href={child.href}

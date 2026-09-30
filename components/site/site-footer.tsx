@@ -79,6 +79,7 @@ const solutionLinks: FooterLink[] = [
 ];
 
 const popularToolLinks: FooterLink[] = [
+  { label: "Free PDF Tools", href: "/pdf-tools" },
   { label: "AI Resume ATS Checker", href: "/tools/resume-ats-checker" },
   {
     label: "AI Final Year Project Kit",

@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { allSeoPages } from "@/lib/site-content";
 import { prisma } from "@/lib/admin/prisma";
+import { pdfTools } from "@/lib/pdf-tools";
 
 const SITE_URL = "https://www.getkasa.in";
 
@@ -106,6 +107,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${SITE_URL}/tools`,
       changeFrequency: "weekly",
       priority: 0.9,
+    },
+    {
+      url: `${SITE_URL}/pdf-tools`,
+      changeFrequency: "weekly",
+      priority: 0.94,
     },
     {
       url: `${SITE_URL}/students`,
@@ -311,6 +317,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     ...staticPages,
+    ...pdfTools.map((tool) => ({
+      url: `${SITE_URL}/pdf-tools/${tool.slug}`,
+      changeFrequency: "weekly" as const,
+      priority: 0.92,
+    })),
     ...allSeoPages.map((page) => ({
       url: `${SITE_URL}${page.href}`,
       changeFrequency: page.group === "Resources" ? "monthly" : "weekly",
