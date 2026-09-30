@@ -160,6 +160,8 @@ type UploadedResume = {
 
 type ResumeProfile = {
   candidateName: string;
+  candidateEmail: string;
+  candidatePhone: string;
   detectedRole: string;
   roleFamily: string;
   yearsExperience: number;
@@ -198,6 +200,8 @@ export function ResumeAtsChecker() {
   const [uploadedResume, setUploadedResume] = useState<UploadedResume | null>(null);
   const [roleFamily, setRoleFamily] = useState<(typeof roleFamilies)[number]>("Software Engineering");
   const [candidateName, setCandidateName] = useState("Candidate");
+  const [candidateEmail, setCandidateEmail] = useState("");
+  const [candidatePhone, setCandidatePhone] = useState("");
   const [targetRole, setTargetRole] = useState("General resume review");
   const [yearsExperience, setYearsExperience] = useState(0);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
@@ -227,6 +231,8 @@ export function ResumeAtsChecker() {
     setSaveReport(true);
     setUploadedResume(saved.uploadedResume || null);
     setCandidateName(saved.candidateName || deriveNameFromResume(saved.uploadedResume?.name) || "Candidate");
+    setCandidateEmail("");
+    setCandidatePhone("");
     setTargetRole(saved.targetRole || "Frontend Developer");
     setRoleFamily((saved.roleFamily as (typeof roleFamilies)[number]) || "Software Engineering");
     setYearsExperience(clamp(Number(saved.yearsExperience ?? legacyExperienceToYears(saved.experienceLevel)), 0, 20));
@@ -258,6 +264,8 @@ export function ResumeAtsChecker() {
             setResumeText(handoff.resumeText);
             setUploadedResume(null);
             setCandidateName(handoff.candidateName || "Candidate");
+            setCandidateEmail("");
+            setCandidatePhone("");
             setTargetRole(handoff.targetRole || "Frontend Developer");
             setRoleFamily((handoff.roleFamily as (typeof roleFamilies)[number]) || "Software Engineering");
             setSelectedSkills(Array.isArray(handoff.selectedSkills) ? handoff.selectedSkills.slice(0, 12) : []);
@@ -340,6 +348,8 @@ export function ResumeAtsChecker() {
       setUploadedResume(nextResume);
       setResumeText(extractedText);
       setCandidateName(deriveNameFromResume(file.name) || "Candidate");
+      setCandidateEmail("");
+      setCandidatePhone("");
       setDetectedSummary("");
       setActionMessage("Resume uploaded. Detecting your role, experience, and skills…");
       trackAts("upload_completed");
@@ -348,6 +358,8 @@ export function ResumeAtsChecker() {
       if (version !== uploadVersion.current) return;
       setUploadedResume(null);
       setResumeText("");
+      setCandidateEmail("");
+      setCandidatePhone("");
       notify("error", "Could not read resume", error instanceof Error ? error.message : "Try a PDF or paste resume text.");
       trackAts("upload_failed");
     } finally {
@@ -380,6 +392,8 @@ export function ResumeAtsChecker() {
       if (!profile) throw new Error("AI could not detect a usable profile from this resume.");
 
       if (profile.candidateName) setCandidateName(profile.candidateName);
+      setCandidateEmail(profile.candidateEmail || "");
+      setCandidatePhone(profile.candidatePhone || "");
       if (profile.detectedRole) setTargetRole(profile.detectedRole);
       if (profile.roleFamily && roleFamilies.includes(profile.roleFamily as (typeof roleFamilies)[number])) {
         setRoleFamily(profile.roleFamily as (typeof roleFamilies)[number]);
@@ -436,6 +450,8 @@ export function ResumeAtsChecker() {
     setUploadedResume(null);
     setRoleFamily("Software Engineering");
     setCandidateName("Candidate");
+    setCandidateEmail("");
+    setCandidatePhone("");
     setTargetRole("General resume review");
     setYearsExperience(0);
     setSelectedSkills([]);
@@ -481,6 +497,8 @@ export function ResumeAtsChecker() {
           fileMimeType: attachFile ? uploadedResume?.mimeType : undefined,
           fileName: uploadedResume?.name,
           candidateName,
+          candidateEmail,
+          candidatePhone,
           targetRole,
           roleFamily,
           yearsExperience,
@@ -687,7 +705,7 @@ export function ResumeAtsChecker() {
                   {uploadedResume ? "Replace" : "Choose resume"}
                   <input type="file" accept=".pdf,.docx,.txt" onChange={(event) => { handleFileUpload(event.target.files?.[0]); event.currentTarget.value = ""; }} className="sr-only" />
                 </label>
-                {uploadedResume ? <button type="button" onClick={() => { setUploadedResume(null); setResumeText(""); clearGenerated(); }} className="grid size-10 cursor-pointer place-items-center rounded-full border border-blue-950/10 bg-white text-slate-500 transition hover:border-rose-300 hover:text-rose-600 dark:border-white/10 dark:bg-white/7" aria-label="Remove uploaded resume"><X className="size-4" aria-hidden="true" /></button> : null}
+                {uploadedResume ? <button type="button" onClick={() => { setUploadedResume(null); setResumeText(""); setCandidateEmail(""); setCandidatePhone(""); clearGenerated(); }} className="grid size-10 cursor-pointer place-items-center rounded-full border border-blue-950/10 bg-white text-slate-500 transition hover:border-rose-300 hover:text-rose-600 dark:border-white/10 dark:bg-white/7" aria-label="Remove uploaded resume"><X className="size-4" aria-hidden="true" /></button> : null}
                 {savedAvailable ? <ActionButton label="Restore last" icon={Sparkles} onClick={restoreLast} /> : null}
               </div>
               {uploadProgress > 0 ? <div className="sm:col-span-2"><div className="h-1.5 overflow-hidden rounded-full bg-slate-200"><div className="h-full rounded-full bg-[image:var(--button-solid)] transition-[width]" style={{ width: `${uploadProgress}%` }} /></div></div> : null}
@@ -715,7 +733,7 @@ export function ResumeAtsChecker() {
               <div className="min-h-0 overflow-hidden">
                 <div key={activeInputPanel} id={activeInputPanel ? `resume-input-${activeInputPanel}` : undefined} className="animate-in fade-in-0 slide-in-from-top-2 rounded-2xl border border-blue-950/10 bg-slate-50/80 p-3 duration-300 dark:border-white/10 dark:bg-white/[0.035] sm:p-4">
                   {activeInputPanel === "resume-text" ? (
-                    <textarea value={resumeText} maxLength={30000} onChange={(event) => { setResumeText(event.target.value); setUploadedResume(null); clearGenerated(); }} rows={5} autoFocus placeholder="Paste your complete resume here…" className="w-full resize-y rounded-xl border border-blue-950/10 bg-white px-4 py-3 text-sm font-medium leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 dark:border-white/10 dark:bg-white/[0.06] dark:text-white" />
+                    <textarea value={resumeText} maxLength={30000} onChange={(event) => { setResumeText(event.target.value); setUploadedResume(null); setCandidateEmail(""); setCandidatePhone(""); clearGenerated(); }} rows={5} autoFocus placeholder="Paste your complete resume here…" className="w-full resize-y rounded-xl border border-blue-950/10 bg-white px-4 py-3 text-sm font-medium leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-primary/50 focus:ring-4 focus:ring-primary/10 dark:border-white/10 dark:bg-white/[0.06] dark:text-white" />
                   ) : null}
 
                   {activeInputPanel === "job-match" ? (

@@ -10,6 +10,8 @@ type ResumeProfileRequest = {
 
 type ResumeProfileResponse = {
   candidateName: string;
+  candidateEmail: string;
+  candidatePhone: string;
   detectedRole: string;
   roleFamily: string;
   yearsExperience: number;
@@ -73,6 +75,8 @@ function normalizeProfile(value: Partial<ResumeProfileResponse>): ResumeProfileR
   const yearsExperience = cleanNumber(value.yearsExperience, 0, 0, 20);
   return {
     candidateName: cleanString(value.candidateName, "Candidate", 100),
+    candidateEmail: cleanString(value.candidateEmail, "", 160).toLowerCase(),
+    candidatePhone: cleanString(value.candidatePhone, "", 40),
     detectedRole: cleanString(value.detectedRole, "Software Engineer", 100),
     roleFamily: cleanString(value.roleFamily, "Software Engineering", 80),
     yearsExperience,
@@ -104,6 +108,7 @@ export async function POST(request: NextRequest) {
     "You are an expert resume parser. Extract factual profile data from the uploaded resume.",
     "Return only valid JSON. Do not guess wildly. Prefer evidence inside the resume.",
     "Extract candidateName from the resume header or contact section.",
+    "Extract candidateEmail and candidatePhone exactly from the resume header or contact section. Return an empty string when either is absent; never invent contact details.",
     "If experience is present in job dates or summary, calculate approximate total professional years.",
     "If the resume says 11+ years, do not return fresher. If dates show senior work history, return a senior experience value.",
     "Choose one roleFamily from: Software Engineering, Data & AI, Product & Design, Cloud & DevOps, Cybersecurity, Business & Marketing, Finance & Operations.",
@@ -129,6 +134,8 @@ export async function POST(request: NextRequest) {
         type: "OBJECT",
         properties: {
           candidateName: { type: "STRING" },
+          candidateEmail: { type: "STRING" },
+          candidatePhone: { type: "STRING" },
           detectedRole: { type: "STRING" },
           roleFamily: { type: "STRING" },
           yearsExperience: { type: "NUMBER" },
@@ -136,7 +143,7 @@ export async function POST(request: NextRequest) {
           skills: { type: "ARRAY", items: { type: "STRING" } },
           summary: { type: "STRING" },
         },
-        required: ["candidateName", "detectedRole", "roleFamily", "yearsExperience", "experienceLevel", "skills", "summary"],
+        required: ["candidateName", "candidateEmail", "candidatePhone", "detectedRole", "roleFamily", "yearsExperience", "experienceLevel", "skills", "summary"],
       },
     },
   });

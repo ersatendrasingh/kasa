@@ -10,6 +10,8 @@ type ResumeAtsRequest = {
   fileMimeType?: string;
   fileName?: string;
   candidateName?: string;
+  candidateEmail?: string;
+  candidatePhone?: string;
   targetRole: string;
   roleFamily?: string;
   yearsExperience?: number;
@@ -43,6 +45,8 @@ function normalizeRequest(input: Partial<ResumeAtsRequest>): ResumeAtsRequest {
     fileMimeType: allowedMimeTypes.includes(fileMimeType) ? fileMimeType : "",
     fileName: cleanString(input.fileName, "", 160),
     candidateName: cleanString(input.candidateName, "", 100),
+    candidateEmail: cleanString(input.candidateEmail, "", 160).toLowerCase(),
+    candidatePhone: cleanString(input.candidatePhone, "", 40),
     targetRole: cleanString(input.targetRole, "Frontend Developer", 80),
     roleFamily: cleanString(input.roleFamily, "Software Engineering", 80),
     yearsExperience: cleanNumber(input.yearsExperience, 0, 0, 20),
@@ -94,11 +98,11 @@ export async function POST(request: NextRequest) {
   }
 
   if (payload.resumeText.length < 300 && !payload.fileData) {
-    await recordAtsCheck({ visitorKey: visitor.visitorKey, status: "INVALID_INPUT", resumeText: payload.resumeText, candidateName: payload.candidateName, targetRole: payload.targetRole, roleFamily: payload.roleFamily, experienceLevel: payload.experienceLevel, hasJobDescription: Boolean(payload.jobDescription), errorCode: "RESUME_TOO_SHORT" });
+    await recordAtsCheck({ visitorKey: visitor.visitorKey, status: "INVALID_INPUT", resumeText: payload.resumeText, candidateName: payload.candidateName, candidateEmail: payload.candidateEmail, candidatePhone: payload.candidatePhone, targetRole: payload.targetRole, roleFamily: payload.roleFamily, experienceLevel: payload.experienceLevel, hasJobDescription: Boolean(payload.jobDescription), errorCode: "RESUME_TOO_SHORT" });
     return respond({ error: "Please upload a PDF resume or paste at least 300 characters." }, 400);
   }
   if (payload.fileData && !payload.fileMimeType) {
-    await recordAtsCheck({ visitorKey: visitor.visitorKey, status: "UNREADABLE", resumeText: payload.resumeText, fileData: payload.fileData, fileName: payload.fileName, candidateName: payload.candidateName, targetRole: payload.targetRole, roleFamily: payload.roleFamily, experienceLevel: payload.experienceLevel, hasJobDescription: Boolean(payload.jobDescription), errorCode: "UNSUPPORTED_FILE" });
+    await recordAtsCheck({ visitorKey: visitor.visitorKey, status: "UNREADABLE", resumeText: payload.resumeText, fileData: payload.fileData, fileName: payload.fileName, candidateName: payload.candidateName, candidateEmail: payload.candidateEmail, candidatePhone: payload.candidatePhone, targetRole: payload.targetRole, roleFamily: payload.roleFamily, experienceLevel: payload.experienceLevel, hasJobDescription: Boolean(payload.jobDescription), errorCode: "UNSUPPORTED_FILE" });
     return respond({ error: "Unsupported resume file type. Upload PDF, DOCX or TXT." }, 400);
   }
 
@@ -226,23 +230,23 @@ export async function POST(request: NextRequest) {
   });
 
   if (!result.ok) {
-    await recordAtsCheck({ visitorKey: visitor.visitorKey, status: "FAILED", resumeText: payload.resumeText, fileData: payload.fileData, fileName: payload.fileName, candidateName: payload.candidateName, fileSizeBytes: payload.fileData ? Math.floor(payload.fileData.length * 0.75) : undefined, targetRole: payload.targetRole, roleFamily: payload.roleFamily, experienceLevel: payload.experienceLevel, hasJobDescription: Boolean(payload.jobDescription), errorCode: "AI_PROVIDER" });
+    await recordAtsCheck({ visitorKey: visitor.visitorKey, status: "FAILED", resumeText: payload.resumeText, fileData: payload.fileData, fileName: payload.fileName, candidateName: payload.candidateName, candidateEmail: payload.candidateEmail, candidatePhone: payload.candidatePhone, fileSizeBytes: payload.fileData ? Math.floor(payload.fileData.length * 0.75) : undefined, targetRole: payload.targetRole, roleFamily: payload.roleFamily, experienceLevel: payload.experienceLevel, hasJobDescription: Boolean(payload.jobDescription), errorCode: "AI_PROVIDER" });
     return respond({ error: result.message }, result.status);
   }
 
   const data = result.data as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
   const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
   if (typeof rawText !== "string") {
-    await recordAtsCheck({ visitorKey: visitor.visitorKey, status: "FAILED", resumeText: payload.resumeText, fileData: payload.fileData, fileName: payload.fileName, candidateName: payload.candidateName, fileSizeBytes: payload.fileData ? Math.floor(payload.fileData.length * 0.75) : undefined, targetRole: payload.targetRole, roleFamily: payload.roleFamily, experienceLevel: payload.experienceLevel, hasJobDescription: Boolean(payload.jobDescription), errorCode: "EMPTY_AI_RESPONSE" });
+    await recordAtsCheck({ visitorKey: visitor.visitorKey, status: "FAILED", resumeText: payload.resumeText, fileData: payload.fileData, fileName: payload.fileName, candidateName: payload.candidateName, candidateEmail: payload.candidateEmail, candidatePhone: payload.candidatePhone, fileSizeBytes: payload.fileData ? Math.floor(payload.fileData.length * 0.75) : undefined, targetRole: payload.targetRole, roleFamily: payload.roleFamily, experienceLevel: payload.experienceLevel, hasJobDescription: Boolean(payload.jobDescription), errorCode: "EMPTY_AI_RESPONSE" });
     return respond({ error: "AI returned an empty response." }, 502);
   }
 
   try {
     const analysis = validateAnalysis(JSON.parse(rawText), Boolean(payload.jobDescription));
-    await recordAtsCheck({ visitorKey: visitor.visitorKey, status: "COMPLETED", resumeText: payload.resumeText, fileData: payload.fileData, fileName: payload.fileName, candidateName: payload.candidateName, fileSizeBytes: payload.fileData ? Math.floor(payload.fileData.length * 0.75) : undefined, targetRole: payload.targetRole, roleFamily: payload.roleFamily, experienceLevel: payload.experienceLevel, hasJobDescription: Boolean(payload.jobDescription), atsScore: analysis.atsScore, jobMatchScore: analysis.jobMatchScore });
+    await recordAtsCheck({ visitorKey: visitor.visitorKey, status: "COMPLETED", resumeText: payload.resumeText || analysis.editableResumeText, fileData: payload.fileData, fileName: payload.fileName, candidateName: payload.candidateName, candidateEmail: payload.candidateEmail, candidatePhone: payload.candidatePhone, fileSizeBytes: payload.fileData ? Math.floor(payload.fileData.length * 0.75) : undefined, targetRole: payload.targetRole, roleFamily: payload.roleFamily, experienceLevel: payload.experienceLevel, hasJobDescription: Boolean(payload.jobDescription), atsScore: analysis.atsScore, jobMatchScore: analysis.jobMatchScore });
     return respond({ analysis });
   } catch {
-    await recordAtsCheck({ visitorKey: visitor.visitorKey, status: "UNREADABLE", resumeText: payload.resumeText, fileData: payload.fileData, fileName: payload.fileName, candidateName: payload.candidateName, fileSizeBytes: payload.fileData ? Math.floor(payload.fileData.length * 0.75) : undefined, targetRole: payload.targetRole, roleFamily: payload.roleFamily, experienceLevel: payload.experienceLevel, hasJobDescription: Boolean(payload.jobDescription), errorCode: "UNREADABLE_RESUME" });
+    await recordAtsCheck({ visitorKey: visitor.visitorKey, status: "UNREADABLE", resumeText: payload.resumeText, fileData: payload.fileData, fileName: payload.fileName, candidateName: payload.candidateName, candidateEmail: payload.candidateEmail, candidatePhone: payload.candidatePhone, fileSizeBytes: payload.fileData ? Math.floor(payload.fileData.length * 0.75) : undefined, targetRole: payload.targetRole, roleFamily: payload.roleFamily, experienceLevel: payload.experienceLevel, hasJobDescription: Boolean(payload.jobDescription), errorCode: "UNREADABLE_RESUME" });
     return respond({ error: "The resume could not be analyzed completely. Please retry or paste your resume text." }, 502);
   }
 }

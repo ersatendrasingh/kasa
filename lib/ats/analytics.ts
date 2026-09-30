@@ -14,6 +14,8 @@ type AtsAnalyticsInput = {
   fileName?: string;
   fileSizeBytes?: number;
   candidateName?: string;
+  candidateEmail?: string;
+  candidatePhone?: string;
   targetRole?: string;
   roleFamily?: string;
   experienceLevel?: string;
@@ -42,8 +44,12 @@ function resumeFingerprint(input: AtsAnalyticsInput) {
 
 function extractContactDetails(input: AtsAnalyticsInput) {
   const text = `${input.candidateName || ""}\n${input.resumeText || ""}`.slice(0, 30_000);
-  const email = text.match(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i)?.[0]?.toLowerCase();
-  const phoneMatch = text.match(/(?:\+?\d[\d\s().-]{7,}\d)/)?.[0];
+  const suppliedEmail = input.candidateEmail?.trim().toLowerCase().slice(0, 160);
+  const email = (/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(suppliedEmail || "") ? suppliedEmail : undefined)
+    || text.match(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i)?.[0]?.toLowerCase();
+  const suppliedPhone = input.candidatePhone?.replace(/\s+/g, " ").trim().slice(0, 40);
+  const phoneMatch = (suppliedPhone && suppliedPhone.replace(/\D/g, "").length >= 8 ? suppliedPhone : undefined)
+    || text.match(/(?:\+?\d[\d\s().-]{7,}\d)/)?.[0];
   const phone = phoneMatch?.replace(/\s+/g, " ").trim().slice(0, 40);
   const suppliedName = input.candidateName?.replace(/\s+/g, " ").trim().slice(0, 100);
   const candidateName = suppliedName && !["candidate", "improved resume"].includes(suppliedName.toLowerCase())
