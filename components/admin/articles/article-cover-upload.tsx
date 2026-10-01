@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ImageIcon, Trash2Icon, UploadCloudIcon } from "lucide-react";
+import { ImageIcon, LoaderCircleIcon, Trash2Icon, UploadCloudIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -91,7 +91,7 @@ export function ArticleCoverUpload({
             </Button>
           ) : null}
           <label className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg bg-primary px-3 text-sm font-semibold !text-white shadow-sm transition hover:opacity-95">
-            <UploadCloudIcon className="size-4 text-white" />
+            {uploading ? <LoaderCircleIcon className="size-4 animate-spin text-white" /> : <UploadCloudIcon className="size-4 text-white" />}
             {uploading ? "Uploading..." : url ? "Replace" : "Upload"}
             <input
               type="file"

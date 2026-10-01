@@ -20,23 +20,32 @@ export function ArticleTitleSlugFields({
   baseUrl,
   initialSlug,
   initialTitle,
+  onChange,
 }: {
   baseUrl: string;
   initialSlug: string;
   initialTitle: string;
+  onChange?: (values: { title: string; slug: string }) => void;
 }) {
   const [title, setTitle] = useState(initialTitle);
-  const [slug, setSlug] = useState(initialSlug);
+  const titleSlug = slugify(initialTitle);
+  const [slug, setSlug] = useState(
+    initialSlug.startsWith(`${titleSlug}-`) ? titleSlug : initialSlug,
+  );
   const [editingSlug, setEditingSlug] = useState(false);
   const [customSlug, setCustomSlug] = useState(false);
 
   function updateTitle(value: string) {
     setTitle(value);
-    if (!customSlug) setSlug(slugify(value));
+    const nextSlug = customSlug ? slug : slugify(value);
+    if (!customSlug) setSlug(nextSlug);
+    onChange?.({ title: value, slug: nextSlug });
   }
 
   function finishSlugEdit() {
-    setSlug((current) => current || slugify(title));
+    const nextSlug = slug || slugify(title);
+    setSlug(nextSlug);
+    onChange?.({ title, slug: nextSlug });
     setEditingSlug(false);
   }
 
@@ -62,7 +71,9 @@ export function ArticleTitleSlugFields({
               value={slug}
               onChange={(event) => {
                 setCustomSlug(true);
-                setSlug(slugify(event.target.value));
+                const nextSlug = slugify(event.target.value);
+                setSlug(nextSlug);
+                onChange?.({ title, slug: nextSlug });
               }}
               onKeyDown={(event) => {
                 if (event.key === "Enter") {

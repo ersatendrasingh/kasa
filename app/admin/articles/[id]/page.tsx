@@ -2,36 +2,24 @@ import Link from "next/link";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
-import {
-  ArrowLeftIcon,
-  BookOpenTextIcon,
-  CheckIcon,
-  ChevronRightIcon,
-  ImageIcon,
-  SearchCheckIcon,
-  SendIcon,
-  StarIcon,
-  Trash2Icon,
-} from "lucide-react";
+import { ArrowLeftIcon, BookOpenTextIcon, CheckIcon, ChevronRightIcon, ImageIcon, SearchCheckIcon, SendIcon, StarIcon, Trash2Icon } from "lucide-react";
 import {
   deleteArticleAction,
+  autosaveArticleContentAction,
   updateArticleFeaturedAction,
-  updateArticleContentAction,
   updateArticlePresentationAction,
   updateArticlePublishingAction,
   updateArticleSeoAction,
 } from "@/actions/admin/articles";
 import { ConfirmActionButton } from "@/components/admin/confirm-action-button";
 import { ArticleCoverUpload } from "@/components/admin/articles/article-cover-upload";
-import {
-  adminTextInputClass,
-  adminTextareaClass,
-} from "@/components/admin/articles/article-admin-primitives";
+import { adminTextInputClass } from "@/components/admin/articles/article-admin-primitives";
 import { ArticlePublishingControls } from "@/components/admin/articles/article-publishing-controls";
-import { ArticleRichEditor } from "@/components/admin/articles/article-rich-editor";
+import { ArticleContentEditor } from "@/components/admin/articles/article-content-editor";
+import { ArticleFeatureToggle } from "@/components/admin/articles/article-feature-toggle";
+import { ArticleSubmitButton } from "@/components/admin/articles/article-submit-button";
 import { ArticleSaveToast } from "@/components/admin/articles/article-save-toast";
 import { ArticleSeoEditor } from "@/components/admin/articles/article-seo-editor";
-import { ArticleTitleSlugFields } from "@/components/admin/articles/article-title-slug-fields";
 import { AdminShell } from "@/components/admin/layouts/admin-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,7 +31,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { requireAdmin } from "@/lib/admin/auth";
 import { prisma } from "@/lib/admin/prisma";
 import { BLOG_BASE_PATH, SITE_URL } from "@/lib/blog";
@@ -52,7 +39,6 @@ export const dynamic = "force-dynamic";
 
 const db = prisma;
 const inputClassName = adminTextInputClass;
-const textareaClassName = adminTextareaClass;
 
 type ArticleDetailParams = Promise<{ id: string }>;
 type ArticleDetailSearchParams = Promise<{ saved?: string }>;
@@ -143,7 +129,7 @@ export default async function AdminArticleDetailPage({
       <div className="grid gap-6">
         <ArticleSaveToast saved={query.saved} />
 
-        <section className="rounded-2xl border border-blue-200 bg-[linear-gradient(135deg,#ffffff_0%,#eff7ff_58%,#e8fff4_100%)] p-5 shadow-sm shadow-blue-950/5 dark:border-white/10 dark:bg-[linear-gradient(135deg,rgba(15,23,42,.94),rgba(15,59,117,.55))] xl:sticky xl:top-16 xl:z-20 xl:p-4 xl:shadow-lg xl:shadow-blue-950/10 xl:backdrop-blur-xl">
+        <section className="rounded-2xl border border-blue-200 bg-[linear-gradient(135deg,#ffffff_0%,#eff7ff_58%,#e8fff4_100%)] p-5 shadow-sm shadow-blue-950/5 dark:border-white/10 dark:bg-[linear-gradient(135deg,rgba(15,23,42,.94),rgba(15,59,117,.55))] xl:p-4">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between xl:gap-4">
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
@@ -175,40 +161,7 @@ export default async function AdminArticleDetailPage({
                   Back
                 </Link>
               </Button>
-              <form action={updateArticleFeaturedAction}>
-                <input type="hidden" name="id" value={article.id} />
-                <input
-                  type="hidden"
-                  name="featured"
-                  value={article.featured ? "false" : "true"}
-                />
-                <Button
-                  type="submit"
-                  variant="outline"
-                  size="icon"
-                  className={
-                    article.featured
-                      ? "h-8 w-8 bg-blue-50 text-primary"
-                      : "h-8 w-8 bg-white"
-                  }
-                  aria-label={
-                    article.featured
-                      ? "Remove featured status"
-                      : "Mark as featured"
-                  }
-                  title={
-                    article.featured
-                      ? "Remove featured status"
-                      : "Mark as featured"
-                  }
-                >
-                  <StarIcon
-                    className={
-                      article.featured ? "size-4 fill-current" : "size-4"
-                    }
-                  />
-                </Button>
-              </form>
+              <ArticleFeatureToggle action={updateArticleFeaturedAction} articleId={article.id} featured={article.featured} />
               <ConfirmActionButton
                 action={deleteArticleAction}
                 fields={[{ name: "id", value: article.id }]}
@@ -226,7 +179,7 @@ export default async function AdminArticleDetailPage({
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_19rem]">
           <div className="grid gap-6">
-            <Card>
+            <Card className="!overflow-visible">
               <CardHeader>
                 <div className="flex items-start gap-3">
                   <IconTile>
@@ -236,39 +189,15 @@ export default async function AdminArticleDetailPage({
                 </div>
               </CardHeader>
               <CardContent>
-                <form
-                  action={updateArticleContentAction}
-                  className="grid gap-4"
-                >
-                  <input type="hidden" name="id" value={article.id} />
-                  <ArticleTitleSlugFields
-                    initialTitle={article.title}
-                    initialSlug={article.slug}
-                    baseUrl={`${siteOrigin}${BLOG_BASE_PATH}/`}
-                  />
-                  <div className="grid gap-2">
-                    <Label htmlFor="excerpt">Excerpt</Label>
-                    <Textarea
-                      id="excerpt"
-                      name="excerpt"
-                      rows={3}
-                      defaultValue={article.excerpt || ""}
-                      className={textareaClassName}
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="content">Story body</Label>
-                    <ArticleRichEditor
-                      name="content"
-                      defaultValue={article.content}
-                    />
-                  </div>
-                  <div className="flex justify-end">
-                    <Button type="submit" className="h-11 min-w-36 !text-white">
-                      Save content
-                    </Button>
-                  </div>
-                </form>
+                <ArticleContentEditor
+                  articleId={article.id}
+                  baseUrl={`${siteOrigin}${BLOG_BASE_PATH}/`}
+                  initialContent={article.content}
+                  initialExcerpt={article.excerpt || ""}
+                  initialSlug={article.slug}
+                  initialTitle={article.title}
+                  saveAction={autosaveArticleContentAction}
+                />
               </CardContent>
             </Card>
 
@@ -297,9 +226,7 @@ export default async function AdminArticleDetailPage({
                     initialSchemaType={article.schemaType || "Article"}
                   />
                   <div className="flex justify-end">
-                    <Button type="submit" className="h-11 min-w-36 !text-white">
-                      Save SEO
-                    </Button>
+                    <ArticleSubmitButton className="h-11 min-w-36 !text-white">Save SEO</ArticleSubmitButton>
                   </div>
                 </form>
               </CardContent>
@@ -488,9 +415,7 @@ export default async function AdminArticleDetailPage({
                     </div>
                   </div>
                   <div className="flex justify-end">
-                    <Button type="submit" className="h-11 min-w-36 !text-white">
-                      Save presentation
-                    </Button>
+                    <ArticleSubmitButton className="h-11 min-w-36 !text-white">Save presentation</ArticleSubmitButton>
                   </div>
                 </form>
               </CardContent>

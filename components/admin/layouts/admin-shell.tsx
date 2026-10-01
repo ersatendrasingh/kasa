@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
+import { AdminNavigationProgress } from "@/components/admin/admin-navigation-progress";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AdminThemeToggle } from "@/components/admin/theme-toggle";
 import { AdminTopNavUser } from "@/components/admin/top-nav-user";
@@ -32,8 +33,11 @@ export function AdminShell({
 }) {
   return (
     <SidebarProvider>
+      <Suspense fallback={null}>
+        <AdminNavigationProgress />
+      </Suspense>
       <AppSidebar admin={{ name: adminName, email: adminEmail }} />
-      <SidebarInset className="admin-shell min-h-svh min-w-0 overflow-x-clip">
+      <SidebarInset className="admin-shell min-h-svh min-w-0">
         <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-2 border-b border-[color:var(--header-border)] bg-[color:var(--header-background)]/95 backdrop-blur-xl transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-14">
           <div className="flex min-w-0 flex-1 items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />

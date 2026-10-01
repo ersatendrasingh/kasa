@@ -17,6 +17,7 @@ import {
   articleTableRowClass,
 } from "@/components/admin/articles/article-admin-primitives";
 import { ConfirmActionButton } from "@/components/admin/confirm-action-button";
+import { ArticleSubmitButton } from "@/components/admin/articles/article-submit-button";
 import { AdminShell } from "@/components/admin/layouts/admin-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -93,7 +94,7 @@ function AddCategorySheet() {
             <Textarea id="seoDescription" name="seoDescription" rows={3} className={adminTextareaClass} />
           </div>
           <SheetFooter className="px-0">
-            <Button type="submit" className="h-11 !text-white">Create category</Button>
+            <ArticleSubmitButton pendingLabel="Creating…" className="h-11 !text-white">Create category</ArticleSubmitButton>
           </SheetFooter>
         </form>
       </SheetContent>
@@ -144,7 +145,7 @@ function EditCategorySheet({ category }: { category: ArticleCategoryWithCount })
             Visible in article filters
           </label>
           <SheetFooter className="px-0">
-            <Button type="submit" className="h-11 !text-white">Save category</Button>
+            <ArticleSubmitButton pendingLabel="Saving…" className="h-11 !text-white">Save category</ArticleSubmitButton>
           </SheetFooter>
         </form>
       </SheetContent>
@@ -219,7 +220,7 @@ export default async function ArticleCategoriesPage({
                 <SearchIcon className="size-4 text-primary" />
                 <input name="q" defaultValue={q} placeholder="Search category title or slug" className="min-w-0 flex-1 bg-transparent text-sm outline-none" />
               </label>
-              <Button type="submit" className="h-11 !text-white">Search</Button>
+              <ArticleSubmitButton pendingLabel="Searching…" className="h-11 !text-white">Search</ArticleSubmitButton>
             </form>
             <ArticleTableFrame>
               <Table>

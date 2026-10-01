@@ -7,6 +7,7 @@ import { BookOpenTextIcon, CheckCircle2Icon, CircleAlertIcon, ImageIcon, StarIco
 import { bulkArticlesAction } from "@/actions/admin/articles";
 import { ArticleTableFrame, articleTableCellClass, articleTableHeadClass, articleTableHeaderRowClass, articleTableRowClass } from "@/components/admin/articles/article-admin-primitives";
 import { BulkDeleteArticlesDialog } from "@/components/admin/articles/bulk-delete-articles-dialog";
+import { ArticleSubmitButton } from "@/components/admin/articles/article-submit-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -57,7 +58,7 @@ export function ArticlesDataTable({ items }: { items: ArticleTableItem[] }) {
   return <form action={bulkArticlesAction} className="grid min-w-0 gap-3">
     <div className="flex min-h-11 flex-wrap items-center justify-between gap-3 rounded-xl bg-blue-50/70 px-3 py-2 dark:bg-white/[0.05]">
       <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{selectedCount ? `${selectedCount} selected` : "Select articles to perform a bulk action"}</p>
-      {selectedCount ? <div className="flex flex-wrap gap-2">{canPublish ? <Button name="bulkAction" value="PUBLISH" type="submit" size="sm" className="!text-white">Publish</Button> : null}{canReview ? <Button name="bulkAction" value="REVIEW" type="submit" size="sm" variant="outline" className="bg-white">Send to review</Button> : null}{canDraft ? <Button name="bulkAction" value="DRAFT" type="submit" size="sm" variant="outline" className="bg-white">Move to draft</Button> : null}{canArchive ? <Button name="bulkAction" value="ARCHIVE" type="submit" size="sm" variant="outline" className="bg-white">Archive</Button> : null}<BulkDeleteArticlesDialog ids={selectedIds} /></div> : null}
+      {selectedCount ? <div className="flex flex-wrap gap-2">{canPublish ? <ArticleSubmitButton name="bulkAction" value="PUBLISH" pendingLabel="Publishing…" size="sm" className="!text-white">Publish</ArticleSubmitButton> : null}{canReview ? <ArticleSubmitButton name="bulkAction" value="REVIEW" pendingLabel="Moving…" size="sm" variant="outline" className="bg-white">Send to review</ArticleSubmitButton> : null}{canDraft ? <ArticleSubmitButton name="bulkAction" value="DRAFT" pendingLabel="Moving…" size="sm" variant="outline" className="bg-white">Move to draft</ArticleSubmitButton> : null}{canArchive ? <ArticleSubmitButton name="bulkAction" value="ARCHIVE" pendingLabel="Archiving…" size="sm" variant="outline" className="bg-white">Archive</ArticleSubmitButton> : null}<BulkDeleteArticlesDialog ids={selectedIds} /></div> : null}
     </div>
     {selectedIds.map((id) => <input key={id} type="hidden" name="articleIds" value={id} />)}
     <ArticleTableFrame className="min-w-0 max-w-full">

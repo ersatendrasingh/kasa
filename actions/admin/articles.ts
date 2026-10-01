@@ -34,6 +34,21 @@ function slugify(value: string) {
     .slice(0, 130);
 }
 
+async function uniqueArticleSlug(baseSlug: string, articleId?: string) {
+  const base = baseSlug || "article";
+  let candidate = base;
+  let suffix = 2;
+
+  while (true) {
+    const existing = await db.article.findUnique({
+      where: { slug: candidate },
+      select: { id: true },
+    });
+    if (!existing || existing.id === articleId) return candidate;
+    candidate = `${base}-${suffix++}`;
+  }
+}
+
 function splitList(value: string | undefined) {
   return (value || "")
     .split(",")
@@ -139,7 +154,7 @@ export async function createArticleDraftAction(formData: FormData) {
   const article = await db.article.create({
     data: {
       title: parsed.title,
-      slug: `${baseSlug}-${Date.now().toString(36)}`,
+      slug: await uniqueArticleSlug(baseSlug),
       excerpt: null,
       content: "Start writing the article content here.",
       status: "DRAFT",
@@ -282,7 +297,7 @@ export async function createArticleAction(formData: FormData) {
   const article = await db.article.create({
     data: {
       title: parsed.title,
-      slug: `${articleSlug}-${Date.now().toString(36)}`,
+      slug: await uniqueArticleSlug(articleSlug),
       excerpt: nullable(parsed.excerpt),
       content: parsed.content,
       status: parsed.status,
@@ -326,7 +341,7 @@ export async function updateArticleAction(formData: FormData) {
     where: { id: parsed.id },
     data: {
       title: parsed.title,
-      slug: parsed.slug ? slugify(parsed.slug) : undefined,
+      slug: parsed.slug ? await uniqueArticleSlug(slugify(parsed.slug), parsed.id) : undefined,
       excerpt: nullable(parsed.excerpt),
       content: parsed.content,
       status: parsed.status,
@@ -359,6 +374,16 @@ export async function updateArticleAction(formData: FormData) {
 }
 
 export async function updateArticleContentAction(formData: FormData) {
+  const parsed = await saveArticleContent(formData);
+  redirect(`/admin/articles/${parsed.id}?saved=content`);
+}
+
+export async function autosaveArticleContentAction(formData: FormData) {
+  const parsed = await saveArticleContent(formData);
+  return { savedAt: new Date().toISOString(), id: parsed.id };
+}
+
+async function saveArticleContent(formData: FormData) {
   await requireAdmin();
   const parsed = articleContentSchema.parse(formObject(formData));
 
@@ -366,7 +391,7 @@ export async function updateArticleContentAction(formData: FormData) {
     where: { id: parsed.id },
     data: {
       title: parsed.title,
-      slug: parsed.slug ? slugify(parsed.slug) : undefined,
+      slug: parsed.slug ? await uniqueArticleSlug(slugify(parsed.slug), parsed.id) : undefined,
       excerpt: nullable(parsed.excerpt),
       content: parsed.content,
       readingTimeMinutes: readingTimeMinutes(parsed.content),
@@ -376,7 +401,7 @@ export async function updateArticleContentAction(formData: FormData) {
   revalidatePath("/admin/articles");
   revalidatePath(`/admin/articles/${parsed.id}`);
   revalidatePath("/resources");
-  redirect(`/admin/articles/${parsed.id}?saved=content`);
+  return parsed;
 }
 
 export async function updateArticlePresentationAction(formData: FormData) {
@@ -426,7 +451,7 @@ export async function updateArticleSeoAction(formData: FormData) {
   await db.article.update({
     where: { id: parsed.id },
     data: {
-      slug: slugify(parsed.slug),
+      slug: await uniqueArticleSlug(slugify(parsed.slug), parsed.id),
       allowIndexing: parsed.allowIndexing,
       focusKeyword: nullable(parsed.focusKeyword),
       seoTitle: nullable(parsed.seoTitle),

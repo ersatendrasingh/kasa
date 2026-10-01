@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { CalendarClockIcon } from "lucide-react";
 import { adminSelectClass, adminTextInputClass } from "@/components/admin/articles/article-admin-primitives";
-import { Button } from "@/components/ui/button";
+import { ArticleSubmitButton } from "@/components/admin/articles/article-submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { articleStatuses } from "@/schemas/admin/articles";
@@ -69,9 +69,7 @@ export function ArticlePublishingControls({
         <input type="hidden" name="scheduledAt" value="" />
       )}
 
-      <Button type="submit" className="h-11 !text-white">
-        {buttonLabel}
-      </Button>
+      <ArticleSubmitButton className="h-11 !text-white">{buttonLabel}</ArticleSubmitButton>
     </div>
   );
 }

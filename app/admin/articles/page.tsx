@@ -22,6 +22,7 @@ import {
 } from "@/components/admin/articles/article-admin-primitives";
 import { ArticleDashboardToast } from "@/components/admin/articles/article-dashboard-toast";
 import { ArticlePerPageSelect } from "@/components/admin/articles/article-per-page-select";
+import { ArticleSubmitButton } from "@/components/admin/articles/article-submit-button";
 import { ArticlesDataTable, type ArticleTableItem } from "@/components/admin/articles/articles-data-table";
 import { AdminShell } from "@/components/admin/layouts/admin-shell";
 import { Button } from "@/components/ui/button";
@@ -155,9 +156,9 @@ function QuickCreateArticle({ categories }: { categories: CategoryOption[] }) {
             </select>
           </div>
           <SheetFooter className="px-0">
-            <Button type="submit" className="h-11 !text-white">
+            <ArticleSubmitButton pendingLabel="Creating…" className="h-11 !text-white">
               Create draft
-            </Button>
+            </ArticleSubmitButton>
           </SheetFooter>
         </form>
       </SheetContent>
@@ -327,10 +328,10 @@ export default async function AdminArticlesPage({
                   <option key={item} value={item}>{item === "ALL" ? "All statuses" : item}</option>
                 ))}
               </select>
-              <Button type="submit" className="h-11 rounded-xl !text-white">
+              <ArticleSubmitButton pendingLabel="Filtering…" className="h-11 rounded-xl !text-white">
                 <Settings2Icon className="size-4" />
                 Filter
-              </Button>
+              </ArticleSubmitButton>
               <Button asChild variant="outline" className="h-11 rounded-xl">
                 <Link href="/admin/articles">
                   <RotateCcwIcon className="size-4" />

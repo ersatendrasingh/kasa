@@ -17,6 +17,7 @@ import {
   articleTableRowClass,
 } from "@/components/admin/articles/article-admin-primitives";
 import { ConfirmActionButton } from "@/components/admin/confirm-action-button";
+import { ArticleSubmitButton } from "@/components/admin/articles/article-submit-button";
 import { AdminShell } from "@/components/admin/layouts/admin-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -85,7 +86,7 @@ function AddTagSheet() {
             <Textarea id="description" name="description" rows={4} placeholder="Short internal note for this topic." className={adminTextareaClass} />
           </div>
           <SheetFooter className="px-0">
-            <Button type="submit" className="h-11 !text-white">Create tag</Button>
+            <ArticleSubmitButton pendingLabel="Creating…" className="h-11 !text-white">Create tag</ArticleSubmitButton>
           </SheetFooter>
         </form>
       </SheetContent>
@@ -123,7 +124,7 @@ function EditTagSheet({ tag }: { tag: ArticleTagWithCount }) {
             <Textarea id={`tag-description-${tag.id}`} name="description" rows={4} defaultValue={tag.description || ""} className={adminTextareaClass} />
           </div>
           <SheetFooter className="px-0">
-            <Button type="submit" className="h-11 !text-white">Save tag</Button>
+            <ArticleSubmitButton pendingLabel="Saving…" className="h-11 !text-white">Save tag</ArticleSubmitButton>
           </SheetFooter>
         </form>
       </SheetContent>
@@ -197,7 +198,7 @@ export default async function ArticleTagsPage({
                 <SearchIcon className="size-4 text-primary" />
                 <input name="q" defaultValue={q} placeholder="Search tags" className="min-w-0 flex-1 bg-transparent text-sm outline-none" />
               </label>
-              <Button type="submit" className="h-11 !text-white">Search</Button>
+              <ArticleSubmitButton pendingLabel="Searching…" className="h-11 !text-white">Search</ArticleSubmitButton>
             </form>
             <ArticleTableFrame>
               <Table>

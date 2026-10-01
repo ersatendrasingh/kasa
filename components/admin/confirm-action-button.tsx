@@ -11,6 +11,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { ArticleSubmitButton } from "@/components/admin/articles/article-submit-button";
 
 type HiddenField = {
   name: string;
@@ -61,15 +62,17 @@ export function ConfirmActionButton({
                 value={String(field.value)}
               />
             ))}
-            <AlertDialogAction
-              type="submit"
-              className={
-                confirmVariant === "destructive"
-                  ? "bg-destructive/10 text-destructive hover:bg-destructive/20"
-                  : undefined
-              }
-            >
-              {confirmLabel}
+            <AlertDialogAction asChild>
+              <ArticleSubmitButton
+                pendingLabel="Working…"
+                className={
+                  confirmVariant === "destructive"
+                    ? "bg-destructive/10 text-destructive hover:bg-destructive/20"
+                    : undefined
+                }
+              >
+                {confirmLabel}
+              </ArticleSubmitButton>
             </AlertDialogAction>
           </form>
         </AlertDialogFooter>
