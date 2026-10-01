@@ -3,9 +3,17 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { saveDemoOperationsSettings } from "@/lib/admin/demo-settings";
+import {
+  getMediaStorageEnvironmentStatus,
+  saveMediaStorageSettings,
+} from "@/lib/admin/media-storage-settings";
 import { getAiProviderEnvironmentStatus, saveAiProviderSettings } from "@/lib/ai/settings";
 import { requireAdmin } from "@/lib/admin/auth";
-import { aiProviderSchema, demoOperationsSchema } from "@/schemas/admin/settings";
+import {
+  aiProviderSchema,
+  demoOperationsSchema,
+  mediaStorageProviderSchema,
+} from "@/schemas/admin/settings";
 
 export async function updateDemoOperationsAction(formData: FormData) {
   await requireAdmin();
@@ -31,4 +39,18 @@ export async function updateAiProviderAction(formData: FormData) {
   await saveAiProviderSettings(parsed);
   revalidatePath("/admin/settings");
   redirect("/admin/settings?saved=ai");
+}
+
+export async function updateMediaStorageProviderAction(formData: FormData) {
+  await requireAdmin();
+  const parsed = mediaStorageProviderSchema.parse({ provider: formData.get("provider") });
+  const status = getMediaStorageEnvironmentStatus();
+
+  if (!status[parsed.provider]) {
+    throw new Error(`${parsed.provider === "cloudinary" ? "Cloudinary" : "S3"} cannot be enabled until its server credentials are configured.`);
+  }
+
+  await saveMediaStorageSettings(parsed);
+  revalidatePath("/admin/settings");
+  redirect("/admin/settings?saved=media");
 }

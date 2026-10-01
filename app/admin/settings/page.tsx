@@ -4,9 +4,15 @@ import { SettingsSaveToast } from "@/components/admin/settings-save-toast";
 import { Button } from "@/components/ui/button";
 import { requireAdmin } from "@/lib/admin/auth";
 import { getAiProviderEnvironmentStatus, getAiProviderSettings, type AiProvider } from "@/lib/ai/settings";
-import { updateAiProviderAction } from "@/actions/admin/settings";
+import {
+  getMediaStorageEnvironmentStatus,
+  getMediaStorageSettings,
+  type MediaStorageProvider,
+} from "@/lib/admin/media-storage-settings";
+import { updateAiProviderAction, updateMediaStorageProviderAction } from "@/actions/admin/settings";
 import {
   BotIcon,
+  CloudIcon,
   CheckCircle2Icon,
   CircleAlertIcon,
   KeyRoundIcon,
@@ -26,11 +32,13 @@ type SettingsPageProps = {
 
 export default async function AdminSettingsPage({ searchParams }: SettingsPageProps) {
   const admin = await requireAdmin();
-  const [aiSettings, query] = await Promise.all([
+  const [aiSettings, mediaStorageSettings, query] = await Promise.all([
     getAiProviderSettings(),
+    getMediaStorageSettings(),
     searchParams,
   ]);
   const aiEnvironment = getAiProviderEnvironmentStatus();
+  const mediaStorageEnvironment = getMediaStorageEnvironmentStatus();
   const emailConfigured = Boolean(
     process.env.RESEND_API_KEY?.trim() &&
       process.env.LEADS_FROM_EMAIL?.trim() &&
@@ -120,6 +128,26 @@ export default async function AdminSettingsPage({ searchParams }: SettingsPagePr
           </form>
       </section>
 
+      <section className="rounded-2xl border border-blue-200 bg-[linear-gradient(135deg,#ffffff_0%,#f4f8ff_58%,#e9fff5_100%)] p-6 shadow-sm shadow-blue-950/5 dark:border-white/10 dark:bg-[linear-gradient(135deg,rgba(15,23,42,.92),rgba(15,59,117,.42),rgba(6,78,59,.25))]">
+        <div className="flex items-start gap-3">
+          <div className="rounded-xl bg-primary/10 p-2.5 text-primary"><CloudIcon className="size-5" /></div>
+          <div>
+            <div className="flex flex-wrap items-center gap-2"><h2 className="text-lg font-semibold text-card-foreground">Article image storage</h2><span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">{mediaStorageSettings.provider === "cloudinary" ? "Cloudinary active" : "S3 active"}</span></div>
+            <p className="mt-1 text-sm text-muted-foreground">Cloudinary is the default image provider. Existing S3 storage remains available, and Cloudinary uploads automatically fall back to configured S3 if Cloudinary is unavailable.</p>
+          </div>
+        </div>
+        <form action={updateMediaStorageProviderAction}>
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <MediaStorageChoice value="cloudinary" name="Cloudinary" shortName="CL" description="Primary image delivery with CDN URLs and optimized media handling." configured={mediaStorageEnvironment.cloudinary} active={mediaStorageSettings.provider === "cloudinary"} detail={mediaStorageEnvironment.cloudName ? `Cloud: ${mediaStorageEnvironment.cloudName}` : "CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET"} />
+            <MediaStorageChoice value="s3" name="Amazon S3" shortName="S3" description="Keep the existing article-media bucket as a selectable provider and automatic fallback." configured={mediaStorageEnvironment.s3} active={mediaStorageSettings.provider === "s3"} detail="ARTICLE_MEDIA_S3_BUCKET and server credentials" />
+          </div>
+          <div className="mt-4 flex flex-col gap-3 rounded-xl bg-white/75 p-3.5 shadow-sm sm:flex-row sm:items-center sm:justify-between dark:bg-white/[0.06]">
+            <p className="flex items-center gap-2 text-xs text-muted-foreground"><KeyRoundIcon className="size-3.5" />Provider keys are read from server environment variables and never stored in the database.</p>
+            <Button type="submit" className="h-10 px-5"><CloudIcon className="size-4" />Apply image storage</Button>
+          </div>
+        </form>
+      </section>
+
       <div className="grid gap-6 xl:grid-cols-2">
         <section className="rounded-2xl bg-white/90 p-6 shadow-sm shadow-blue-950/5 dark:bg-white/[0.055]">
           <div className="flex items-start gap-3">
@@ -179,6 +207,10 @@ export default async function AdminSettingsPage({ searchParams }: SettingsPagePr
       </div>
     </AdminShell>
   );
+}
+
+function MediaStorageChoice({ value, name, shortName, description, configured, active, detail }: { value: MediaStorageProvider; name: string; shortName: string; description: string; configured: boolean; active: boolean; detail: string }) {
+  return <label className="group relative cursor-pointer rounded-2xl border border-blue-200 bg-white/85 p-4 shadow-sm shadow-blue-950/5 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md has-[:checked]:border-primary/55 has-[:checked]:bg-blue-50/80 has-[:checked]:shadow-md has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-55 dark:border-white/10 dark:bg-white/[0.06] dark:has-[:checked]:border-primary/50 dark:has-[:checked]:bg-primary/10"><input type="radio" name="provider" value={value} defaultChecked={active} disabled={!configured} className="peer sr-only" /><div className="flex items-start justify-between gap-3"><div className="flex items-center gap-3"><span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-xs font-bold text-primary">{shortName}</span><div><p className="font-semibold text-foreground">{name}</p><p className="mt-0.5 text-xs text-muted-foreground">{detail}</p></div></div><span className="flex size-5 items-center justify-center rounded-full border-2 border-primary/25 bg-white transition-colors after:size-2.5 after:rounded-full group-has-[:checked]:border-primary group-has-[:checked]:after:bg-primary dark:bg-white/10" /></div><p className="mt-4 min-h-10 text-sm leading-5 text-muted-foreground">{description}</p><div className="mt-4 flex items-center justify-between pt-3 text-xs"><span className={configured ? "flex items-center gap-1.5 font-medium text-primary" : "flex items-center gap-1.5 font-medium text-destructive"}>{configured ? <CheckCircle2Icon className="size-3.5" /> : <CircleAlertIcon className="size-3.5" />}{configured ? "Ready to use" : "Credentials missing"}</span>{active ? <span className="rounded-full bg-primary px-2.5 py-1 font-semibold text-primary-foreground">Currently active</span> : null}</div></label>;
 }
 
 function ProviderChoice({

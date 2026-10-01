@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 const messages: Record<string, string> = {
   ai: "AI provider updated",
+  media: "Media storage provider updated",
   demo: "Demo preferences saved",
 };
 

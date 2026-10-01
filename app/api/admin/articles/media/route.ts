@@ -4,6 +4,11 @@ import { join } from "node:path";
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin/auth";
 import { prisma } from "@/lib/admin/prisma";
+import {
+  getMediaStorageEnvironmentStatus,
+  getMediaStorageSettings,
+  type MediaStorageProvider,
+} from "@/lib/admin/media-storage-settings";
 
 const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 const maxBytes = 4 * 1024 * 1024;
@@ -117,6 +122,45 @@ async function uploadToS3({
     : url.toString();
 }
 
+async function uploadToCloudinary({
+  body,
+  contentType,
+  fileName,
+}: {
+  body: Buffer;
+  contentType: string;
+  fileName: string;
+}) {
+  const cloudName = requiredEnv("CLOUDINARY_CLOUD_NAME");
+  const apiKey = requiredEnv("CLOUDINARY_API_KEY");
+  const apiSecret = requiredEnv("CLOUDINARY_API_SECRET");
+  const folder = process.env.CLOUDINARY_ARTICLE_MEDIA_FOLDER?.trim() || "kasa/articles";
+  const publicId = fileName.replace(/\.[^.]+$/, "");
+  const timestamp = Math.floor(Date.now() / 1000).toString();
+  const signatureSource = `folder=${folder}&public_id=${publicId}&timestamp=${timestamp}${apiSecret}`;
+  const signature = createHash("sha1").update(signatureSource).digest("hex");
+  const formData = new FormData();
+
+  formData.set("file", new Blob([new Uint8Array(body)], { type: contentType }), fileName);
+  formData.set("api_key", apiKey);
+  formData.set("timestamp", timestamp);
+  formData.set("folder", folder);
+  formData.set("public_id", publicId);
+  formData.set("signature", signature);
+
+  const response = await fetch(`https://api.cloudinary.com/v1_1/${encodeURIComponent(cloudName)}/image/upload`, {
+    method: "POST",
+    body: formData,
+  });
+  const payload = await response.json().catch(() => null) as { secure_url?: string; error?: { message?: string } } | null;
+
+  if (!response.ok || !payload?.secure_url) {
+    throw new Error(`Cloudinary upload failed: ${payload?.error?.message || response.statusText || response.status}`);
+  }
+
+  return payload.secure_url;
+}
+
 async function uploadLocally(body: Buffer, fileName: string) {
   const uploadDirectory = join(process.cwd(), "public", "uploads", "articles");
   await mkdir(uploadDirectory, { recursive: true });
@@ -147,9 +191,28 @@ export async function POST(request: Request) {
     const fileName = `${Date.now().toString(36)}-${randomUUID()}.${extensionForType(file.type)}`;
     const key = `articles/${fileName}`;
     const bytes = Buffer.from(await file.arrayBuffer());
-    const url = process.env.ARTICLE_MEDIA_S3_BUCKET
-      ? await uploadToS3({ body: bytes, contentType: file.type, key })
-      : await uploadLocally(bytes, fileName);
+    const settings = await getMediaStorageSettings();
+    const status = getMediaStorageEnvironmentStatus();
+    let url: string;
+    let provider: MediaStorageProvider | "local" = settings.provider;
+    let fallbackUsed = false;
+
+    if (settings.provider === "cloudinary") {
+      try {
+        if (!status.cloudinary) throw new Error("Cloudinary server credentials are not configured.");
+        url = await uploadToCloudinary({ body: bytes, contentType: file.type, fileName });
+      } catch (cloudinaryError) {
+        if (!status.s3) throw cloudinaryError;
+        url = await uploadToS3({ body: bytes, contentType: file.type, key });
+        provider = "s3";
+        fallbackUsed = true;
+      }
+    } else if (status.s3) {
+      url = await uploadToS3({ body: bytes, contentType: file.type, key });
+    } else {
+      url = await uploadLocally(bytes, fileName);
+      provider = "local";
+    }
 
     if (articleId) {
       await db.article.update({
@@ -161,6 +224,8 @@ export async function POST(request: Request) {
     return NextResponse.json({
       url,
       size: file.size,
+      provider,
+      fallbackUsed,
     });
   } catch (error) {
     return NextResponse.json(

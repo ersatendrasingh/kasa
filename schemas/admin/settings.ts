@@ -8,3 +8,7 @@ export const demoOperationsSchema = z.object({
 export const aiProviderSchema = z.object({
   provider: z.enum(["gemini", "openai"]),
 });
+
+export const mediaStorageProviderSchema = z.object({
+  provider: z.enum(["cloudinary", "s3"]),
+});
