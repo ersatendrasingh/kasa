@@ -54,7 +54,7 @@ const infraTabs: InfraTab[] = [
     subtitle: "Domain configure karo, LMS live",
     icon: Code2,
     headline: "Just configure your domain and start running your academy.",
-    body: "CWK LMS is packaged as a production-ready software stack: Next.js 16 client, NestJS backend, Docker-managed services, environment setup, domain mapping, SSL, and branded academy configuration. Institute ko custom build ka wait nahi karna padta.",
+    body: "KASA LMS is packaged as a production-ready software stack: Next.js 16 client, NestJS backend, Docker-managed services, environment setup, domain mapping, SSL, and branded academy configuration. Institute ko custom build ka wait nahi karna padta.",
     metrics: [
       { value: "1-click", label: "Install flow" },
       { value: "Domain", label: "Brand setup" },
@@ -134,7 +134,7 @@ const infraTabs: InfraTab[] = [
     subtitle: "BBB, VAPID, Resend, media",
     icon: Video,
     headline: "Live classes, notifications, and email workflows work as one system.",
-    body: "CWK LMS brings self-paced courses, BigBlueButton live classes, replay workflows, push notifications, transactional emails, and learner progress together so institutes can teach live, recorded, and hybrid programs without juggling tools.",
+    body: "KASA LMS brings self-paced courses, BigBlueButton live classes, replay workflows, push notifications, transactional emails, and learner progress together so institutes can teach live, recorded, and hybrid programs without juggling tools.",
     metrics: [
       { value: "BBB", label: "Live classes" },
       { value: "VAPID", label: "Push alerts" },
@@ -233,7 +233,7 @@ export function InfrastructureSection() {
             without custom development delays.
           </h2>
           <p className="mx-auto mt-5 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base dark:text-slate-300">
-            CWK LMS comes with the app, backend, database, cloud hosting, media,
+            KASA LMS comes with the app, backend, database, cloud hosting, media,
             live classes, email, notifications, social login, and payments already
             wired. Configure your domain, connect keys, and start working.
           </p>

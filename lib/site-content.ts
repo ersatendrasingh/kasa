@@ -99,14 +99,17 @@ export const featurePages: PageSummary[] = [
   {
     slug: "exams-assignments-certificates",
     eyebrow: "Assessment and certificate software",
-    title: "Create tests, assignments, results, and branded certificates.",
+    title: "Online exams, assignment evaluation, results, and branded certificates.",
     description:
-      "KASA includes online exams, assignments, completion tracking, certificate rules, and learner progress workflows for serious training programs.",
+      "KASA assessment and certificate software connects online exams, assignment submissions, faculty evaluation, results, completion rules, and branded course certificates with the learner record.",
     keywords: [
       "online test platform",
       "certificate management software",
       "assignment management LMS",
       "course completion certificates",
+      "online examination software for coaching institutes",
+      "LMS with exams and certificates",
+      "student assignment submission system",
     ],
     heroPoints: ["Online exams", "Assignments", "Certificates"],
     outcomes: [
@@ -330,14 +333,18 @@ export const solutionPages: PageSummary[] = [
   {
     slug: "coaching-institutes",
     eyebrow: "For coaching institutes",
-    title: "LMS software for coaching institutes that want their own online academy.",
+    title: "LMS software for coaching institutes: batches, students, fees, tests, and classes.",
     description:
-      "KASA helps coaching institutes sell courses, run batches, manage students, collect fees, publish tests, issue certificates, and track growth from one branded LMS.",
+      "KASA is coaching institute management software for admissions, course selling, live and recorded batches, student and faculty management, fees, tests, certificates, and reporting under your own brand.",
     keywords: [
       "LMS software for coaching institutes",
       "coaching institute management software",
       "coaching institute app",
       "online coaching platform",
+      "student management software for coaching institutes",
+      "coaching class management software",
+      "coaching institute student portal",
+      "online coaching LMS India",
     ],
     heroPoints: ["Course sales", "Live batches", "Student operations"],
     outcomes: [
@@ -595,10 +602,16 @@ export const resourcePages: PageSummary[] = [
   {
     slug: "start-online-academy-india",
     eyebrow: "Guide",
-    title: "How to start an online academy in India with courses, payments, and certificates.",
+    title: "How to start an online academy in India: a practical launch guide.",
     description:
-      "A practical guide for trainers and institutes planning to launch an online academy with course pages, payments, learner dashboards, and completion certificates.",
-    keywords: ["how to start online academy in India", "start online course business", "online academy setup"],
+      "Plan and launch an online academy in India with a clear course offer, pricing, payments, learner delivery, support, assessments, certificates, and an owned academy website.",
+    keywords: [
+      "how to start online academy in India",
+      "start online course business in India",
+      "online academy setup",
+      "create online course website India",
+      "launch online coaching academy",
+    ],
     heroPoints: ["Academy setup", "Course sales", "Learner delivery"],
     outcomes: [
       "Plan the website, courses, pricing, and learner journey before launch.",

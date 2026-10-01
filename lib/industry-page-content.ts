@@ -555,27 +555,28 @@ export const industrySeoPageContent = Object.fromEntries(
               : "Growth control",
         ]),
         steps: [
-          `Create a branded ${page.eyebrow.toLowerCase()} page with outcomes, pricing, and enquiry capture.`,
-          "Configure batches, lessons, live sessions, resources, tests, and learner access rules.",
-          "Connect payments, dashboards, certificates, CRM follow-up, and reports inside one KASA workspace.",
+          `Define the ${page.heroPoints[0].toLowerCase()} offer, learner segment, entry level, and success outcome before publishing the page.`,
+          `Configure ${page.sections[0].points.join(", ").toLowerCase()} around the way this team actually teaches and supports learners.`,
+          `Use ${page.sections[1].points.join(", ").toLowerCase()} to connect delivery, learner access, enquiries, and progress reporting.`,
         ],
         proof: [
           page.outcomes[0],
           page.outcomes[1],
           page.outcomes[2],
         ],
+        faqHeading: `${page.eyebrow}: practical questions before rollout`,
         faqs: [
           [
-            `Is KASA suitable for ${page.eyebrow.toLowerCase()}?`,
-            `Yes. KASA supports ${page.eyebrow.toLowerCase()} workflows with course pages, learner dashboards, live classes, payments, progress tracking, and admin controls.`,
+            `What should a ${page.eyebrow.toLowerCase()} team configure first?`,
+            `Start with ${page.sections[0].points.join(", ").toLowerCase()}, then define learner access, faculty ownership, and the progress signal the team will review.`,
           ],
           [
-            "Can we use our own academy brand and domain?",
-            "Yes. KASA is positioned as a branded LMS, so the website, course pages, learner journey, and certificates can stay under your academy identity.",
+            `What is the learner's main path in this model?`,
+            `${page.sections[0].body} The page should make the next action clear after enrolment instead of sending learners across unrelated links.`,
           ],
           [
-            "Can recorded and live programs run together?",
-            "Yes. You can combine recorded modules, live batches, replays, assignments, tests, resources, and certificates in one learning journey.",
+            "What should we verify before choosing the rollout?",
+            `Confirm batch size, content format, faculty workload, payment process, support ownership, and whether ${page.heroPoints.join(", ").toLowerCase()} are genuinely needed for the first launch.`,
           ],
         ],
       },

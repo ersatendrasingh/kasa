@@ -42,6 +42,15 @@ type SeoPageContent = {
   steps: string[];
   proof: string[];
   faqs: [string, string][];
+  faqHeading?: string;
+};
+
+type PageDetails = {
+  audience: string;
+  implementation: string[];
+  fitNote: string;
+  pricingContext: string;
+  example: string;
 };
 
 const enrichedPages = {
@@ -110,11 +119,110 @@ const groupHref = {
   compare: "/compare",
 } as const;
 
+const featureDetails: Record<string, Partial<PageDetails>> = {
+  "course-selling-platform": {
+    audience: "Coaching institutes, trainers, and academies selling recorded or cohort-based programs.",
+    fitNote: "It is not a marketplace listing service; you still need to prepare your own course content, pricing, payment account, and learner support process.",
+    pricingContext: "Starter fits a small self-paced catalog; Plus is the practical tier when live batches, coupons, and exams are part of the sale.",
+    example: "A trainer publishes a six-week course, collects a Razorpay payment, and gives the buyer course access and invoice details without sending a manual Drive link.",
+  },
+  "live-class-management": {
+    audience: "Institutes running recurring batches, doubt sessions, workshops, or hybrid programs.",
+    fitNote: "It does not replace faculty planning or attendance discipline; the academy still owns the timetable, teacher availability, and class quality.",
+    pricingContext: "Live classes and batch workflows are positioned for the Plus tier; confirm classroom, media, and support scope before purchase.",
+    example: "A coaching team creates a batch, assigns a faculty member, runs the class, and keeps the replay and follow-up assignment under that batch.",
+  },
+  "exams-assignments-certificates": {
+    audience: "Training teams that need evidence of completion rather than only video access.",
+    fitNote: "Certificates only carry value when the institute defines credible completion rules and verifies submissions; the software cannot validate learning by itself.",
+    pricingContext: "Assessment and certificate workflows are included in the Plus-style rollout; define exam volume and certificate rules during the demo.",
+    example: "A skills academy requires lesson completion plus a passing score before generating a branded certificate for a learner.",
+  },
+  "payments-coupons-orders": {
+    audience: "Academies selling paid courses, bundles, workshops, or recurring learning programs in India.",
+    fitNote: "KASA does not become the payment gateway or decide refunds and taxes; gateway onboarding, settlement, GST, and commercial policies remain the academy's responsibility.",
+    pricingContext: "Payment and order workflows are most useful from the Plus rollout; confirm gateway, invoice, refund, and tax requirements before launch.",
+    example: "A campaign coupon is applied at checkout, the order is recorded, and the learner receives the correct course access instead of a manually shared link.",
+  },
+  "student-faculty-management": {
+    audience: "Institutes with separate learner, faculty, counsellor, and admin responsibilities.",
+    fitNote: "Role permissions do not replace internal access policies; the institute must still review who can export, edit, or view sensitive learner data.",
+    pricingContext: "Starter supports a small team; Plus and Enterprise make more sense when faculty roles, users, batches, and permission boundaries grow.",
+    example: "A faculty member sees only assigned batches while an admin can review the learner's access, orders, progress, and certificate status.",
+  },
+  "education-crm-leads": {
+    audience: "Admissions teams and academy owners following up on demo, pricing, and course enquiries.",
+    fitNote: "CRM improves follow-up context but does not replace a sales process; someone still needs to own lead response, qualification, and consent.",
+    pricingContext: "Lead capture can start with the basic website flow; larger teams should confirm ownership, reporting, and integration needs in the Plus or Enterprise rollout.",
+    example: "A pricing-page enquiry keeps its page, CTA, message, and course context so a counsellor can follow up without asking the learner to repeat everything.",
+  },
+  "academy-website-builder": {
+    audience: "Institutes that need a branded public website connected to courses, enquiries, checkout, and learner login.",
+    fitNote: "A website builder does not create authority automatically; the academy still needs original course information, proof, support details, and regular updates.",
+    pricingContext: "The branded website is part of the core KASA rollout; final scope depends on domains, pages, content migration, and custom setup.",
+    example: "A visitor reads a course page, submits a demo enquiry, compares delivery options, and later enters the same branded learner account after enrolment.",
+  },
+  "admin-dashboard-reporting": {
+    audience: "Owners and operations teams that need one view of users, courses, orders, leads, and learner activity.",
+    fitNote: "Reports are only as reliable as the data and workflows entered by the team; dashboards do not fix inconsistent course or payment operations.",
+    pricingContext: "Basic administration fits smaller rollouts; deeper reporting, roles, and multi-team controls should be scoped under Enterprise requirements.",
+    example: "An owner checks course demand, unpaid orders, active learners, and certificate activity before deciding which batch or campaign to expand.",
+  },
+  "white-label-lms": {
+    audience: "Trainers, institutes, and EdTech teams that want learners to stay inside their own domain and brand.",
+    fitNote: "White-label branding does not mean unlimited custom development; domain, identity, integrations, and rollout boundaries must be agreed before implementation.",
+    pricingContext: "Branding is available across KASA rollouts; custom domain, infrastructure, integrations, and support scope should be confirmed commercially.",
+    example: "A trainer sells a program under their own domain, keeps the learner dashboard and certificate branded, and avoids sending students to a marketplace profile.",
+  },
+  "learner-dashboard-progress": {
+    audience: "Academies whose learners need one place for lessons, classes, tasks, orders, and certificates.",
+    fitNote: "A dashboard cannot improve completion without useful course sequencing, reminders, responsive faculty support, and content worth returning to.",
+    pricingContext: "Learner access is part of every KASA LMS rollout; user limits, storage, live delivery, and certificate scope affect the final plan.",
+    example: "A learner opens one dashboard to see today's live class, an unfinished assignment, the next recorded lesson, and certificate progress.",
+  },
+};
+
+function getPageDetails(
+  page: PageSummary,
+  content: SeoPageContent | undefined,
+  variant: SeoPageContent["template"],
+): PageDetails {
+  const override = featureDetails[page.slug] ?? {};
+  const firstSection = page.sections[0];
+  const secondSection = page.sections[1] ?? firstSection;
+
+  return {
+    audience:
+      override.audience ??
+      `Teams searching for ${page.eyebrow.toLowerCase()} and needing a clearer ${firstSection.title.toLowerCase()} workflow.`,
+    implementation:
+      content?.steps?.length
+        ? content.steps
+        : [
+            `Start with ${firstSection.title.toLowerCase()}: ${firstSection.body}`,
+            `Configure ${firstSection.points.join(", ")}, then connect them to the learner journey.`,
+            `Review ${secondSection.title.toLowerCase()} using the outcomes and operating limits described on this page.`,
+          ],
+    fitNote:
+      override.fitNote ??
+      content?.proof?.[2] ??
+      `Before rollout, confirm that your team can support ${firstSection.points.join(", ")} and maintain the required content and learner operations.`,
+    pricingContext:
+      override.pricingContext ??
+      (variant === "compare"
+        ? "Use the comparison as a buying checklist: confirm setup cost, support, integrations, user limits, and ownership before choosing a platform."
+        : "Pricing depends on the modules, users, storage, live delivery, integrations, and rollout support this workflow needs. Confirm the exact scope before purchase."),
+    example:
+      override.example ??
+      `${firstSection.title}: ${firstSection.body} The team then connects it with ${secondSection.title.toLowerCase()} before opening the workflow to learners.`,
+  };
+}
+
 export function SeoPageTemplate({ page }: SeoPageTemplateProps) {
   const variant = pageVariant(page);
   const content = enrichedPages[page.slug];
   const copy = templateCopy[content?.template ?? variant];
-  const playbook = getPagePlaybook(page, content?.template ?? variant);
+  const details = getPageDetails(page, content, content?.template ?? variant);
   const relatedPages = getRelatedSeoPages(page);
 
   return (
@@ -184,7 +292,7 @@ export function SeoPageTemplate({ page }: SeoPageTemplateProps) {
 
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
-                {copy.eyebrow}
+                Implementation detail
               </p>
               <h2 className="mt-3 font-heading text-3xl font-semibold leading-tight text-slate-950 sm:text-5xl dark:text-white">
                 {content.spotlightTitle}
@@ -216,13 +324,13 @@ export function SeoPageTemplate({ page }: SeoPageTemplateProps) {
         <div className="mx-auto w-full max-w-[108rem]">
           <div className="mx-auto max-w-4xl text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
-              {copy.eyebrow}
+              What this page is for
             </p>
             <h2 className="mt-3 font-heading text-3xl font-semibold leading-tight text-slate-950 sm:text-5xl dark:text-white">
-              {copy.title}
+              How {page.eyebrow.toLowerCase()} works in a real academy
             </h2>
             <p className="mx-auto mt-5 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base dark:text-slate-300">
-              {copy.description}
+              {page.description}
             </p>
           </div>
 
@@ -252,29 +360,40 @@ export function SeoPageTemplate({ page }: SeoPageTemplateProps) {
           <div className="grid gap-6 lg:grid-cols-[0.34fr_0.66fr] lg:items-start">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary dark:text-emerald-200">
-                {playbook.eyebrow}
+                Who this is for
               </p>
               <h2 className="mt-3 font-heading text-3xl font-semibold leading-tight text-slate-950 dark:text-white">
-                {playbook.title}
+                {details.audience}
               </h2>
               <p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-300">
-                {playbook.description}
+                The page is written for a specific operating situation, not as a generic feature list. Use the workflow below to decide whether it matches your team.
               </p>
             </div>
             <div className="grid gap-4 md:grid-cols-2">
-              {playbook.cards.map((card) => (
+              {[
+                ["Implementation", details.implementation[0]],
+                ["Team action", details.implementation[1]],
+                ["Operational limit", details.fitNote],
+                ["Example rollout", details.example],
+              ].map(([label, text]) => (
                 <article
-                  key={card.title}
+                  key={label}
                   className="rounded-[1.5rem] border border-blue-950/10 bg-white p-5 shadow-xl shadow-blue-950/6 dark:border-white/10 dark:bg-white/[0.04]"
                 >
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary dark:text-emerald-200">
-                    {card.label}
+                    {label}
                   </p>
                   <h3 className="mt-3 font-heading text-xl font-semibold leading-tight text-slate-950 dark:text-white">
-                    {card.title}
+                    {label === "Implementation"
+                      ? "Start with the real workflow"
+                      : label === "Team action"
+                        ? "What the team configures"
+                        : label === "Operational limit"
+                          ? "Check this before choosing"
+                          : "A practical use case"}
                   </h3>
                   <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">
-                    {card.text}
+                    {text}
                   </p>
                 </article>
               ))}
@@ -291,7 +410,7 @@ export function SeoPageTemplate({ page }: SeoPageTemplateProps) {
               <Lightbulb className="size-6" aria-hidden="true" />
             </div>
             <h2 className="mt-5 font-heading text-3xl font-semibold leading-tight text-slate-950 dark:text-white">
-              {copy.workflowTitle}
+              How the team implements it
             </h2>
             <p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-300">
               {content?.spotlightBody ??
@@ -333,7 +452,7 @@ export function SeoPageTemplate({ page }: SeoPageTemplateProps) {
                     </div>
                     <div className="min-w-0">
                       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary dark:text-emerald-200">
-                        Workflow {index + 1}
+                        {section.points[0] ?? `Workflow detail ${index + 1}`}
                       </p>
                       <h2 className="mt-3 font-heading text-2xl font-semibold leading-tight text-slate-950 dark:text-white">
                         {section.title}
@@ -367,15 +486,13 @@ export function SeoPageTemplate({ page }: SeoPageTemplateProps) {
             <div className="grid gap-6 lg:grid-cols-[0.35fr_0.65fr] lg:items-start">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
-                {copy.proofTitle}
+                Fit, pricing, and trade-offs
               </p>
               <h2 className="mt-3 font-heading text-3xl font-semibold leading-tight text-slate-950 dark:text-white">
-                  What this means for your academy decision.
+                  Know what you are buying before the demo.
               </h2>
               <p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-300">
-                  Use these points to decide whether this workflow matters for
-                  your academy now, what your team should prepare before a demo,
-                  and which connected KASA pages are worth reading next.
+                  The important question is not whether the feature sounds useful. It is whether your audience, team, budget, and operating constraints match the workflow.
               </p>
               </div>
               <div
@@ -386,6 +503,12 @@ export function SeoPageTemplate({ page }: SeoPageTemplateProps) {
                     : "md:grid-cols-3",
                 ].join(" ")}
               >
+                <article className="rounded-[1.5rem] border border-blue-950/10 bg-white p-5 shadow-xl shadow-blue-950/6 dark:border-white/10 dark:bg-white/[0.04]">
+                  <CheckCircle2 className="size-6 text-primary" aria-hidden="true" />
+                  <p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-300">
+                    {details.pricingContext}
+                  </p>
+                </article>
                 {content.proof.map((item) => (
                   <article
                     key={item}
@@ -411,7 +534,8 @@ export function SeoPageTemplate({ page }: SeoPageTemplateProps) {
                 {copy.faqTitle}
               </p>
               <h2 className="mt-3 font-heading text-3xl font-semibold leading-tight text-slate-950 sm:text-5xl dark:text-white">
-                Questions this page should answer before the product tour.
+                {content.faqHeading ??
+                  `Questions to answer before implementing ${page.eyebrow.toLowerCase()}.`}
               </h2>
             </div>
             <div className="mx-auto mt-10 grid max-w-5xl gap-4 md:grid-cols-2">
@@ -513,133 +637,4 @@ export function SeoPageTemplate({ page }: SeoPageTemplateProps) {
       </section>
     </>
   );
-}
-
-function getPagePlaybook(page: PageSummary, variant: SeoPageContent["template"]) {
-  const primarySection = page.sections[0];
-  const secondarySection = page.sections[1] ?? page.sections[0];
-  const primaryKeyword = page.keywords[0] ?? page.eyebrow.toLowerCase();
-  const secondaryKeyword = page.keywords[1] ?? page.title.toLowerCase();
-
-  if (variant === "solution") {
-    return {
-      eyebrow: "Team-specific playbook",
-      title: `${page.eyebrow} needs a workflow that matches how the team actually teaches.`,
-      description:
-        "This section makes the solution page less generic by tying the page to roles, operating rhythm, and rollout decisions an education business has to make.",
-      cards: [
-        {
-          label: "Best fit",
-          title: page.title,
-          text: `Use this path when ${primaryKeyword} is the main operating model, not just one marketing phrase on the website.`,
-        },
-        {
-          label: "Daily workflow",
-          title: primarySection.title,
-          text: primarySection.body,
-        },
-        {
-          label: "Rollout decision",
-          title: secondarySection.title,
-          text: `Start with the workflow around ${secondaryKeyword}, then connect enrolment, payment, learner access, faculty work, and reporting.`,
-        },
-        {
-          label: "Proof to prepare",
-          title: "Before the demo",
-          text: "Bring current batch size, course formats, fee collection process, learner support gaps, and the one workflow your team wants to fix first.",
-        },
-      ],
-    };
-  }
-
-  if (variant === "feature") {
-    return {
-      eyebrow: "Feature-specific playbook",
-      title: `${page.eyebrow} should solve one operational problem clearly.`,
-      description:
-        "Feature pages now include a practical operating view so the content is not only hero, benefits, feature cards, and FAQ.",
-      cards: [
-        {
-          label: "Where it appears",
-          title: page.title,
-          text: `This feature matters when teams are actively managing ${primaryKeyword} and need it connected to the rest of the academy system.`,
-        },
-        {
-          label: "Admin action",
-          title: primarySection.title,
-          text: primarySection.body,
-        },
-        {
-          label: "Learner impact",
-          title: secondarySection.title,
-          text: `The learner experience should make ${secondaryKeyword} feel simple while admins still keep control of rules and reporting.`,
-        },
-        {
-          label: "Demo check",
-          title: "What to verify",
-          text: "Ask how this feature connects with course access, live classes, payments, certificates, CRM, and analytics before treating it as a standalone module.",
-        },
-      ],
-    };
-  }
-
-  if (variant === "compare") {
-    return {
-      eyebrow: "Decision worksheet",
-      title: "Compare the tradeoff, not only the headline promise.",
-      description:
-        "Comparison pages need stronger decision support, so this block turns the topic into a practical buying checklist.",
-      cards: [
-        {
-          label: "Option being compared",
-          title: page.title,
-          text: `Use this comparison when your team is weighing ${primaryKeyword} against speed, ownership, cost, maintenance, and learner experience.`,
-        },
-        {
-          label: "Operational question",
-          title: primarySection.title,
-          text: primarySection.body,
-        },
-        {
-          label: "Hidden cost",
-          title: secondarySection.title,
-          text: `Check what happens after launch: content updates, payment issues, support tickets, faculty onboarding, reporting, and future course expansion.`,
-        },
-        {
-          label: "Decision evidence",
-          title: "Before choosing",
-          text: "List your launch deadline, technical support capacity, expected enrolments, branding needs, and integrations before comparing platforms.",
-        },
-      ],
-    };
-  }
-
-  return {
-    eyebrow: "Guide worksheet",
-    title: "Turn the guide into an implementation checklist.",
-    description:
-      "Resource pages should educate first, so this block converts broad advice into next actions a founder or academy team can use.",
-    cards: [
-      {
-        label: "Use case",
-        title: page.title,
-        text: `Use this guide when ${primaryKeyword} is an active planning question and the team needs a clearer sequence of decisions.`,
-      },
-      {
-        label: "First step",
-        title: primarySection.title,
-        text: primarySection.body,
-      },
-      {
-        label: "Second step",
-        title: secondarySection.title,
-        text: `After the first decision, connect ${secondaryKeyword} with pricing, content access, learner support, and reporting.`,
-      },
-      {
-        label: "Useful output",
-        title: "What to document",
-        text: "Write down the target learner, course format, price range, launch date, support model, and the metric you will review after launch.",
-      },
-    ],
-  };
 }

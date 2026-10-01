@@ -207,23 +207,6 @@ html:not(.dark) [class*="text-muted"] {
   color: #64748b;
 }
 
-html:not(.dark) [class*="border-white/"] {
-  border-color: rgba(22, 71, 163, 0.12);
-}
-
-html:not(.dark) [class*="bg-white/"] {
-  background-color: rgba(255, 255, 255, 0.72);
-}
-
-html:not(.dark) [class*="bg-slate-950/"],
-html:not(.dark) [class*="bg-black/"] {
-  background-color: rgba(237, 246, 255, 0.78);
-}
-
-html:not(.dark) [class*="shadow-black/"] {
-  --tw-shadow-color: rgba(22, 71, 163, 0.12);
-}
-
 html:not(.dark) .admin-shell [data-slot="input"],
 html:not(.dark) .admin-shell [data-slot="textarea"],
 html:not(.dark) .admin-shell select {
@@ -258,6 +241,71 @@ html:not(.dark) .admin-shell select:focus {
   background: var(--button-solid-hover);
   background-clip: border-box;
   background-origin: border-box;
+}
+
+.course-selling-final-cta,
+.course-selling-final-cta:hover {
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  background: #ffffff !important;
+  color: #123b73 !important;
+  box-shadow: 0 18px 45px -18px rgba(3, 19, 48, 0.65);
+}
+
+.course-selling-final-cta:hover {
+  background: #f0f9ff !important;
+  transform: translateY(-2px);
+}
+
+.features-final-cta,
+.features-final-cta:hover {
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  background: #ffffff !important;
+  color: #123b73 !important;
+  box-shadow: 0 18px 45px -18px rgba(3, 19, 48, 0.65);
+}
+
+.features-final-cta:hover {
+  background: #f0f9ff !important;
+  transform: translateY(-2px);
+}
+
+.coaching-final-cta,
+.coaching-final-cta:hover {
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  background: #ffffff !important;
+  color: #123b73 !important;
+  box-shadow: 0 18px 45px -18px rgba(3, 19, 48, 0.65);
+}
+
+.coaching-final-cta:hover {
+  background: #f0f9ff !important;
+  transform: translateY(-2px);
+}
+
+.assessment-final-cta,
+.assessment-final-cta:hover {
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  background: #ffffff !important;
+  color: #123b73 !important;
+  box-shadow: 0 18px 45px -18px rgba(3, 19, 48, 0.65);
+}
+
+.assessment-final-cta:hover {
+  background: #f0f9ff !important;
+  transform: translateY(-2px);
+}
+
+.academy-launch-final-cta,
+.academy-launch-final-cta:hover {
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  background: #ffffff !important;
+  color: #173f77 !important;
+  box-shadow: 0 18px 45px -18px rgba(73, 36, 6, 0.55);
+}
+
+.academy-launch-final-cta:hover {
+  background: #fff8ed !important;
+  transform: translateY(-2px);
 }
 
 .site-btn-outline {

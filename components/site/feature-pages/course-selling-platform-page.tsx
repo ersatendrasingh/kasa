@@ -222,7 +222,12 @@ export function CourseSellingPlatformPage({ page }: { page: PageSummary }) {
                 <h2 className="mt-5 max-w-4xl font-heading text-3xl font-semibold leading-tight sm:text-5xl">Map your current offer from the first page to learner access.</h2>
                 <p className="mt-5 max-w-3xl text-base leading-8 text-blue-100">Bring the course, pricing, delivery model, and current enrolment process. The walkthrough can follow that exact workflow.</p>
               </div>
-              <ProductTourTrigger label="Map my course flow" variant="solid" size="lg" className="w-full justify-center !bg-white !text-primary" />
+              <ProductTourTrigger
+                label="Map my course flow"
+                variant="solid"
+                size="lg"
+                className="course-selling-final-cta w-full justify-center"
+              />
             </div>
           </div>
         </section>
@@ -317,8 +322,8 @@ function ModelsSection() {
           <div className="grid lg:grid-cols-3">{courseModels.map((model, index) => { const Icon = model.icon; return <article key={model.title} className={["p-7 sm:p-9", index ? "border-t border-white/10 lg:border-l lg:border-t-0" : ""].join(" ")}><div className="flex items-center justify-between"><span className="grid size-12 place-items-center rounded-2xl bg-white/10 text-emerald-200"><Icon className="size-5" aria-hidden="true" /></span><span className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-200">{model.label}</span></div><h3 className="mt-10 font-heading text-2xl font-semibold">{model.title}</h3><p className="mt-4 text-sm leading-7 text-slate-300">{model.text}</p></article>; })}</div>
         </div>
         <div className="mt-6 grid gap-5 md:grid-cols-2">
-          <Link href="/tools/course-pricing-calculator" className="group flex items-center justify-between rounded-[1.5rem] border border-blue-950/10 bg-[linear-gradient(135deg,#eef7ff,#ffffff)] p-6 dark:border-white/10 dark:bg-white/[0.035]"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Free planning tool</p><h3 className="mt-2 font-heading text-xl font-semibold">Course pricing calculator</h3></div><ArrowRight className="size-5 text-primary transition group-hover:translate-x-1" /></Link>
-          <Link href="/tools/profit-calculator" className="group flex items-center justify-between rounded-[1.5rem] border border-blue-950/10 bg-[linear-gradient(135deg,#effbf6,#ffffff)] p-6 dark:border-white/10 dark:bg-white/[0.035]"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">Free planning tool</p><h3 className="mt-2 font-heading text-xl font-semibold">Academy profit calculator</h3></div><ArrowRight className="size-5 text-emerald-600 transition group-hover:translate-x-1" /></Link>
+          <Link href="/tools/course-pricing-calculator" className="group flex items-center justify-between rounded-[1.5rem] border border-blue-950/10 bg-[linear-gradient(135deg,#eef7ff,#ffffff)] p-6 shadow-sm transition hover:-translate-y-1 hover:border-primary/30 hover:shadow-xl dark:border-white/12 dark:bg-[linear-gradient(135deg,rgba(42,102,178,.24),rgba(255,255,255,.055))]"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary dark:text-sky-300">Free planning tool</p><h3 className="mt-2 font-heading text-xl font-semibold">Course pricing calculator</h3></div><span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary text-white shadow-lg shadow-blue-900/20"><ArrowRight className="size-4 transition group-hover:translate-x-0.5" /></span></Link>
+          <Link href="/tools/profit-calculator" className="group flex items-center justify-between rounded-[1.5rem] border border-blue-950/10 bg-[linear-gradient(135deg,#effbf6,#ffffff)] p-6 shadow-sm transition hover:-translate-y-1 hover:border-emerald-500/30 hover:shadow-xl dark:border-white/12 dark:bg-[linear-gradient(135deg,rgba(27,125,98,.24),rgba(255,255,255,.055))]"><div><p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-300">Free planning tool</p><h3 className="mt-2 font-heading text-xl font-semibold">Academy profit calculator</h3></div><span className="grid size-10 shrink-0 place-items-center rounded-full bg-emerald-600 text-white shadow-lg shadow-emerald-950/20"><ArrowRight className="size-4 transition group-hover:translate-x-0.5" /></span></Link>
         </div>
       </div>
     </section>

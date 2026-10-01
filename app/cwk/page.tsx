@@ -11,7 +11,7 @@ import {
 import { HowItWorksSection } from "@/components/home-sections/how-it-works-section";
 
 export const metadata = {
-  title: "KASA CWK | Online Academy LMS Demo",
+  title: "KASA | Online Academy LMS Demo",
   description:
     "Dark campaign landing page for KASA, the LMS software for coaching institutes, online academies, trainers, and EdTech teams.",
   alternates: {
