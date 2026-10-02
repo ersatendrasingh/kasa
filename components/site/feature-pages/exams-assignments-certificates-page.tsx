@@ -71,11 +71,24 @@ export function ExamsAssignmentsCertificatesPage({ page }: { page: PageSummary }
         <CertificateSection />
         <EligibilityRules />
         <HonestLimits />
+        <AssessmentToolbox />
         <FaqSection />
         <FinalCta />
       </main>
     </>
   );
+}
+
+function AssessmentToolbox() {
+  const tools = [
+    ["Assignment generator", "/tools/assignment-generator", "Draft applied work and submission instructions."],
+    ["Quiz generator", "/tools/quiz-generator", "Create a quick formative knowledge check."],
+    ["Worksheet generator", "/tools/worksheet-generator", "Prepare guided practice before evaluation."],
+    ["Report card generator", "/tools/report-card-generator", "Turn results into a readable learner record."],
+    ["Question paper generator", "/tools/question-paper-generator", "Draft a structured paper by topic and difficulty."],
+    ["Certificate generator", "/tools/certificate-generator", "Prototype completion proof after the rule is defined."],
+  ] as const;
+  return <section className="px-4 py-12 sm:px-6 lg:px-8"><div className="mx-auto max-w-[108rem] border-y border-blue-950/10 py-7 dark:border-white/10"><div className="grid gap-6 lg:grid-cols-[.28fr_.72fr] lg:items-center"><div><p className="text-xs font-semibold uppercase tracking-[.2em] text-primary dark:text-emerald-300">Assessment workbench</p><h2 className="mt-3 font-heading text-2xl font-semibold sm:text-3xl">Build each piece around one real outcome.</h2><Link href="/resources/course-certificates-best-practices" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary dark:text-emerald-300">Read the certificate guide <ArrowRight className="size-4" /></Link></div><div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{tools.map(([title, href, text]) => <Link key={href} href={href} className="group rounded-xl border border-blue-950/10 bg-white p-4 dark:border-white/10 dark:bg-white/[.035]"><h3 className="text-sm font-semibold">{title}</h3><p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">{text}</p><span className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-primary dark:text-emerald-300">Open tool <ArrowRight className="size-3 transition group-hover:translate-x-1" /></span></Link>)}</div></div></div></section>;
 }
 
 function Hero() {
@@ -152,7 +165,7 @@ function CertificateSection() {
 
 function CertificatePreview() {
   return (
-    <div className="relative mx-auto w-full max-w-3xl rotate-[-1deg] rounded-[1.3rem] bg-[#e7e0d0] p-3 shadow-[0_30px_80px_-35px_rgba(43,49,65,.55)] dark:bg-[#17233a]"><div className="relative overflow-hidden border border-[#c6a76b] bg-[#fffdf7] px-6 py-9 text-center text-slate-900 sm:px-10 sm:py-11"><div className="absolute inset-3 border border-[#d8c290]" /><div className="absolute left-1/2 top-0 h-16 w-px bg-[#d8c290]" /><Award className="relative mx-auto size-9 text-[#9c742c]" /><p className="relative mt-5 text-[.65rem] font-semibold uppercase tracking-[.28em] text-[#8a6c35]">Certificate of achievement</p><h3 className="relative mt-6 font-serif text-3xl font-semibold sm:text-4xl">Aarav Sharma</h3><p className="relative mx-auto mt-5 max-w-lg text-sm leading-7 text-slate-600">has successfully completed the assessed learning requirements for</p><p className="relative mt-3 font-heading text-xl font-semibold text-[#173f77] sm:text-2xl">Applied Data Analytics</p><div className="relative mx-auto mt-7 flex max-w-lg items-end justify-between border-t border-[#d8c290] pt-5 text-left"><div><p className="text-[.6rem] uppercase tracking-[.16em] text-slate-500">Credential ID</p><p className="mt-1 text-xs font-semibold">KASA-ADA-2048</p></div><div className="grid size-16 place-items-center rounded-full border-4 border-double border-[#b69049] bg-[#f7efd9] text-[#8a682d]"><Medal className="size-7" /></div><div className="text-right"><p className="text-[.6rem] uppercase tracking-[.16em] text-slate-500">Eligibility</p><p className="mt-1 text-xs font-semibold">84% · Passed</p></div></div></div></div>
+    <div className="relative mx-auto w-full max-w-3xl rotate-[-1deg] rounded-[1.3rem] bg-[#e7e0d0] p-3 shadow-[0_30px_80px_-35px_rgba(43,49,65,.55)] dark:bg-[#17233a]"><div className="relative overflow-hidden border border-[#c6a76b] bg-[#fffdf7] px-6 py-9 text-center text-slate-900 sm:px-10 sm:py-11"><div className="absolute inset-3 border border-[#d8c290]" /><div className="absolute left-1/2 top-0 h-16 w-px bg-[#d8c290]" /><Award className="relative mx-auto size-9 text-[#9c742c]" /><p className="relative mt-5 text-[.65rem] font-semibold uppercase tracking-[.28em] text-[#8a6c35]">Certificate of achievement</p><h3 className="relative mt-6 font-serif text-3xl font-semibold sm:text-4xl">Shivaan Gangwar</h3><p className="relative mx-auto mt-5 max-w-lg text-sm leading-7 text-slate-600">has successfully completed the assessed learning requirements for</p><p className="relative mt-3 font-heading text-xl font-semibold text-[#173f77] sm:text-2xl">Applied Data Analytics</p><div className="relative mx-auto mt-7 flex max-w-lg items-end justify-between border-t border-[#d8c290] pt-5 text-left"><div><p className="text-[.6rem] uppercase tracking-[.16em] text-slate-500">Credential ID</p><p className="mt-1 text-xs font-semibold">KASA-ADA-2048</p></div><div className="grid size-16 place-items-center rounded-full border-4 border-double border-[#b69049] bg-[#f7efd9] text-[#8a682d]"><Medal className="size-7" /></div><div className="text-right"><p className="text-[.6rem] uppercase tracking-[.16em] text-slate-500">Eligibility</p><p className="mt-1 text-xs font-semibold">84% · Passed</p></div></div></div></div>
   );
 }
 

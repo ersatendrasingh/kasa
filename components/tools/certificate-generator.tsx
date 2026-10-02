@@ -173,7 +173,7 @@ function frameClasses(style: string) {
 
 export function CertificateGenerator() {
   const [academyName, setAcademyName] = useState("KASA Academy");
-  const [studentName, setStudentName] = useState("Aarav Sharma");
+  const [studentName, setStudentName] = useState("Shivaan Gangwar");
   const [courseName, setCourseName] = useState("Digital Marketing Masterclass");
   const [certificateType, setCertificateType] = useState<(typeof certificateTypes)[number]>("Course Completion");
   const [template, setTemplate] = useState<(typeof templates)[number]["key"]>("classic");
@@ -229,7 +229,7 @@ export function CertificateGenerator() {
 
   const reset = () => {
     setAcademyName("KASA Academy");
-    setStudentName("Aarav Sharma");
+    setStudentName("Shivaan Gangwar");
     setCourseName("Digital Marketing Masterclass");
     setCertificateType("Course Completion");
     setTemplate("classic");

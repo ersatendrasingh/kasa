@@ -220,6 +220,10 @@ export function OnlineAcademiesPage({ page }: { page: PageSummary }) {
           </div>
         </section>
 
+        <section className="px-4 pb-14 sm:px-6 sm:pb-16 lg:px-8">
+          <div className="mx-auto max-w-7xl border-y border-blue-950/10 py-7 dark:border-white/10"><div className="grid gap-6 lg:grid-cols-[.32fr_.68fr] lg:items-center"><div><p className="text-xs font-semibold uppercase tracking-[.22em] text-primary">From offer to operation</p><h2 className="mt-3 font-heading text-2xl font-semibold sm:text-3xl">Pressure-test the academy before launch.</h2><div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm font-semibold"><Link href="/resources/start-online-academy-india" className="text-primary hover:underline">Launch guide</Link><Link href="/resources/sell-recorded-courses-online" className="text-primary hover:underline">Recorded-course guide</Link><Link href="/resources/online-course-pricing-guide" className="text-primary hover:underline">Pricing guide</Link></div></div><div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{[["Course pricing calculator", "/tools/course-pricing-calculator"], ["Profit calculator", "/tools/profit-calculator"], ["Admission form generator", "/tools/admission-form-generator"], ["Batch capacity calculator", "/tools/batch-capacity-calculator"], ["Fee receipt generator", "/tools/fee-receipt-generator"], ["Certificate generator", "/tools/certificate-generator"]].map(([title, href]) => <Link key={href} href={href} className="group flex items-center justify-between rounded-xl border border-blue-950/10 bg-surface px-4 py-3 text-sm font-semibold dark:border-white/10"><span>{title}</span><ArrowRight className="size-3.5 text-primary transition group-hover:translate-x-1" /></Link>)}</div></div></div>
+        </section>
+
         <section className="border-t border-blue-950/8 bg-surface-muted/55 px-4 py-14 sm:px-6 sm:py-16 lg:px-8 dark:border-white/8 dark:bg-surface-strong">
           <div className="mx-auto grid w-full max-w-7xl gap-9 lg:grid-cols-[.34fr_.66fr]">
             <div>

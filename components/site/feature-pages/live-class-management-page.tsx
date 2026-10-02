@@ -258,6 +258,12 @@ export function LiveClassManagementPage({ page }: { page: PageSummary }) {
           </div>
         </section>
 
+        <section className="px-4 pb-14 sm:px-6 sm:pb-16 lg:px-8">
+          <div className="mx-auto max-w-7xl rounded-[1.6rem] border border-blue-950/10 bg-[linear-gradient(110deg,#eef6ff,#f2fbf7)] p-5 dark:border-white/10 dark:bg-[linear-gradient(110deg,rgba(35,91,156,.17),rgba(36,129,99,.12))] sm:p-7">
+            <div className="grid gap-6 lg:grid-cols-[.3fr_.7fr] lg:items-center"><div><p className="text-xs font-semibold uppercase tracking-[.2em] text-primary dark:text-emerald-300">Prepare the next class</p><h2 className="mt-3 font-heading text-2xl font-semibold sm:text-3xl">Useful tools around the batch workflow.</h2><Link href="/resources/run-live-online-classes" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary dark:text-emerald-300">Read the live-class operations guide <ArrowRight className="size-4" /></Link></div><div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{[["Attendance calculator", "/tools/attendance-calculator"], ["Lesson plan generator", "/tools/lesson-plan-generator"], ["Study timetable generator", "/tools/study-timetable-generator"], ["Assignment generator", "/tools/assignment-generator"], ["Quiz generator", "/tools/quiz-generator"], ["Worksheet generator", "/tools/worksheet-generator"]].map(([title, href]) => <Link key={href} href={href} className="group flex items-center justify-between rounded-xl border border-blue-950/10 bg-white/75 px-4 py-3 text-sm font-semibold transition hover:border-primary/35 dark:border-white/10 dark:bg-white/[.045]"><span>{title}</span><ArrowRight className="size-3.5 text-primary transition group-hover:translate-x-1 dark:text-emerald-300" /></Link>)}</div></div>
+          </div>
+        </section>
+
         <section className="border-t border-blue-950/8 bg-surface-muted/55 px-4 py-14 sm:px-6 sm:py-16 lg:px-8 dark:border-white/8 dark:bg-surface-strong">
           <div className="mx-auto grid w-full max-w-7xl gap-9 lg:grid-cols-[.34fr_.66fr]">
             <div className="max-w-xl">

@@ -195,10 +195,29 @@ export function FeaturesIndexPage() {
 
         <ConnectedSystem />
         <RoleViews />
+        <WorkflowShortcuts />
         <DecisionSection />
         <FinalCta />
       </main>
     </>
+  );
+}
+
+function WorkflowShortcuts() {
+  const shortcuts = [
+    ["Plan course economics", "/tools/course-pricing-calculator", "Price, cost, margin, and enrolment assumptions.", CreditCard],
+    ["Prepare admissions", "/tools/admission-form-generator", "Draft the information your counselling team needs.", ClipboardCheck],
+    ["Build an assessment", "/tools/question-paper-generator", "Turn a topic and difficulty mix into a paper draft.", BookOpenCheck],
+    ["Prototype completion proof", "/tools/certificate-generator", "Check certificate wording, identity, and issue fields.", FileBadge2],
+  ] as const;
+
+  return (
+    <section className="border-y border-blue-950/8 bg-[#eef6fb] px-4 py-12 sm:px-6 lg:px-8 dark:border-white/8 dark:bg-[#0a1930]">
+      <div className="mx-auto max-w-7xl">
+        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between"><div><p className="text-xs font-semibold uppercase tracking-[.2em] text-primary dark:text-emerald-300">Try the workflow before setup</p><h2 className="mt-2 font-heading text-2xl font-semibold sm:text-3xl">Four practical starting points.</h2></div><Link href="/resources/start-online-academy-india" className="inline-flex items-center gap-2 text-sm font-semibold text-primary dark:text-emerald-300">Read the academy launch guide <ArrowRight className="size-4" /></Link></div>
+        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{shortcuts.map(([title, href, text, Icon]) => <Link key={href} href={href} className="group rounded-2xl border border-blue-950/10 bg-white p-4 transition hover:-translate-y-0.5 hover:border-primary/35 dark:border-white/10 dark:bg-white/[.04]"><Icon className="size-5 text-primary dark:text-emerald-300" /><h3 className="mt-4 font-heading text-base font-semibold">{title}</h3><p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">{text}</p><span className="mt-4 inline-flex items-center gap-2 text-xs font-semibold text-primary dark:text-emerald-300">Open free tool <ArrowRight className="size-3.5 transition group-hover:translate-x-1" /></span></Link>)}</div>
+      </div>
+    </section>
   );
 }
 

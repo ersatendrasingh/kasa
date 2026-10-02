@@ -383,6 +383,8 @@ function AcademyToolRail() {
     ["Test academy profit", "Model revenue against monthly operating costs.", "/tools/profit-calculator", TrendingUp],
     ["Plan batch capacity", "Check seats, faculty load, and occupancy.", "/tools/batch-capacity-calculator", UsersRound],
     ["Prepare fee receipts", "Create a clear printable payment record.", "/tools/fee-receipt-generator", FileText],
+    ["Draft the admission form", "Collect the right learner and program details from day one.", "/tools/admission-form-generator", ClipboardCheck],
+    ["Prototype a certificate", "Test identity, course, issue-date, and credential fields.", "/tools/certificate-generator", FileBadge2],
   ] as const;
 
   return (
@@ -392,7 +394,7 @@ function AcademyToolRail() {
           <div><p className="text-xs font-semibold uppercase tracking-[.2em] text-primary dark:text-emerald-300">Free academy planning tools</p><h2 id="academy-planning-tools" className="mt-2 font-heading text-2xl font-semibold sm:text-3xl">Put real numbers behind the launch plan.</h2></div>
           <Link href="/tools" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline dark:text-emerald-300">See all free tools <ArrowRight className="size-4" /></Link>
         </div>
-        <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {tools.map(([title, text, href, Icon]) => (
             <Link key={href} href={href} className="group flex items-start gap-3 rounded-xl border border-slate-900/10 bg-white/65 p-4 transition hover:-translate-y-0.5 hover:border-primary/35 hover:bg-white dark:border-white/10 dark:bg-white/[.035] dark:hover:bg-white/[.06]">
               <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-[#e8f3ed] text-emerald-700 dark:bg-emerald-300/10 dark:text-emerald-200"><Icon className="size-4" /></span>

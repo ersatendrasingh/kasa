@@ -83,11 +83,24 @@ export function CoachingInstitutesPage({ page }: { page: PageSummary }) {
         <HybridExperience />
         <InstituteModels />
         <RolloutSection />
+        <InstituteToolDesk />
         <FaqSection />
         <FinalCta />
       </main>
     </>
   );
+}
+
+function InstituteToolDesk() {
+  const links = [
+    ["Admission form", "/tools/admission-form-generator", "Standardise the enquiry-to-admission handoff."],
+    ["Batch capacity", "/tools/batch-capacity-calculator", "Check seats against faculty and timetable load."],
+    ["Fee receipt", "/tools/fee-receipt-generator", "Create a clear record for manual fee collection."],
+    ["Question paper", "/tools/question-paper-generator", "Draft a structured test for a real batch."],
+    ["Report card", "/tools/report-card-generator", "Prepare a readable academic progress record."],
+    ["Certificate", "/tools/certificate-generator", "Prototype course-completion proof."],
+  ] as const;
+  return <section className="border-y border-blue-950/8 bg-[#eef6fb] px-4 py-12 sm:px-6 lg:px-8 dark:border-white/8 dark:bg-[#0a1930]"><div className="mx-auto max-w-7xl"><div className="grid gap-7 lg:grid-cols-[.3fr_.7fr] lg:items-center"><div><p className="text-xs font-semibold uppercase tracking-[.2em] text-primary dark:text-emerald-300">Institute operations desk</p><h2 className="mt-3 font-heading text-2xl font-semibold sm:text-3xl">Use a real workflow in the rollout conversation.</h2><div className="mt-4 flex flex-col items-start gap-2 text-sm font-semibold"><Link href="/resources/run-live-online-classes" className="text-primary hover:underline dark:text-emerald-300">Plan live-class operations</Link><Link href="/resources/course-certificates-best-practices" className="text-primary hover:underline dark:text-emerald-300">Define certificate rules</Link></div></div><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{links.map(([title, href, text]) => <Link key={href} href={href} className="group rounded-xl border border-blue-950/10 bg-white p-4 dark:border-white/10 dark:bg-white/[.04]"><h3 className="text-sm font-semibold">{title}</h3><p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">{text}</p><span className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-primary dark:text-emerald-300">Open tool <ArrowRight className="size-3 transition group-hover:translate-x-1" /></span></Link>)}</div></div></div></section>;
 }
 
 function Hero() {

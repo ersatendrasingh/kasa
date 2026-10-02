@@ -214,10 +214,13 @@ export function RunLiveOnlineClassesPage({ page }: { page: PageSummary }) {
         <section className="px-4 py-12 sm:px-6 lg:px-8">
           <div className="mx-auto grid max-w-7xl gap-6 border-b border-[#07162d]/10 pb-12 dark:border-white/10 lg:grid-cols-[.32fr_.68fr] lg:items-center">
             <div><p className="text-xs font-semibold uppercase tracking-[.2em] text-primary dark:text-emerald-300">Planning desk</p><h2 className="mt-3 font-heading text-3xl font-semibold leading-tight">Useful tools around the class.</h2><p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">Use them for preparation and decisions; keep the final class record inside the batch workflow.</p></div>
-            <div className="grid gap-3 sm:grid-cols-3">{[
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{[
               ["Attendance calculator", "/tools/attendance-calculator", "Check attendance position and required classes."],
               ["Study timetable generator", "/tools/study-timetable-generator", "Turn class commitments into a practical study plan."],
+              ["Lesson plan generator", "/tools/lesson-plan-generator", "Prepare the class objective, sequence, and checks."],
               ["Assignment generator", "/tools/assignment-generator", "Draft structured follow-up work after a session."],
+              ["Quiz generator", "/tools/quiz-generator", "Create a quick post-class understanding check."],
+              ["Worksheet generator", "/tools/worksheet-generator", "Give learners guided practice with the replay."],
             ].map(([title, href, text]) => <Link key={title} href={href} className="group rounded-2xl border border-[#07162d]/10 bg-white/60 p-4 transition hover:-translate-y-0.5 hover:bg-white dark:border-white/10 dark:bg-white/[.04] dark:hover:bg-white/[.07]"><p className="font-heading text-base font-semibold">{title}</p><p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">{text}</p><span className="mt-4 inline-flex items-center gap-2 text-xs font-semibold text-primary dark:text-emerald-300">Open tool <ArrowRight className="size-3.5 transition group-hover:translate-x-1" /></span></Link>)}</div>
           </div>
         </section>

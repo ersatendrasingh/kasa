@@ -60,7 +60,7 @@ function escapeHtml(value: string) {
 export function AdmissionFormGenerator() {
   const [academyName, setAcademyName] = useState("KASA Academy");
   const [formTitle, setFormTitle] = useState("Student Admission Form");
-  const [studentName, setStudentName] = useState("Aarav Sharma");
+  const [studentName, setStudentName] = useState("Shivaan Gangwar");
   const [parentName, setParentName] = useState("Rohit Sharma");
   const [phone, setPhone] = useState("+91 98765 43210");
   const [email, setEmail] = useState("parent@example.com");
@@ -108,7 +108,7 @@ export function AdmissionFormGenerator() {
   const reset = () => {
     setAcademyName("KASA Academy");
     setFormTitle("Student Admission Form");
-    setStudentName("Aarav Sharma");
+    setStudentName("Shivaan Gangwar");
     setParentName("Rohit Sharma");
     setPhone("+91 98765 43210");
     setEmail("parent@example.com");

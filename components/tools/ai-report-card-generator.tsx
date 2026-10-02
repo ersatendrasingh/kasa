@@ -43,7 +43,7 @@ type SavedReport = {
 export function AiReportCardGenerator() {
   const resultPanelRef = useRef<HTMLDivElement>(null);
   const [selectedClass, setSelectedClass] = useState<(typeof classes)[number]>("Class 6-8");
-  const [studentName, setStudentName] = useState("Aarav Sharma");
+  const [studentName, setStudentName] = useState("Shivaan Gangwar");
   const [examName, setExamName] = useState("Term Assessment");
   const [overallPercentage, setOverallPercentage] = useState(78);
   const [attendancePercentage, setAttendancePercentage] = useState(88);
@@ -128,7 +128,7 @@ export function AiReportCardGenerator() {
       const saved = JSON.parse(raw) as Partial<SavedReport>;
       if (!saved.reportCard) return false;
       setSelectedClass(saved.selectedClass || "Class 6-8");
-      setStudentName(saved.studentName || "Aarav Sharma");
+      setStudentName(saved.studentName || "Shivaan Gangwar");
       setExamName(saved.examName || "Term Assessment");
       setOverallPercentage(clamp(Number(saved.overallPercentage), 0, 100));
       setAttendancePercentage(clamp(Number(saved.attendancePercentage), 0, 100));
@@ -185,7 +185,7 @@ export function AiReportCardGenerator() {
 
   const reset = () => {
     setSelectedClass("Class 6-8");
-    setStudentName("Aarav Sharma");
+    setStudentName("Shivaan Gangwar");
     setExamName("Term Assessment");
     setOverallPercentage(78);
     setAttendancePercentage(88);

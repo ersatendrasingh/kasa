@@ -4,6 +4,8 @@ import { StartOnlineAcademyIndiaPage } from "@/components/site/resource-pages/st
 import { SellRecordedCoursesOnlinePage } from "@/components/site/resource-pages/sell-recorded-courses-online-page";
 import { RunLiveOnlineClassesPage } from "@/components/site/resource-pages/run-live-online-classes-page";
 import { LmsSeoForAcademiesPage } from "@/components/site/resource-pages/lms-seo-for-academies-page";
+import { CourseCertificatesBestPracticesPage } from "@/components/site/resource-pages/course-certificates-best-practices-page";
+import { OnlineCoursePricingGuidePage } from "@/components/site/resource-pages/online-course-pricing-guide-page";
 import { getResourcePage, resourcePages } from "@/lib/site-content";
 import { pageMetadata } from "@/lib/seo";
 
@@ -42,6 +44,14 @@ export default async function ResourcePage({ params }: PageProps) {
 
   if (slug === "lms-seo-for-academies") {
     return <LmsSeoForAcademiesPage page={page} />;
+  }
+
+  if (slug === "course-certificates-best-practices") {
+    return <CourseCertificatesBestPracticesPage page={page} />;
+  }
+
+  if (slug === "online-course-pricing-guide") {
+    return <OnlineCoursePricingGuidePage page={page} />;
   }
 
   return <SeoPageTemplate page={page} />;

@@ -67,7 +67,7 @@ function escapeHtml(value: string) {
 
 export function FeeReceiptGenerator() {
   const [academyName, setAcademyName] = useState("KASA Academy");
-  const [studentName, setStudentName] = useState("Aarav Sharma");
+  const [studentName, setStudentName] = useState("Shivaan Gangwar");
   const [course, setCourse] = useState<(typeof courses)[number]>("Class 10");
   const [feeType, setFeeType] =
     useState<(typeof feeTypes)[number]>("Monthly fee");
@@ -208,7 +208,7 @@ export function FeeReceiptGenerator() {
 
   const reset = () => {
     setAcademyName("KASA Academy");
-    setStudentName("Aarav Sharma");
+    setStudentName("Shivaan Gangwar");
     setCourse("Class 10");
     setFeeType("Monthly fee");
     setPaymentMode("UPI");
