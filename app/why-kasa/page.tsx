@@ -62,35 +62,35 @@ export default function WhyKasaPage() {
                 <p className="text-xs font-semibold uppercase tracking-[.24em] text-primary dark:text-emerald-300">Company thesis · 01</p>
                 <p className="mt-4 max-w-xs text-sm leading-6 text-slate-500 dark:text-slate-400">We did not build another place to upload videos. We built continuity for the institution around them.</p>
               </div>
-              <h1 className="max-w-5xl font-heading text-4xl font-semibold leading-[1.04] tracking-[-.04em] sm:text-5xl lg:text-[3.75rem]">An academy is not a stack of software.<span className="mt-1 block bg-[image:var(--stat-gradient)] bg-clip-text text-transparent">It is one continuous promise.</span></h1>
+              <h1 className="max-w-5xl font-heading text-[2.15rem] font-semibold leading-[1.08] tracking-[-.04em] sm:text-5xl lg:text-[3.55rem]"><span className="sm:hidden"><span className="block">An academy is</span><span className="block">more than a stack</span><span className="block">of software.</span></span><span className="hidden sm:block"><span className="block">An academy is more than</span><span className="block">a stack of software.</span></span><span className="mt-2 block bg-[image:var(--stat-gradient)] bg-clip-text text-transparent"><span className="sm:hidden"><span className="block">It is one</span><span className="block">continuous promise.</span></span><span className="hidden sm:block">It is one continuous promise.</span></span></h1>
             </div>
 
             <div className="grid border-b border-blue-950/10 dark:border-white/10 lg:grid-cols-[.4fr_.22fr_.38fr]">
-              <div className="relative min-h-[17rem] overflow-hidden border-b border-blue-950/10 py-8 dark:border-white/10 lg:border-b-0 lg:border-r lg:pr-8 dark:lg:border-white/10">
+              <div className="relative min-h-[14rem] overflow-hidden border-b border-blue-950/10 py-6 dark:border-white/10 lg:min-h-[17rem] lg:border-b-0 lg:border-r lg:py-8 lg:pr-8 dark:lg:border-white/10">
                 <p className="text-[.65rem] font-semibold uppercase tracking-[.2em] text-rose-600 dark:text-rose-300">Before · scattered work</p>
-                <div className="relative mt-4 h-48 font-heading font-semibold text-slate-700 dark:text-slate-200">
+                <div className="relative mt-4 h-44 font-heading font-semibold text-slate-700 dark:text-slate-200 sm:h-48">
                   <span className="absolute left-[4%] top-[10%] -rotate-6 text-xl">Website</span>
                   <span className="absolute right-[8%] top-[4%] rotate-3 text-base text-primary">Payments</span>
                   <span className="absolute left-[35%] top-[42%] rotate-6 text-2xl text-slate-400">Sheets</span>
-                  <span className="absolute bottom-[8%] left-[3%] rotate-3 text-base text-emerald-700 dark:text-emerald-300">Class links</span>
+                  <span className="absolute bottom-[8%] left-[18%] rotate-3 text-base text-emerald-700 dark:text-emerald-300 sm:left-[3%]">Class links</span>
                   <span className="absolute bottom-[5%] right-[3%] -rotate-6 text-xl">Video folders</span>
                   <svg className="absolute inset-0 size-full text-slate-300 dark:text-white/15" viewBox="0 0 500 190" fill="none" aria-hidden="true"><path d="M42 42C160 74 112 137 243 100C341 72 356 156 466 139" stroke="currentColor" strokeWidth="1.5" strokeDasharray="5 8"/><path d="M385 27C326 71 192 30 86 154" stroke="currentColor" strokeWidth="1.5" strokeDasharray="5 8"/></svg>
                 </div>
               </div>
 
-              <div className="relative grid min-h-[13rem] place-items-center border-b border-blue-950/10 py-8 dark:border-white/10 lg:min-h-[17rem] lg:border-b-0 lg:border-r dark:lg:border-white/10">
+              <div className="relative grid min-h-[8rem] place-items-center border-b border-blue-950/10 py-5 dark:border-white/10 lg:min-h-[17rem] lg:border-b-0 lg:border-r lg:py-8 dark:lg:border-white/10">
                 <div className="absolute inset-x-8 top-1/2 h-px bg-gradient-to-r from-rose-400/20 via-primary to-emerald-400/30" />
                 <div className="relative grid size-20 place-items-center rounded-full border border-primary/20 bg-[#f8f7f2] shadow-[0_0_0_14px_rgba(40,104,190,.05)] dark:bg-[#061126]"><ArrowRight className="size-6 text-primary dark:text-emerald-300" /></div>
                 <p className="absolute bottom-6 text-center text-[.62rem] font-semibold uppercase tracking-[.18em] text-slate-400">Context stops getting lost</p>
               </div>
 
-              <div className="relative min-h-[18rem] py-8 lg:pl-9">
+              <div className="relative min-h-[16rem] py-6 lg:min-h-[18rem] lg:py-8 lg:pl-9">
                 <p className="text-[.65rem] font-semibold uppercase tracking-[.2em] text-emerald-700 dark:text-emerald-300">After · one academy record</p>
-                <div className="relative mx-auto mt-5 grid size-52 place-items-center sm:size-56">
+                <div className="relative mx-auto mt-4 grid size-44 place-items-center sm:mt-5 sm:size-56">
                   <div className="absolute inset-0 rounded-full border border-primary/15" />
                   <div className="absolute inset-6 rounded-full border border-emerald-500/25" />
                   <div className="absolute inset-12 rounded-full bg-[radial-gradient(circle,#2465b4_0%,#123b73_56%,#071a37_100%)] shadow-[0_24px_60px_-25px_rgba(18,59,115,.8)]" />
-                  <div className="relative text-center text-white"><p className="font-heading text-2xl font-semibold tracking-[-.03em]">KASA</p><p className="mt-1 text-[.58rem] font-semibold uppercase tracking-[.2em] text-emerald-200">One operating flow</p></div>
+                  <div className="relative max-w-28 text-center text-white"><p className="font-heading text-2xl font-semibold tracking-[-.03em]">KASA</p><p className="mt-1.5 text-[.52rem] font-semibold uppercase leading-[1.45] tracking-[.16em] text-emerald-200"><span className="block">One operating</span><span className="block">flow</span></p></div>
                   {[["Sales", "-left-5 top-10"], ["Learning", "-right-7 top-12"], ["Teaching", "-left-7 bottom-10"], ["Proof", "-right-3 bottom-8"]].map(([label, position]) => <span key={label} className={`absolute ${position} text-[.65rem] font-semibold text-slate-600 dark:text-slate-300`}>{label}</span>)}
                 </div>
               </div>
