@@ -3,20 +3,14 @@ import Link from "next/link";
 import {
   ArrowRight,
   BadgeCheck,
-  BookOpenCheck,
   Check,
-  CircleDollarSign,
   Clock3,
   GraduationCap,
   Layers3,
   Minus,
-  Radio,
   ShieldCheck,
-  Sparkles,
-  UsersRound,
   X,
 } from "lucide-react";
-import { LazyVideo } from "@/components/site/lazy-video";
 import { ProductTourTrigger } from "@/components/site/product-tour-trigger";
 import {
   BreadcrumbStructuredData,
@@ -59,34 +53,52 @@ export default function WhyKasaPage() {
 
       <main className="overflow-hidden bg-[#f8f7f2] text-slate-950 dark:bg-[#061126] dark:text-white">
         <section className="relative px-4 pb-14 pt-28 sm:px-6 sm:pb-16 sm:pt-32 lg:px-8">
-          <div className="pointer-events-none absolute inset-0"><div className="absolute -left-56 top-20 size-[34rem] rounded-full bg-blue-200/55 blur-[120px] dark:bg-blue-500/10" /><div className="absolute -right-48 top-8 size-[32rem] rounded-full bg-emerald-200/55 blur-[120px] dark:bg-emerald-400/10" /></div>
+          <div className="pointer-events-none absolute inset-0 overflow-hidden"><div className="absolute -left-48 top-16 size-[30rem] rounded-full bg-blue-200/55 blur-[120px] dark:bg-blue-500/10" /><div className="absolute -right-40 top-20 size-[34rem] rounded-full bg-emerald-200/55 blur-[130px] dark:bg-emerald-400/10" /></div>
           <div className="relative mx-auto max-w-7xl">
             <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400"><Link href="/" className="transition hover:text-primary">Home</Link><span aria-hidden="true">/</span><span className="text-slate-800 dark:text-white">Why KASA</span></nav>
-            <div className="mt-10 grid gap-10 lg:grid-cols-[.9fr_1.1fr] lg:items-end">
+
+            <div className="mt-9 grid gap-8 border-b border-blue-950/10 pb-9 dark:border-white/10 lg:grid-cols-[.28fr_.72fr] lg:items-end">
               <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-blue-950/10 bg-white/70 px-4 py-2 text-[.68rem] font-semibold uppercase tracking-[.2em] text-primary shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/5 dark:text-emerald-200"><Sparkles className="size-4" />Why we built KASA</div>
-                <h1 className="mt-6 max-w-3xl font-heading text-4xl font-semibold leading-[1.05] tracking-[-.035em] sm:text-5xl lg:text-[3.65rem]">Your academy should feel like<span className="block bg-[image:var(--stat-gradient)] bg-clip-text text-transparent">one institution.</span>Not ten tools.</h1>
+                <p className="text-xs font-semibold uppercase tracking-[.24em] text-primary dark:text-emerald-300">Company thesis · 01</p>
+                <p className="mt-4 max-w-xs text-sm leading-6 text-slate-500 dark:text-slate-400">We did not build another place to upload videos. We built continuity for the institution around them.</p>
               </div>
-              <div className="border-l border-blue-950/15 pl-6 dark:border-white/15 sm:pl-8">
-                <p className="max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">KASA exists for education teams that have outgrown the patchwork of a website, payment gateway, spreadsheets, meeting links, video folders, and manual certificates.</p>
-                <div className="mt-6 flex flex-col gap-3 sm:flex-row"><ProductTourTrigger label="See the connected workflow" variant="solid" size="md" className="justify-center" /><Link href="#reason" className="inline-flex h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold text-slate-700 transition hover:text-primary dark:text-slate-200">Read our product thinking <ArrowRight className="size-4" /></Link></div>
+              <h1 className="max-w-5xl font-heading text-4xl font-semibold leading-[1.04] tracking-[-.04em] sm:text-5xl lg:text-[3.75rem]">An academy is not a stack of software.<span className="mt-1 block bg-[image:var(--stat-gradient)] bg-clip-text text-transparent">It is one continuous promise.</span></h1>
+            </div>
+
+            <div className="grid border-b border-blue-950/10 dark:border-white/10 lg:grid-cols-[.4fr_.22fr_.38fr]">
+              <div className="relative min-h-[17rem] overflow-hidden border-b border-blue-950/10 py-8 dark:border-white/10 lg:border-b-0 lg:border-r lg:pr-8 dark:lg:border-white/10">
+                <p className="text-[.65rem] font-semibold uppercase tracking-[.2em] text-rose-600 dark:text-rose-300">Before · scattered work</p>
+                <div className="relative mt-4 h-48 font-heading font-semibold text-slate-700 dark:text-slate-200">
+                  <span className="absolute left-[4%] top-[10%] -rotate-6 text-xl">Website</span>
+                  <span className="absolute right-[8%] top-[4%] rotate-3 text-base text-primary">Payments</span>
+                  <span className="absolute left-[35%] top-[42%] rotate-6 text-2xl text-slate-400">Sheets</span>
+                  <span className="absolute bottom-[8%] left-[3%] rotate-3 text-base text-emerald-700 dark:text-emerald-300">Class links</span>
+                  <span className="absolute bottom-[5%] right-[3%] -rotate-6 text-xl">Video folders</span>
+                  <svg className="absolute inset-0 size-full text-slate-300 dark:text-white/15" viewBox="0 0 500 190" fill="none" aria-hidden="true"><path d="M42 42C160 74 112 137 243 100C341 72 356 156 466 139" stroke="currentColor" strokeWidth="1.5" strokeDasharray="5 8"/><path d="M385 27C326 71 192 30 86 154" stroke="currentColor" strokeWidth="1.5" strokeDasharray="5 8"/></svg>
+                </div>
+              </div>
+
+              <div className="relative grid min-h-[13rem] place-items-center border-b border-blue-950/10 py-8 dark:border-white/10 lg:min-h-[17rem] lg:border-b-0 lg:border-r dark:lg:border-white/10">
+                <div className="absolute inset-x-8 top-1/2 h-px bg-gradient-to-r from-rose-400/20 via-primary to-emerald-400/30" />
+                <div className="relative grid size-20 place-items-center rounded-full border border-primary/20 bg-[#f8f7f2] shadow-[0_0_0_14px_rgba(40,104,190,.05)] dark:bg-[#061126]"><ArrowRight className="size-6 text-primary dark:text-emerald-300" /></div>
+                <p className="absolute bottom-6 text-center text-[.62rem] font-semibold uppercase tracking-[.18em] text-slate-400">Context stops getting lost</p>
+              </div>
+
+              <div className="relative min-h-[18rem] py-8 lg:pl-9">
+                <p className="text-[.65rem] font-semibold uppercase tracking-[.2em] text-emerald-700 dark:text-emerald-300">After · one academy record</p>
+                <div className="relative mx-auto mt-5 grid size-52 place-items-center sm:size-56">
+                  <div className="absolute inset-0 rounded-full border border-primary/15" />
+                  <div className="absolute inset-6 rounded-full border border-emerald-500/25" />
+                  <div className="absolute inset-12 rounded-full bg-[radial-gradient(circle,#2465b4_0%,#123b73_56%,#071a37_100%)] shadow-[0_24px_60px_-25px_rgba(18,59,115,.8)]" />
+                  <div className="relative text-center text-white"><p className="font-heading text-2xl font-semibold tracking-[-.03em]">KASA</p><p className="mt-1 text-[.58rem] font-semibold uppercase tracking-[.2em] text-emerald-200">One operating flow</p></div>
+                  {[["Sales", "-left-5 top-10"], ["Learning", "-right-7 top-12"], ["Teaching", "-left-7 bottom-10"], ["Proof", "-right-3 bottom-8"]].map(([label, position]) => <span key={label} className={`absolute ${position} text-[.65rem] font-semibold text-slate-600 dark:text-slate-300`}>{label}</span>)}
+                </div>
               </div>
             </div>
 
-            <div className="mt-12 overflow-hidden rounded-[1.75rem] border border-blue-950/10 bg-[#071a37] p-3 shadow-[0_35px_90px_-45px_rgba(15,54,105,.65)] dark:border-white/10 sm:p-4">
-              <div className="grid overflow-hidden rounded-[1.25rem] lg:grid-cols-[.42fr_.58fr]">
-                <div className="relative min-h-[22rem] bg-[#0b2245] sm:min-h-[27rem]">
-                  <LazyVideo src="/learner-access-video.mp4" poster="/academy-live-class.jpg" ariaLabel="KASA learner experience" className="absolute inset-0 h-full w-full object-cover" />
-                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,18,41,.08),rgba(5,18,41,.82))]" />
-                  <div className="absolute inset-x-5 bottom-5 rounded-2xl border border-white/15 bg-slate-950/65 p-4 text-white backdrop-blur-xl"><p className="text-[.65rem] font-semibold uppercase tracking-[.18em] text-emerald-200">The learner sees</p><p className="mt-2 font-heading text-xl font-semibold">One clear next step.</p><p className="mt-2 text-sm leading-6 text-slate-300">Not the complexity required to operate the academy.</p></div>
-                </div>
-                <div className="bg-white p-5 dark:bg-[#0a1730] sm:p-7">
-                  <div className="flex items-center justify-between border-b border-blue-950/10 pb-5 dark:border-white/10"><div><p className="text-[.65rem] font-semibold uppercase tracking-[.18em] text-primary dark:text-emerald-200">Behind that simplicity</p><h2 className="mt-2 font-heading text-2xl font-semibold">The institution stays connected.</h2></div><BadgeCheck className="size-6 text-emerald-600" /></div>
-                  <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                    {[[CircleDollarSign, "Order", "Payment creates the right learner access."], [UsersRound, "Batch", "Faculty, schedule, and learners share context."], [Radio, "Class", "Room, attendance, replay, and task stay together."], [BookOpenCheck, "Progress", "Completion is based on visible evidence."]].map(([Icon, title, text]) => { const ItemIcon = Icon as typeof CircleDollarSign; return <article key={String(title)} className="rounded-2xl border border-blue-950/8 bg-[#f7f9fc] p-4 dark:border-white/8 dark:bg-white/[.035]"><ItemIcon className="size-5 text-primary dark:text-emerald-300" /><h3 className="mt-4 font-heading text-base font-semibold">{String(title)}</h3><p className="mt-2 text-xs leading-5 text-slate-600 dark:text-slate-300">{String(text)}</p></article>; })}
-                  </div>
-                </div>
-              </div>
+            <div className="grid gap-7 pt-8 lg:grid-cols-[1fr_auto] lg:items-center">
+              <p className="max-w-3xl text-base leading-8 text-slate-600 dark:text-slate-300">KASA connects discovery, payment, learner access, teaching, progress, and credentials under your own brand—so every team inherits context instead of rebuilding it.</p>
+              <div className="flex flex-col gap-3 sm:flex-row"><ProductTourTrigger label="See KASA in action" variant="solid" size="md" className="justify-center" /><Link href="#reason" className="inline-flex h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold text-slate-700 transition hover:text-primary dark:text-slate-200">Read the product thinking <ArrowRight className="size-4" /></Link></div>
             </div>
           </div>
         </section>
