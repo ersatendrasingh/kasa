@@ -106,8 +106,8 @@ export function CourseSellingPlatformPage({ page }: { page: PageSummary }) {
       />
       <FaqStructuredData faqs={faqs} />
 
-      <main className="overflow-hidden bg-white text-slate-950 dark:bg-[#061126] dark:text-white">
-        <section className="relative px-4 pb-0 pt-32 sm:px-6 sm:pt-36 lg:px-8">
+      <main className="lms-compact-page overflow-hidden bg-white text-slate-950 dark:bg-[#061126] dark:text-white">
+        <section className="relative px-4 pb-0 pt-28 sm:px-6 sm:pt-32 lg:px-8">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-[52rem] bg-[radial-gradient(circle_at_50%_12%,rgba(43,168,255,0.14),transparent_32rem),radial-gradient(circle_at_82%_24%,rgba(34,181,115,0.1),transparent_28rem),linear-gradient(180deg,#f7fbff_0%,#ffffff_92%)] dark:bg-[radial-gradient(circle_at_50%_12%,rgba(69,145,255,0.16),transparent_32rem),radial-gradient(circle_at_82%_24%,rgba(88,201,138,0.1),transparent_28rem),linear-gradient(180deg,#08152c_0%,#061126_92%)]" />
 
           <div className="relative mx-auto max-w-7xl">
@@ -124,7 +124,7 @@ export function CourseSellingPlatformPage({ page }: { page: PageSummary }) {
                 <ShoppingBag className="size-4" aria-hidden="true" />
                 Course commerce for your own academy
               </div>
-              <h1 className="mt-6 font-heading text-4xl font-semibold leading-[1.06] tracking-tight sm:text-6xl lg:text-7xl">
+              <h1 className="mt-5 font-heading text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl lg:text-[3.4rem]">
                 From course page to payment
                 <span className="block stat-gradient-text">to learner access.</span>
               </h1>
@@ -135,7 +135,7 @@ export function CourseSellingPlatformPage({ page }: { page: PageSummary }) {
               </p>
               <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
                 <ProductTourTrigger label="See the selling workflow" variant="solid" size="lg" className="w-full justify-center sm:w-auto" />
-                <Link href="#commerce-system" className="inline-flex h-14 items-center justify-center gap-2 rounded-full border border-blue-950/12 bg-white px-7 text-base font-semibold text-primary shadow-sm transition hover:-translate-y-0.5 hover:border-primary/35 dark:border-white/15 dark:bg-white/8 dark:text-white sm:w-auto">
+                <Link href="#commerce-system" className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-blue-950/12 bg-white px-6 text-sm font-semibold text-primary shadow-sm transition hover:-translate-y-0.5 hover:border-primary/35 dark:border-white/15 dark:bg-white/8 dark:text-white sm:w-auto">
                   Explore the system
                   <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>
@@ -146,11 +146,11 @@ export function CourseSellingPlatformPage({ page }: { page: PageSummary }) {
           </div>
         </section>
 
-        <section id="commerce-system" className="scroll-mt-24 px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
+        <section id="commerce-system" className="scroll-mt-24 px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
           <div className="mx-auto max-w-7xl">
             <div className="max-w-3xl">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">One connected system</p>
-              <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-5xl">
+              <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-4xl">
                 Course selling is an operating workflow, not a payment link.
               </h2>
               <p className="mt-5 text-base leading-8 text-slate-600 dark:text-slate-300">
@@ -213,13 +213,13 @@ export function CourseSellingPlatformPage({ page }: { page: PageSummary }) {
         <ModelsSection />
         <FaqSection />
 
-        <section className="px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
+        <section className="px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
           <div className="relative mx-auto max-w-7xl overflow-hidden rounded-[2.25rem] bg-[linear-gradient(135deg,#173f77_0%,#1d63a3_58%,#168465_100%)] px-6 py-12 text-white shadow-[0_30px_80px_-35px_rgba(18,59,115,.55)] sm:px-10 sm:py-14 lg:px-14">
             <div className="pointer-events-none absolute -right-24 -top-28 size-80 rounded-full border-[3rem] border-white/8" />
             <div className="relative grid gap-8 lg:grid-cols-[0.72fr_0.28fr] lg:items-center">
               <div>
                 <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-100"><Sparkles className="size-4" aria-hidden="true" /> Use one real course in the demo</div>
-                <h2 className="mt-5 max-w-4xl font-heading text-3xl font-semibold leading-tight sm:text-5xl">Map your current offer from the first page to learner access.</h2>
+                <h2 className="mt-5 max-w-4xl font-heading text-3xl font-semibold leading-tight sm:text-4xl">Map your current offer from the first page to learner access.</h2>
                 <p className="mt-5 max-w-3xl text-base leading-8 text-blue-100">Bring the course, pricing, delivery model, and current enrolment process. The walkthrough can follow that exact workflow.</p>
               </div>
               <ProductTourTrigger
@@ -292,9 +292,9 @@ function ProductCanvas() {
 
 function JourneySection() {
   return (
-    <section className="bg-[#f5f8fc] px-4 py-20 sm:px-6 sm:py-24 lg:px-8 dark:bg-[#08152a]">
-      <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.36fr_0.64fr]">
-        <div className="lg:sticky lg:top-32 lg:self-start"><div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary shadow-sm dark:bg-white/8 dark:text-emerald-200"><Sparkles className="size-4" aria-hidden="true" />The commerce journey</div><h2 className="mt-6 font-heading text-3xl font-semibold leading-tight sm:text-5xl">Four handoffs. One learner record.</h2><p className="mt-5 text-base leading-8 text-slate-600 dark:text-slate-300">The page, transaction, enrolment, and learning experience should feel like one product.</p></div>
+    <section className="bg-[#f5f8fc] px-4 py-14 sm:px-6 sm:py-16 lg:px-8 dark:bg-[#08152a]">
+      <div className="mx-auto grid max-w-7xl gap-9 lg:grid-cols-[0.36fr_0.64fr]">
+        <div className="lg:sticky lg:top-32 lg:self-start"><div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary shadow-sm dark:bg-white/8 dark:text-emerald-200"><Sparkles className="size-4" aria-hidden="true" />The commerce journey</div><h2 className="mt-5 font-heading text-3xl font-semibold leading-tight sm:text-4xl">Four handoffs. One learner record.</h2><p className="mt-4 text-base leading-7 text-slate-600 dark:text-slate-300">The page, transaction, enrolment, and learning experience should feel like one product.</p></div>
         <div className="border-l border-blue-950/10 pl-5 sm:pl-8 dark:border-white/10">
           {journey.map((item, index) => {
             const Icon = item.icon;
@@ -315,9 +315,9 @@ function JourneySection() {
 
 function ModelsSection() {
   return (
-    <section className="px-4 py-20 sm:px-6 sm:py-24 lg:px-8">
+    <section className="px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between"><div><p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Delivery models</p><h2 className="mt-4 font-heading text-3xl font-semibold sm:text-5xl">Sell the format that matches the promise.</h2></div><p className="max-w-xl text-sm leading-7 text-slate-600 dark:text-slate-300">Different offers can share the same storefront, buyer record, and learner account.</p></div>
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between"><div><p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Delivery models</p><h2 className="mt-4 font-heading text-3xl font-semibold sm:text-4xl">Sell the format that matches the promise.</h2></div><p className="max-w-xl text-sm leading-7 text-slate-600 dark:text-slate-300">Different offers can share the same storefront, buyer record, and learner account.</p></div>
         <div className="mt-12 overflow-hidden rounded-[2rem] border border-blue-950/10 bg-[#0c2245] text-white">
           <div className="grid lg:grid-cols-3">{courseModels.map((model, index) => { const Icon = model.icon; return <article key={model.title} className={["p-7 sm:p-9", index ? "border-t border-white/10 lg:border-l lg:border-t-0" : ""].join(" ")}><div className="flex items-center justify-between"><span className="grid size-12 place-items-center rounded-2xl bg-white/10 text-emerald-200"><Icon className="size-5" aria-hidden="true" /></span><span className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-200">{model.label}</span></div><h3 className="mt-10 font-heading text-2xl font-semibold">{model.title}</h3><p className="mt-4 text-sm leading-7 text-slate-300">{model.text}</p></article>; })}</div>
         </div>
@@ -332,9 +332,9 @@ function ModelsSection() {
 
 function FaqSection() {
   return (
-    <section className="border-y border-blue-950/8 bg-[#f8fafc] px-4 py-20 sm:px-6 sm:py-24 lg:px-8 dark:border-white/8 dark:bg-white/[0.02]">
+    <section className="border-y border-blue-950/8 bg-[#f8fafc] px-4 py-14 sm:px-6 sm:py-16 lg:px-8 dark:border-white/8 dark:bg-white/[0.02]">
       <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.35fr_0.65fr]">
-        <div><p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Questions before rollout</p><h2 className="mt-4 font-heading text-3xl font-semibold sm:text-5xl">Evaluate the complete journey.</h2><p className="mt-5 text-base leading-8 text-slate-600 dark:text-slate-300">Look beyond the payment gateway and ask what happens before and after every transaction.</p></div>
+        <div><p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Questions before rollout</p><h2 className="mt-4 font-heading text-3xl font-semibold sm:text-4xl">Evaluate the complete journey.</h2><p className="mt-4 text-base leading-7 text-slate-600 dark:text-slate-300">Look beyond the payment gateway and ask what happens before and after every transaction.</p></div>
         <div>{faqs.map(([question, answer], index) => <details key={question} open={index === 0} className="group border-t border-blue-950/10 py-5 last:border-b dark:border-white/10"><summary className="flex cursor-pointer list-none items-start justify-between gap-5 font-heading text-lg font-semibold"><span>{question}</span><span className="grid size-8 shrink-0 place-items-center rounded-full border border-blue-950/10 text-primary transition group-open:rotate-45">+</span></summary><p className="mt-4 max-w-3xl pr-10 text-sm leading-7 text-slate-600 dark:text-slate-300">{answer}</p></details>)}</div>
       </div>
     </section>

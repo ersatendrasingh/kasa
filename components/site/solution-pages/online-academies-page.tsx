@@ -70,13 +70,13 @@ export function OnlineAcademiesPage({ page }: { page: PageSummary }) {
       <WebPageStructuredData name={page.title} description={page.description} href="/solutions/online-academies" />
       <FaqStructuredData faqs={faqs} />
 
-      <div className="overflow-hidden bg-background text-foreground">
-        <section className="relative px-4 pb-16 pt-[9.25rem] sm:px-6 sm:pb-20 sm:pt-[10.25rem] lg:px-8 lg:pb-24 lg:pt-[10.75rem]">
+      <div className="lms-compact-page overflow-hidden bg-background text-foreground">
+        <section className="relative px-4 pb-12 pt-28 sm:px-6 sm:pb-14 sm:pt-32 lg:px-8">
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute left-1/2 top-24 h-[34rem] w-[68rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(43,168,255,.19),rgba(34,181,115,.1)_42%,transparent_72%)] blur-2xl dark:opacity-55" />
             <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background to-transparent" />
           </div>
-          <div className="relative mx-auto w-full max-w-[108rem]">
+          <div className="relative mx-auto w-full max-w-7xl">
             <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
               <Link href="/" className="transition hover:text-primary">Home</Link><span>/</span>
               <Link href="/solutions" className="transition hover:text-primary">Solutions</Link><span>/</span>
@@ -87,7 +87,7 @@ export function OnlineAcademiesPage({ page }: { page: PageSummary }) {
               <p className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/7 px-4 py-2 text-xs font-semibold uppercase tracking-[.2em] text-primary">
                 <Sparkles className="size-4" /> Build an academy learners remember
               </p>
-              <h1 className="mt-6 font-heading text-4xl font-semibold leading-[1.05] tracking-[-.035em] sm:text-6xl lg:text-[4.7rem]">
+              <h1 className="mt-5 font-heading text-4xl font-semibold leading-[1.08] tracking-[-.025em] sm:text-5xl lg:text-[3.4rem]">
                 Your courses deserve more than
                 <span className="block bg-[image:var(--stat-gradient)] bg-clip-text text-transparent">a checkout page and a folder of videos.</span>
               </h1>
@@ -96,7 +96,7 @@ export function OnlineAcademiesPage({ page }: { page: PageSummary }) {
               </p>
               <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
                 <ProductTourTrigger label="Map my academy" variant="solid" size="lg" className="justify-center" />
-                <Link href="/pricing" className="inline-flex h-14 items-center justify-center gap-2 rounded-full border border-blue-950/12 bg-surface px-7 text-sm font-semibold shadow-sm transition hover:border-primary/35 hover:text-primary dark:border-white/12">
+                <Link href="/pricing" className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-blue-950/12 bg-surface px-6 text-sm font-semibold shadow-sm transition hover:border-primary/35 hover:text-primary dark:border-white/12">
                   Understand pricing <ArrowRight className="size-4" />
                 </Link>
               </div>
@@ -107,7 +107,7 @@ export function OnlineAcademiesPage({ page }: { page: PageSummary }) {
         </section>
 
         <section className="border-y border-blue-950/8 bg-surface-muted/55 px-4 py-14 sm:px-6 sm:py-16 lg:px-8 dark:border-white/8 dark:bg-surface-strong">
-          <div className="mx-auto grid w-full max-w-[108rem] gap-8 lg:grid-cols-[.32fr_.68fr] lg:items-center">
+          <div className="mx-auto grid w-full max-w-7xl gap-8 lg:grid-cols-[.32fr_.68fr] lg:items-center">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[.22em] text-primary">One academy, four public promises</p>
               <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-4xl">What buyers see should match what learners receive.</h2>
@@ -125,12 +125,12 @@ export function OnlineAcademiesPage({ page }: { page: PageSummary }) {
           </div>
         </section>
 
-        <section className="px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
-          <div className="mx-auto w-full max-w-[108rem]">
+        <section className="px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
+          <div className="mx-auto w-full max-w-7xl">
             <div className="grid gap-8 lg:grid-cols-[.42fr_.58fr] lg:items-end">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[.22em] text-primary">The learner journey</p>
-                <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-5xl">From first visit to completion—without rebuilding context.</h2>
+                <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-4xl">From first visit to completion—without rebuilding context.</h2>
               </div>
               <p className="max-w-2xl text-base leading-8 text-slate-600 lg:justify-self-end dark:text-slate-300">A serious academy is not one screen. Every stage should pass useful information to the next stage.</p>
             </div>
@@ -148,13 +148,13 @@ export function OnlineAcademiesPage({ page }: { page: PageSummary }) {
           </div>
         </section>
 
-        <section className="relative overflow-hidden bg-slate-950 px-4 py-16 text-white sm:px-6 sm:py-24 lg:px-8 dark:bg-black">
+        <section className="relative overflow-hidden bg-slate-950 px-4 py-14 text-white sm:px-6 sm:py-16 lg:px-8 dark:bg-black">
           <div className="pointer-events-none absolute -left-48 -top-48 size-[38rem] rounded-full bg-blue-500/20 blur-[120px]" />
           <div className="pointer-events-none absolute -bottom-48 right-0 size-[36rem] rounded-full bg-emerald-400/15 blur-[120px]" />
-          <div className="relative mx-auto grid w-full max-w-[108rem] items-center gap-12 lg:grid-cols-[.46fr_.54fr] xl:gap-20">
+          <div className="relative mx-auto grid w-full max-w-7xl items-center gap-9 lg:grid-cols-[.46fr_.54fr] xl:gap-12">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[.22em] text-emerald-300">Inside the learning experience</p>
-              <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-5xl">Recorded lessons become a program—not a playlist.</h2>
+              <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-4xl">Recorded lessons become a program—not a playlist.</h2>
               <p className="mt-5 max-w-2xl text-base leading-8 text-slate-300">Modules, resources, progress, assignments, live support, and completion rules give learners a reason to continue after the first login.</p>
               <div className="mt-8 grid gap-3 sm:grid-cols-2">
                 {["Module-level progress", "Resources beside lessons", "Assignments and feedback", "Completion certificates"].map((item) => <div key={item} className="flex items-center gap-3 border-b border-white/10 py-3 text-sm font-semibold"><Check className="size-4 text-emerald-300" />{item}</div>)}
@@ -164,11 +164,11 @@ export function OnlineAcademiesPage({ page }: { page: PageSummary }) {
           </div>
         </section>
 
-        <section className="px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
-          <div className="mx-auto w-full max-w-[108rem]">
+        <section className="px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
+          <div className="mx-auto w-full max-w-7xl">
             <div className="mx-auto max-w-4xl text-center">
               <p className="text-xs font-semibold uppercase tracking-[.22em] text-primary">Choose the operating model</p>
-              <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-5xl">Your delivery model should shape the academy.</h2>
+              <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-4xl">Your delivery model should shape the academy.</h2>
               <p className="mx-auto mt-5 max-w-3xl text-base leading-8 text-slate-600 dark:text-slate-300">Recorded, live, and hybrid programs share the same commerce and learner records—but need different operating rhythms.</p>
             </div>
             <div className="mt-12 grid gap-5 lg:grid-cols-3">
@@ -186,11 +186,11 @@ export function OnlineAcademiesPage({ page }: { page: PageSummary }) {
           </div>
         </section>
 
-        <section className="border-y border-blue-950/8 bg-surface-muted/55 px-4 py-16 sm:px-6 sm:py-24 lg:px-8 dark:border-white/8 dark:bg-surface-strong">
-          <div className="mx-auto grid w-full max-w-[108rem] gap-12 lg:grid-cols-[.44fr_.56fr] xl:gap-20">
+        <section className="border-y border-blue-950/8 bg-surface-muted/55 px-4 py-14 sm:px-6 sm:py-16 lg:px-8 dark:border-white/8 dark:bg-surface-strong">
+          <div className="mx-auto grid w-full max-w-7xl gap-9 lg:grid-cols-[.44fr_.56fr] xl:gap-12">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[.22em] text-primary">What the platform will not do for you</p>
-              <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-5xl">Technology can organize an academy. It cannot create its value.</h2>
+              <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-4xl">Technology can organize an academy. It cannot create its value.</h2>
               <p className="mt-5 text-base leading-8 text-slate-600 dark:text-slate-300">Approval, retention, and growth depend on original programs, honest positioning, real support, and measurable learner outcomes—not simply having an LMS.</p>
               <div className="mt-7 rounded-2xl border-l-4 border-primary bg-surface px-5 py-4 text-sm leading-7 text-slate-600 shadow-sm dark:text-slate-300"><strong className="text-foreground">Rollout reality:</strong> prepare your first program, pricing, policies, support owner, and access rules before configuration.</div>
             </div>
@@ -202,11 +202,11 @@ export function OnlineAcademiesPage({ page }: { page: PageSummary }) {
           </div>
         </section>
 
-        <section className="px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
-          <div className="mx-auto grid w-full max-w-[108rem] items-center gap-12 lg:grid-cols-[.38fr_.62fr] xl:gap-20">
+        <section className="px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
+          <div className="mx-auto grid w-full max-w-7xl items-center gap-9 lg:grid-cols-[.38fr_.62fr] xl:gap-12">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[.22em] text-primary">Price the real operation</p>
-              <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-5xl">Bring one program to the demo.</h2>
+              <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-4xl">Bring one program to the demo.</h2>
               <p className="mt-5 text-base leading-8 text-slate-600 dark:text-slate-300">The useful conversation starts with the offer you plan to sell—not an abstract feature list.</p>
               <ProductTourTrigger label="Plan my academy rollout" variant="solid" size="lg" className="mt-8 justify-center" />
             </div>
@@ -220,11 +220,11 @@ export function OnlineAcademiesPage({ page }: { page: PageSummary }) {
           </div>
         </section>
 
-        <section className="border-t border-blue-950/8 bg-surface-muted/55 px-4 py-16 sm:px-6 sm:py-24 lg:px-8 dark:border-white/8 dark:bg-surface-strong">
-          <div className="mx-auto grid w-full max-w-[108rem] gap-12 lg:grid-cols-[.34fr_.66fr]">
+        <section className="border-t border-blue-950/8 bg-surface-muted/55 px-4 py-14 sm:px-6 sm:py-16 lg:px-8 dark:border-white/8 dark:bg-surface-strong">
+          <div className="mx-auto grid w-full max-w-7xl gap-9 lg:grid-cols-[.34fr_.66fr]">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[.22em] text-primary">Online academy questions</p>
-              <h2 className="mt-4 max-w-xl font-heading text-3xl font-semibold leading-tight sm:text-5xl">Decide with the full operating picture.</h2>
+              <h2 className="mt-4 max-w-xl font-heading text-3xl font-semibold leading-tight sm:text-4xl">Decide with the full operating picture.</h2>
             </div>
             <div className="border-t border-blue-950/10 dark:border-white/10">
               {faqs.map(([question, answer], index) => (
@@ -239,8 +239,8 @@ export function OnlineAcademiesPage({ page }: { page: PageSummary }) {
 
         <section className="relative isolate overflow-hidden bg-foreground px-4 py-14 text-background sm:px-6 sm:py-16 lg:px-8">
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_10%_15%,rgba(43,168,255,.3),transparent_32rem),radial-gradient(circle_at_88%_88%,rgba(34,181,115,.3),transparent_34rem)]" />
-          <div className="mx-auto flex w-full max-w-[108rem] flex-col gap-8 md:flex-row md:items-center md:justify-between">
-            <div><p className="text-xs font-semibold uppercase tracking-[.22em] text-promo-accent">Your brand. Your programs. Your learner relationship.</p><h2 className="mt-3 max-w-4xl font-heading text-3xl font-semibold leading-tight sm:text-5xl">Build the academy around one real offer.</h2></div>
+          <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 md:flex-row md:items-center md:justify-between">
+            <div><p className="text-xs font-semibold uppercase tracking-[.22em] text-promo-accent">Your brand. Your programs. Your learner relationship.</p><h2 className="mt-3 max-w-4xl font-heading text-3xl font-semibold leading-tight sm:text-4xl">Build the academy around one real offer.</h2></div>
             <ProductTourTrigger label="See KASA in action" variant="solid" size="lg" className="shrink-0 justify-center" />
           </div>
         </section>

@@ -75,7 +75,7 @@ export function CoachingInstitutesPage({ page }: { page: PageSummary }) {
       <WebPageStructuredData name={page.title} description={page.description} href="/solutions/coaching-institutes" />
       <FaqStructuredData faqs={faqs} />
 
-      <main className="overflow-hidden bg-white text-slate-950 dark:bg-[#061126] dark:text-white">
+      <main className="lms-compact-page overflow-hidden bg-white text-slate-950 dark:bg-[#061126] dark:text-white">
         <Hero />
         <TrustStrip />
         <OperatingDay />
@@ -92,17 +92,17 @@ export function CoachingInstitutesPage({ page }: { page: PageSummary }) {
 
 function Hero() {
   return (
-    <section className="relative px-4 pb-16 pt-32 sm:px-6 sm:pb-20 sm:pt-36 lg:px-8">
+    <section className="relative px-4 pb-12 pt-28 sm:px-6 sm:pb-14 sm:pt-32 lg:px-8">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_8%_15%,rgba(43,168,255,.17),transparent_31rem),radial-gradient(circle_at_92%_26%,rgba(34,181,115,.13),transparent_30rem),linear-gradient(180deg,#f5faff_0%,#fff_90%)] dark:bg-[radial-gradient(circle_at_8%_15%,rgba(69,145,255,.17),transparent_31rem),radial-gradient(circle_at_92%_26%,rgba(88,201,138,.1),transparent_30rem),linear-gradient(180deg,#08152c_0%,#061126_90%)]" />
-      <div className="relative mx-auto max-w-[108rem]">
+      <div className="relative mx-auto max-w-7xl">
         <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-300"><Link href="/" className="transition hover:text-primary">Home</Link><ChevronRight className="size-4 text-slate-300" /><Link href="/solutions" className="transition hover:text-primary">Solutions</Link><ChevronRight className="size-4 text-slate-300" /><span className="text-primary dark:text-emerald-300">Coaching institutes</span></nav>
 
         <div className="mt-7 grid gap-8 xl:grid-cols-[.9fr_1.1fr] xl:items-center">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-blue-950/10 bg-white/82 px-4 py-2 text-xs font-semibold uppercase tracking-[.18em] text-primary shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/7 dark:text-emerald-200"><School className="size-4" />LMS software for coaching institutes</div>
-            <h1 className="mt-5 font-heading text-4xl font-semibold leading-[1.06] tracking-tight sm:text-5xl xl:text-[3.8rem]">Run the institute as one system—<span className="block stat-gradient-text">not ten disconnected tools.</span></h1>
+            <h1 className="mt-5 font-heading text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl xl:text-[3.4rem]">Run the institute as one system—<span className="block stat-gradient-text">not ten disconnected tools.</span></h1>
             <p className="mt-6 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg dark:text-slate-300">KASA is coaching institute management software for admissions, course selling, live and recorded classes, student and faculty operations, fees, tests, certificates, and reporting under your own brand.</p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row"><ProductTourTrigger label="Map my institute workflow" variant="solid" size="lg" className="justify-center" /><Link href="#daily-operations" className="inline-flex h-14 items-center justify-center gap-2 rounded-full border border-blue-950/12 bg-white/82 px-7 text-sm font-semibold text-primary shadow-sm transition hover:-translate-y-0.5 hover:border-primary/35 dark:border-white/15 dark:bg-white/7 dark:text-white">See daily operations <ArrowRight className="size-4" /></Link></div>
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row"><ProductTourTrigger label="Map my institute workflow" variant="solid" size="lg" className="justify-center" /><Link href="#daily-operations" className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-blue-950/12 bg-white/82 px-6 text-sm font-semibold text-primary shadow-sm transition hover:-translate-y-0.5 hover:border-primary/35 dark:border-white/15 dark:bg-white/7 dark:text-white">See daily operations <ArrowRight className="size-4" /></Link></div>
             <div className="mt-8 grid max-w-2xl grid-cols-2 gap-x-6 gap-y-3 text-sm font-semibold text-slate-600 dark:text-slate-300">{["Own domain and branding", "Recorded + live + hybrid", "Admin, faculty, and learner roles", "Payments and academic records"].map((item) => <span key={item} className="flex items-center gap-2"><CheckCircle2 className="size-4 shrink-0 text-emerald-600" />{item}</span>)}</div>
           </div>
           <InstituteConsole />

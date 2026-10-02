@@ -63,7 +63,7 @@ export function ExamsAssignmentsCertificatesPage({ page }: { page: PageSummary }
       <WebPageStructuredData name={page.title} description={page.description} href="/features/exams-assignments-certificates" />
       <FaqStructuredData faqs={faqs} />
 
-      <main className="overflow-hidden bg-[#fbfaf7] text-slate-950 dark:bg-[#071021] dark:text-white">
+      <main className="lms-compact-page overflow-hidden bg-[#fbfaf7] text-slate-950 dark:bg-[#071021] dark:text-white">
         <Hero />
         <EvidenceRail />
         <ExamStudio />
@@ -80,17 +80,17 @@ export function ExamsAssignmentsCertificatesPage({ page }: { page: PageSummary }
 
 function Hero() {
   return (
-    <section className="relative px-4 pb-14 pt-32 sm:px-6 sm:pt-36 lg:px-8">
+    <section className="relative px-4 pb-12 pt-28 sm:px-6 sm:pt-32 lg:px-8">
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(22,71,163,.035)_1px,transparent_1px),linear-gradient(90deg,rgba(22,71,163,.035)_1px,transparent_1px),radial-gradient(circle_at_82%_20%,rgba(34,181,115,.13),transparent_28rem),radial-gradient(circle_at_12%_18%,rgba(43,168,255,.13),transparent_30rem)] bg-[size:32px_32px,32px_32px,auto,auto] dark:bg-[linear-gradient(rgba(255,255,255,.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.025)_1px,transparent_1px),radial-gradient(circle_at_82%_20%,rgba(88,201,138,.1),transparent_28rem),radial-gradient(circle_at_12%_18%,rgba(69,145,255,.12),transparent_30rem)]" />
-      <div className="relative mx-auto max-w-[108rem]">
+      <div className="relative mx-auto max-w-7xl">
         <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-300"><Link href="/" className="hover:text-primary">Home</Link><ChevronRight className="size-4 text-slate-300" /><Link href="/features" className="hover:text-primary">Features</Link><ChevronRight className="size-4 text-slate-300" /><span className="text-primary dark:text-emerald-300">Assessment and certificates</span></nav>
 
         <div className="mt-8 grid gap-10 xl:grid-cols-[.82fr_1.18fr] xl:items-center">
           <div className="max-w-3xl">
             <p className="inline-flex items-center gap-2 rounded-full border border-blue-950/10 bg-white/80 px-4 py-2 text-xs font-semibold uppercase tracking-[.18em] text-primary shadow-sm backdrop-blur dark:border-white/10 dark:bg-white/7 dark:text-emerald-200"><ScanLine className="size-4" />Assessment and certificate software</p>
-            <h1 className="mt-5 font-heading text-4xl font-semibold leading-[1.06] tracking-tight sm:text-5xl xl:text-[3.75rem]">Do not award completion.<span className="block stat-gradient-text">Build evidence for it.</span></h1>
+            <h1 className="mt-5 font-heading text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl xl:text-[3.4rem]">Do not award completion.<span className="block stat-gradient-text">Build evidence for it.</span></h1>
             <p className="mt-5 max-w-2xl text-base leading-8 text-slate-600 dark:text-slate-300">Create online exams, collect assignments, review learner work, record results, apply completion rules, and issue branded course certificates inside the same learning journey.</p>
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row"><ProductTourTrigger label="See the assessment workflow" variant="solid" size="lg" className="justify-center" /><Link href="#exam-studio" className="inline-flex h-14 items-center justify-center gap-2 rounded-full border border-blue-950/12 bg-white px-7 text-sm font-semibold text-primary shadow-sm transition hover:-translate-y-0.5 hover:border-primary/35 dark:border-white/15 dark:bg-white/7 dark:text-white">Open the exam studio <ArrowRight className="size-4" /></Link></div>
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row"><ProductTourTrigger label="See the assessment workflow" variant="solid" size="lg" className="justify-center" /><Link href="#exam-studio" className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-blue-950/12 bg-white px-6 text-sm font-semibold text-primary shadow-sm transition hover:-translate-y-0.5 hover:border-primary/35 dark:border-white/15 dark:bg-white/7 dark:text-white">Open the exam studio <ArrowRight className="size-4" /></Link></div>
             <div className="mt-7 flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold text-slate-600 dark:text-slate-300">{["Course-linked assessments", "Faculty review", "Rule-based certificates"].map((item) => <span key={item} className="flex items-center gap-2"><CheckCircle2 className="size-4 text-emerald-600" />{item}</span>)}</div>
           </div>
           <AssessmentDesk />

@@ -1039,3 +1039,8 @@ input:disabled {
   background: rgba(30, 64, 175, 0.18);
   color: #dbeafe;
 }
+
+/* Keep the individually designed LMS pages on the same readable content rail. */
+.lms-compact-page [class~="max-w-[108rem]"] {
+  max-width: 80rem;
+}

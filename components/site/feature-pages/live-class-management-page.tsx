@@ -72,15 +72,15 @@ export function LiveClassManagementPage({ page }: { page: PageSummary }) {
       <WebPageStructuredData name={page.title} description={page.description} href="/features/live-class-management" />
       <FaqStructuredData faqs={faqs} />
 
-      <div className="overflow-hidden bg-background text-foreground">
-        <section className="relative px-4 pb-16 pt-[9.25rem] sm:px-6 sm:pb-20 sm:pt-[10.25rem] lg:px-8 lg:pt-[10.75rem]">
+      <div className="lms-compact-page overflow-hidden bg-background text-foreground">
+        <section className="relative px-4 pb-12 pt-28 sm:px-6 sm:pb-14 sm:pt-32 lg:px-8">
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
             <div className="absolute -left-40 top-20 size-[34rem] rounded-full bg-blue-300/25 blur-[100px] dark:bg-blue-500/10" />
             <div className="absolute -right-48 top-0 size-[38rem] rounded-full bg-emerald-200/35 blur-[110px] dark:bg-emerald-400/10" />
             <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background to-transparent" />
           </div>
 
-          <div className="relative mx-auto w-full max-w-[108rem]">
+          <div className="relative mx-auto w-full max-w-7xl">
             <nav aria-label="Breadcrumb" className="mb-9 flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
               <Link href="/" className="transition hover:text-primary">Home</Link>
               <span aria-hidden="true">/</span>
@@ -98,7 +98,7 @@ export function LiveClassManagementPage({ page }: { page: PageSummary }) {
                   </span>
                   Live delivery workspace
                 </div>
-                <h1 className="mt-5 max-w-3xl font-heading text-4xl font-semibold leading-[1.04] tracking-[-.035em] sm:text-6xl xl:text-[4.6rem]">
+                <h1 className="mt-5 max-w-3xl font-heading text-4xl font-semibold leading-[1.08] tracking-[-.025em] sm:text-5xl xl:text-[3.4rem]">
                   One live class.
                   <span className="mt-1 block bg-[image:var(--stat-gradient)] bg-clip-text text-transparent">No broken handoffs.</span>
                 </h1>
@@ -107,7 +107,7 @@ export function LiveClassManagementPage({ page }: { page: PageSummary }) {
                 </p>
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
                   <ProductTourTrigger label="See a live batch demo" variant="solid" size="lg" className="justify-center" />
-                  <a href="#class-flow" className="inline-flex h-14 items-center justify-center gap-2 px-5 text-sm font-semibold text-foreground transition hover:text-primary">
+                  <a href="#class-flow" className="inline-flex h-12 items-center justify-center gap-2 px-5 text-sm font-semibold text-foreground transition hover:text-primary">
                     Follow the class flow <ArrowRight className="size-4" aria-hidden="true" />
                   </a>
                 </div>
@@ -137,11 +137,11 @@ export function LiveClassManagementPage({ page }: { page: PageSummary }) {
           </div>
         </section>
 
-        <section id="class-flow" className="scroll-mt-24 border-y border-blue-950/8 bg-surface-muted/65 px-4 py-16 sm:px-6 sm:py-20 lg:px-8 dark:border-white/8 dark:bg-surface-strong">
-          <div className="mx-auto w-full max-w-[108rem]">
+        <section id="class-flow" className="scroll-mt-24 border-y border-blue-950/8 bg-surface-muted/65 px-4 py-14 sm:px-6 sm:py-16 lg:px-8 dark:border-white/8 dark:bg-surface-strong">
+          <div className="mx-auto w-full max-w-7xl">
             <div className="mx-auto max-w-4xl text-center">
               <p className="text-xs font-semibold uppercase tracking-[.22em] text-primary">A single connected class flow</p>
-              <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-5xl">Three people. Three jobs. One shared session.</h2>
+              <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-4xl">Three people. Three jobs. One shared session.</h2>
               <p className="mx-auto mt-5 max-w-3xl text-base leading-8 text-slate-600 dark:text-slate-300">Each person gets a focused view, while the session history stays connected behind the scenes.</p>
             </div>
 
@@ -162,12 +162,12 @@ export function LiveClassManagementPage({ page }: { page: PageSummary }) {
           </div>
         </section>
 
-        <section className="relative px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
-          <div className="mx-auto grid w-full max-w-[108rem] items-center gap-12 lg:grid-cols-[1.08fr_.92fr] xl:gap-24">
+        <section className="relative px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
+          <div className="mx-auto grid w-full max-w-7xl items-center gap-9 lg:grid-cols-[1.08fr_.92fr] xl:gap-12">
             <LearnerCanvas />
             <div className="max-w-2xl">
               <p className="text-xs font-semibold uppercase tracking-[.22em] text-primary">The learner lens</p>
-              <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-5xl">One clear next step—not six disconnected links.</h2>
+              <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-4xl">One clear next step—not six disconnected links.</h2>
               <p className="mt-5 text-base leading-8 text-slate-600 dark:text-slate-300">The learner view prioritizes today&apos;s room, the previous replay, and the task that follows. Every item stays attached to the right batch and subject.</p>
               <div className="mt-8 divide-y divide-blue-950/10 border-y border-blue-950/10 dark:divide-white/10 dark:border-white/10">
                 {[
@@ -185,12 +185,12 @@ export function LiveClassManagementPage({ page }: { page: PageSummary }) {
           </div>
         </section>
 
-        <section className="border-y border-blue-950/8 bg-surface-muted/55 px-4 py-16 sm:px-6 sm:py-20 lg:px-8 dark:border-white/8 dark:bg-surface-strong">
-          <div className="mx-auto w-full max-w-[108rem]">
+        <section className="border-y border-blue-950/8 bg-surface-muted/55 px-4 py-14 sm:px-6 sm:py-16 lg:px-8 dark:border-white/8 dark:bg-surface-strong">
+          <div className="mx-auto w-full max-w-7xl">
             <div className="grid gap-8 lg:grid-cols-[.32fr_.68fr] lg:items-end">
               <div className="max-w-xl">
                 <p className="text-xs font-semibold uppercase tracking-[.22em] text-primary">A real class day</p>
-                <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-5xl">From reminder to follow-up in ninety minutes.</h2>
+                <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-4xl">From reminder to follow-up in ninety minutes.</h2>
               </div>
               <p className="max-w-2xl text-base leading-8 text-slate-600 lg:justify-self-end dark:text-slate-300">Example: a Physics class for Batch A. Each event adds context to the same session instead of creating another disconnected message or folder.</p>
             </div>
@@ -220,14 +220,14 @@ export function LiveClassManagementPage({ page }: { page: PageSummary }) {
           </div>
         </section>
 
-        <section className="relative overflow-hidden bg-slate-950 px-4 py-16 text-white sm:px-6 sm:py-24 lg:px-8 dark:bg-black">
+        <section className="relative overflow-hidden bg-slate-950 px-4 py-14 text-white sm:px-6 sm:py-16 lg:px-8 dark:bg-black">
           <div className="absolute inset-0 opacity-40 [background-image:linear-gradient(rgba(255,255,255,.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.035)_1px,transparent_1px)] [background-size:48px_48px]" />
           <div className="pointer-events-none absolute -right-32 -top-48 size-[34rem] rounded-full bg-emerald-400/15 blur-[120px]" />
-          <div className="relative mx-auto w-full max-w-[108rem]">
+          <div className="relative mx-auto w-full max-w-7xl">
             <div className="grid gap-8 lg:grid-cols-[.42fr_.58fr] lg:items-end">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[.22em] text-emerald-300">What software cannot decide</p>
-                <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-5xl">KASA runs the handoff. Your academy owns the standard.</h2>
+                <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-4xl">KASA runs the handoff. Your academy owns the standard.</h2>
               </div>
               <p className="max-w-2xl text-base leading-8 text-slate-300 lg:justify-self-end">A useful rollout starts by separating platform automation from the academic decisions only your team can make.</p>
             </div>
@@ -243,11 +243,11 @@ export function LiveClassManagementPage({ page }: { page: PageSummary }) {
           </div>
         </section>
 
-        <section className="px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
-          <div className="mx-auto grid w-full max-w-[108rem] items-center gap-12 lg:grid-cols-[.43fr_.57fr] xl:gap-20">
+        <section className="px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
+          <div className="mx-auto grid w-full max-w-7xl items-center gap-9 lg:grid-cols-[.43fr_.57fr] xl:gap-12">
             <div className="max-w-2xl">
               <p className="text-xs font-semibold uppercase tracking-[.22em] text-primary">Plan with a real batch</p>
-              <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-5xl">Your demo should look like your operation.</h2>
+              <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-4xl">Your demo should look like your operation.</h2>
               <p className="mt-5 text-base leading-8 text-slate-600 dark:text-slate-300">Bring one batch, its faculty roles, weekly frequency, replay policy, and support owner. The walkthrough will use those details to expose missing handoffs before setup begins.</p>
               <div className="mt-7 inline-flex items-start gap-3 rounded-2xl bg-primary/8 px-4 py-3 text-sm leading-6 text-slate-700 dark:text-slate-200">
                 <Sparkles className="mt-1 size-4 shrink-0 text-primary" />
@@ -258,11 +258,11 @@ export function LiveClassManagementPage({ page }: { page: PageSummary }) {
           </div>
         </section>
 
-        <section className="border-t border-blue-950/8 bg-surface-muted/55 px-4 py-16 sm:px-6 sm:py-24 lg:px-8 dark:border-white/8 dark:bg-surface-strong">
-          <div className="mx-auto grid w-full max-w-[108rem] gap-12 lg:grid-cols-[.34fr_.66fr]">
+        <section className="border-t border-blue-950/8 bg-surface-muted/55 px-4 py-14 sm:px-6 sm:py-16 lg:px-8 dark:border-white/8 dark:bg-surface-strong">
+          <div className="mx-auto grid w-full max-w-7xl gap-9 lg:grid-cols-[.34fr_.66fr]">
             <div className="max-w-xl">
               <p className="text-xs font-semibold uppercase tracking-[.22em] text-primary">Before you move a batch</p>
-              <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-5xl">Questions worth answering first.</h2>
+              <h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-4xl">Questions worth answering first.</h2>
               <p className="mt-5 text-base leading-8 text-slate-600 dark:text-slate-300">Operational clarity matters more than a long feature checklist.</p>
             </div>
             <div className="border-t border-blue-950/10 dark:border-white/10">
@@ -281,10 +281,10 @@ export function LiveClassManagementPage({ page }: { page: PageSummary }) {
 
         <section className="relative isolate overflow-hidden bg-foreground px-4 py-14 text-background sm:px-6 sm:py-16 lg:px-8">
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_10%,rgba(43,168,255,.3),transparent_35rem),radial-gradient(circle_at_85%_90%,rgba(34,181,115,.3),transparent_35rem)]" />
-          <div className="mx-auto flex w-full max-w-[108rem] flex-col gap-8 md:flex-row md:items-center md:justify-between">
+          <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[.22em] text-promo-accent">Ready to simplify live delivery?</p>
-              <h2 className="mt-3 max-w-4xl font-heading text-3xl font-semibold leading-tight sm:text-5xl">Show us one batch. We will map every handoff.</h2>
+              <h2 className="mt-3 max-w-4xl font-heading text-3xl font-semibold leading-tight sm:text-4xl">Show us one batch. We will map every handoff.</h2>
             </div>
             <ProductTourTrigger label="Book the class demo" variant="solid" size="lg" className="shrink-0 justify-center" />
           </div>
