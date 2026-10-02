@@ -1,212 +1,72 @@
 import type { Metadata } from "next";
-import { CheckCircle2, ShieldCheck, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, BadgeIndianRupee, Boxes, Check, CircleDot, CloudCog, Database, Gauge, GraduationCap, HardDrive, Layers3, MessageCircleMore, Route, ShieldCheck, Sparkles, UsersRound } from "lucide-react";
 import { LeadCaptureModalTrigger } from "@/components/lead-capture-trigger";
-import { PageHero } from "@/components/site/page-hero";
 import { ProductTourTrigger } from "@/components/site/product-tour-trigger";
-import { RelatedToolsBlock } from "@/components/site/related-tools-block";
 import { siteButtonClasses } from "@/components/site/site-button";
-import {
-  BreadcrumbStructuredData,
-  WebPageStructuredData,
-} from "@/components/site/structured-data";
+import { BreadcrumbStructuredData, FaqStructuredData, WebPageStructuredData } from "@/components/site/structured-data";
 import { getWebsitePricingPlans } from "@/lib/website-pricing";
 
 export const metadata: Metadata = {
   title: "KASA Pricing | LMS Software Plans for Online Academies",
-  description:
-    "Explore KASA LMS pricing approach for coaching institutes, online academies, trainers, and EdTech teams.",
-  alternates: {
-    canonical: "/pricing",
-  },
+  description: "Compare KASA LMS pricing plans for coaching institutes, online academies, trainers, and EdTech teams, including features, limits, rollout scope, and cost drivers.",
+  alternates: { canonical: "/pricing" },
 };
+
+const pricingFaqs: Array<[string, string]> = [
+  ["Is the displayed plan price the complete rollout cost?", "The plan price covers the product entitlement shown for that edition. Migration, unusual integrations, additional infrastructure, exceptional media or live-class usage, and deeper implementation support may need separate scope. Confirm these items before purchase."],
+  ["Why can two academies on the same plan need different rollout work?", "A clean new academy with one program is different from an institute moving years of learners, courses, media, fee records, domains, gateways, and staff workflows. The product plan may match while the implementation effort differs."],
+  ["Does KASA charge marketplace commission on course sales?", "KASA is positioned as an owned academy platform rather than a course marketplace. Payment-gateway fees, taxes, refunds, and other transaction responsibilities still depend on the providers and commercial setup you choose."],
+  ["Can we begin with Starter and move later?", "The intended path is to start with the smallest edition that supports the real workflow, then expand as live delivery, faculty roles, assessments, CRM, reporting, or team controls become necessary. Data and configuration implications should be reviewed before changing editions."],
+];
+
+const costDrivers = [
+  [UsersRound, "People and access", "Learners, faculty, administrators, counsellors, and installation limits."],
+  [GraduationCap, "Program model", "Recorded, live, hybrid, cohort-based, or certification-led delivery."],
+  [HardDrive, "Media and usage", "Video volume, storage, playback, classroom usage, and retention expectations."],
+  [Database, "Migration", "Data cleanliness, history, media location, mapping rules, and manual review."],
+  [CloudCog, "Integrations", "Payments, email, live classes, domains, APIs, and external systems."],
+  [ShieldCheck, "Rollout and support", "Configuration, training, environments, response expectations, and ownership."],
+] as const;
 
 export default async function PricingPage() {
   const plans = await getWebsitePricingPlans();
   const leadsEndpoint = "/api/leads";
-  const featureRows = [
-    "Branded academy website and course storefront",
-    "Live classes, batches, and faculty workflows",
-    "Payments, coupons, invoices, and learner access",
-    "Tests, assignments, certificates, and reports",
-    "Rollout support and advanced admin controls",
-  ];
 
   return (
     <>
-      <BreadcrumbStructuredData
-        items={[
-          { name: "Home", href: "/" },
-          { name: "Pricing", href: "/pricing" },
-        ]}
-      />
-      <WebPageStructuredData
-        name="KASA Pricing"
-        description="KASA LMS pricing for coaching institutes, online academies, trainers, and EdTech teams based on workflow, modules, rollout support, and academy scale."
-        href="/pricing"
-      />
-      <PageHero
-        eyebrow="KASA pricing"
-        title="Choose the LMS rollout that matches your academy stage."
-        description="KASA pricing is based on your launch scope, users, modules, live class needs, media usage, and rollout support. Take a product tour so the team can map the right plan."
-        points={["Plan by workflow", "No marketplace commission", "Demo before rollout"]}
-        variant="compare"
-        primaryLabel="Take a Product Tour"
-        breadcrumbs={[
-          { label: "Home", href: "/" },
-          { label: "Pricing" },
-        ]}
-      />
+      <BreadcrumbStructuredData items={[{ name: "Home", href: "/" }, { name: "Pricing", href: "/pricing" }]} />
+      <WebPageStructuredData name="KASA Pricing" description="KASA LMS pricing plans and rollout cost guidance for academies and coaching institutes." href="/pricing" />
+      <FaqStructuredData faqs={pricingFaqs} />
 
-      <RelatedToolsBlock
-        context="pricing"
-        pageTitle="KASA pricing LMS course pricing profit calculator batch capacity fee receipt"
-        title="Calculate pricing before you choose a plan."
-        description="Use these free tools to estimate course fees, profit margin, batch capacity, receipts, and certificates before mapping the full KASA rollout."
-        limit={4}
-        className="py-10 sm:py-12"
-      />
+      <main className="overflow-hidden bg-[#f8fafc] text-slate-950 dark:bg-[#061126] dark:text-white">
+        <section className="relative px-4 pb-14 pt-32 sm:px-6 sm:pb-16 sm:pt-36 lg:px-8">
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,#edf4ff_0%,#ffffff_48%,#eefaf3_100%)] dark:bg-[linear-gradient(120deg,#08172e_0%,#061126_48%,#09221d_100%)]" />
+          <div className="pointer-events-none absolute -right-32 top-16 size-[30rem] rounded-full border-[4.5rem] border-blue-400/[.06]" />
+          <div className="relative mx-auto max-w-7xl">
+            <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400"><Link href="/" className="hover:text-primary">Home</Link><span>/</span><span className="text-slate-900 dark:text-white">Pricing</span></nav>
+            <div className="mt-8 grid gap-10 lg:grid-cols-[.8fr_1.2fr] lg:items-center xl:gap-16">
+              <div><div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[.22em] text-primary dark:text-emerald-300"><BadgeIndianRupee className="size-4" />Pricing with context</div><h1 className="mt-5 max-w-xl font-heading text-[2.45rem] font-semibold leading-[1.05] tracking-[-.04em] sm:text-5xl lg:text-[3.4rem]">Choose the plan for the operation you run—not the feature list you admire.</h1><p className="mt-6 max-w-xl text-base leading-8 text-slate-600 dark:text-slate-300">Start with the edition that supports today’s workflow. Scope migration, media, live usage, integrations, and rollout work separately so the commercial decision stays clear.</p><div className="mt-7 flex flex-col gap-3 sm:flex-row"><ProductTourTrigger label="Map my pricing scope" variant="solid" size="sm" className="justify-center" /><a href="#plans" className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-primary/20 bg-white/70 px-5 text-sm font-semibold text-primary dark:border-white/15 dark:bg-white/5 dark:text-white">Compare editions <ArrowRight className="size-4" /></a></div></div>
 
-      <section className="bg-background px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-        <div className="mx-auto w-full max-w-[108rem]">
-          <div className="mx-auto max-w-4xl text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
-              Plan structure
-            </p>
-            <h2 className="mt-3 font-heading text-3xl font-semibold leading-tight text-slate-950 sm:text-5xl dark:text-white">
-              Pricing should follow how your academy actually operates.
-            </h2>
-            <p className="mx-auto mt-5 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base dark:text-slate-300">
-              The right plan depends on whether you need only course selling,
-              live batches, exams, certificates, CRM, media scale, custom domain
-              setup, or a full institute workflow.
-            </p>
-          </div>
-
-          <div className="mt-10 grid gap-5 lg:grid-cols-3">
-            {plans.map((plan) => (
-              <article
-                key={plan.name}
-                className={[
-                  "relative flex overflow-hidden rounded-[2rem] border p-6 shadow-xl transition hover:-translate-y-1 sm:p-7",
-                  plan.highlighted
-                    ? "border-primary/40 bg-[linear-gradient(180deg,#f0fff8_0%,#ffffff_34%,#f8fcff_100%)] shadow-primary/12 dark:border-primary/40 dark:bg-[linear-gradient(180deg,rgba(88,201,138,0.14),rgba(255,255,255,0.05))]"
-                    : "border-blue-950/10 bg-white shadow-blue-950/6 dark:border-white/10 dark:bg-white/[0.04]",
-                ].join(" ")}
-              >
-                <div className="flex w-full flex-col">
-                  {plan.highlighted ? (
-                    <div className="absolute right-5 top-5 rounded-full bg-[image:var(--button-solid)] px-3 py-1 text-xs font-semibold !text-white">
-                      Popular
-                    </div>
-                  ) : null}
-                  <div className="inline-flex size-12 items-center justify-center rounded-2xl bg-primary/8 text-primary dark:bg-white/8">
-                    <ShieldCheck className="size-5" aria-hidden="true" />
-                  </div>
-                  <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-                    {plan.eyebrow}
-                  </p>
-                  <h3 className="mt-2 font-heading text-3xl font-semibold text-slate-950 dark:text-white">
-                    {plan.name}
-                  </h3>
-                  <div className="mt-5 rounded-[1.3rem] border border-blue-950/10 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/[0.05]">
-                    <div className="font-heading text-4xl font-semibold text-slate-950 dark:text-white">
-                      {plan.price}
-                    </div>
-                    <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                      {plan.note}
-                    </p>
-                  </div>
-                  <p className="mt-5 text-sm font-semibold leading-6 text-slate-700 dark:text-slate-200">
-                    {plan.bestFor}
-                  </p>
-                  <div className="mt-6 grid gap-3">
-                    {plan.features.map((point) => (
-                      <div
-                        key={point}
-                        className="flex items-start gap-2 text-sm font-medium text-slate-700 dark:text-slate-200"
-                      >
-                        <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
-                        <span>{point}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-auto pt-7">
-                    <LeadCaptureModalTrigger
-                      endpoint={leadsEndpoint}
-                      source={`pricing-${plan.name.toLowerCase()}-page`}
-                      leadType="pricing"
-                      buttonLabel={plan.highlighted ? "Enquire Now" : "Talk to sales"}
-                      ctaLabel={`${plan.highlighted ? "Enquire Now" : "Talk to sales"} - ${plan.name} plan`}
-                      modalTitle="Tell us about your academy"
-                      modalEyebrow={`${plan.name} plan enquiry`}
-                      icon={<Sparkles className="size-4" aria-hidden="true" />}
-                      buttonClassName={siteButtonClasses({
-                        size: "sm",
-                        className: "w-full justify-center",
-                      })}
-                    />
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-
-          <div className="mt-10 overflow-hidden rounded-[2rem] border border-blue-950/10 bg-white shadow-xl shadow-blue-950/6 dark:border-white/10 dark:bg-white/[0.04]">
-            <div className="grid bg-slate-50 text-sm font-semibold text-slate-600 dark:bg-white/[0.05] dark:text-slate-300 md:grid-cols-[1.2fr_repeat(3,1fr)]">
-              <div className="p-4">Capability</div>
-              {plans.map((plan) => (
-                <div key={plan.name} className="border-t border-blue-950/10 p-4 md:border-l md:border-t-0 dark:border-white/10">
-                  {plan.name}
-                </div>
-              ))}
+              <div className="overflow-hidden rounded-[1.6rem] border border-blue-950/10 bg-white/90 shadow-[0_30px_90px_-50px_rgba(20,65,130,.55)] dark:border-white/10 dark:bg-white/[.045]"><div className="flex items-center justify-between border-b border-blue-950/10 px-5 py-4 dark:border-white/10"><div><p className="text-[.65rem] font-semibold uppercase tracking-[.2em] text-primary dark:text-emerald-300">Price anatomy</p><h2 className="mt-1 font-heading text-xl font-semibold">Plan + usage + rollout</h2></div><Gauge className="size-5 text-primary dark:text-emerald-300" /></div><div className="grid gap-px bg-blue-950/10 sm:grid-cols-3 dark:bg-white/10">{[[Layers3, "Edition", "Enabled product scope and published limits"], [HardDrive, "Usage", "People, media, storage, and live delivery"], [Route, "Implementation", "Migration, integrations, training, and support"]].map(([Icon, title, text], index) => { const ItemIcon = Icon as typeof Boxes; return <div key={String(title)} className="relative bg-white p-5 dark:bg-[#0b1931]"><span className="font-mono text-[.6rem] text-primary/45">0{index + 1}</span><ItemIcon className="mt-7 size-5 text-primary dark:text-emerald-300" /><h3 className="mt-4 font-heading text-lg font-semibold">{String(title)}</h3><p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">{String(text)}</p>{index < 2 ? <ArrowRight className="absolute -right-3 top-1/2 z-10 hidden size-5 -translate-y-1/2 rounded-full bg-white text-emerald-500 sm:block dark:bg-[#0b1931]" /> : null}</div>; })}</div><div className="flex items-start gap-3 border-t border-blue-950/10 px-5 py-4 text-xs leading-5 text-slate-500 dark:border-white/10 dark:text-slate-300"><CircleDot className="mt-0.5 size-3.5 shrink-0 text-emerald-500" />The page displays active plan data managed in KASA Admin. Final scope should match a reviewed academy workflow.</div></div>
             </div>
-            {featureRows.map((row) => (
-              <div
-                key={row}
-                className="grid border-t border-blue-950/10 text-sm md:grid-cols-[1.2fr_repeat(3,1fr)] dark:border-white/10"
-              >
-                <div className="p-4 font-semibold text-slate-800 dark:text-white">
-                  {row}
-                </div>
-                {plans.map((plan) => {
-                  const included = plan.features.some((feature) =>
-                    feature.toLowerCase().includes(row.split(",")[0].toLowerCase().split(" ")[0]),
-                  );
-                  return (
-                    <div
-                      key={`${plan.name}-${row}`}
-                      className="border-t border-blue-950/10 p-4 md:border-l md:border-t-0 dark:border-white/10"
-                    >
-                      <span className="inline-flex items-center gap-2 font-semibold text-slate-700 dark:text-slate-200">
-                        <CheckCircle2 className="size-5 shrink-0 text-primary" aria-hidden="true" />
-                        {included || plan.highlighted ? "Included" : "Available by scope"}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
           </div>
+        </section>
 
-          <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-[2rem] border border-blue-950/10 bg-[linear-gradient(135deg,#f8fcff,#effbf5)] p-6 text-center shadow-xl shadow-blue-950/6 sm:p-8 lg:flex-row lg:text-left dark:border-white/10 dark:bg-[linear-gradient(135deg,rgba(69,145,255,0.12),rgba(88,201,138,0.09))]">
-            <div>
-              <h2 className="font-heading text-2xl font-semibold text-slate-950 dark:text-white">
-                Want exact pricing for your academy?
-              </h2>
-              <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-600 dark:text-slate-300">
-                Take a product tour and share your workflow. The team can
-                suggest the right module set and rollout path.
-              </p>
-            </div>
-            <ProductTourTrigger
-              label="Take a Product Tour"
-              variant="solid"
-              size="md"
-              className="justify-center"
-            />
+        <section id="plans" className="scroll-mt-28 border-y border-blue-950/8 bg-white px-4 py-14 sm:px-6 sm:py-16 lg:px-8 dark:border-white/8 dark:bg-[#08152a]">
+          <div className="mx-auto max-w-7xl"><div className="grid gap-6 lg:grid-cols-[.35fr_.65fr] lg:items-end"><div><p className="text-xs font-semibold uppercase tracking-[.22em] text-primary dark:text-emerald-300">Active editions</p><h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-4xl">Three starting points. One upgrade path.</h2></div><p className="max-w-3xl text-sm leading-7 text-slate-600 dark:text-slate-300">The prices, limits, billing term, and enabled features below come from active Admin pricing records. Read each row as a product entitlement—not a promise that every migration or integration is included.</p></div>
+            <div className="mt-9 overflow-hidden rounded-[1.6rem] border border-blue-950/10 dark:border-white/10">{plans.map((plan, index) => <article key={plan.name} className={`relative grid gap-6 border-b border-blue-950/10 p-5 last:border-0 sm:p-6 lg:grid-cols-[.25fr_.23fr_.36fr_.16fr] lg:items-start dark:border-white/10 ${plan.highlighted ? "bg-[linear-gradient(100deg,#effbf5,#ffffff_48%,#eef6ff)] dark:bg-[linear-gradient(100deg,rgba(42,170,116,.12),rgba(255,255,255,.035),rgba(66,133,244,.1))]" : "bg-white dark:bg-white/[.025]"}`}><div><div className="flex items-center gap-2"><span className="font-mono text-[.65rem] text-primary/45">0{index + 1}</span>{plan.highlighted ? <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[.6rem] font-bold uppercase tracking-[.12em] text-emerald-800 dark:bg-emerald-300/10 dark:text-emerald-200">Most common fit</span> : null}</div><p className="mt-6 text-[.65rem] font-semibold uppercase tracking-[.18em] text-primary dark:text-emerald-300">{plan.eyebrow}</p><h3 className="mt-2 font-heading text-3xl font-semibold">{plan.name}</h3><p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">{plan.bestFor}</p></div><div><p className="text-[.65rem] font-semibold uppercase tracking-[.16em] text-slate-400">Published price</p><p className="mt-3 font-heading text-3xl font-semibold tracking-[-.03em]">{plan.price}</p><p className="mt-3 text-xs leading-5 text-slate-500 dark:text-slate-400">{plan.note}</p></div><div><p className="text-[.65rem] font-semibold uppercase tracking-[.16em] text-slate-400">Current entitlement</p><div className="mt-3 grid gap-2 sm:grid-cols-2">{plan.features.map((feature) => <div key={feature} className="flex gap-2 text-xs font-medium leading-5 text-slate-700 dark:text-slate-200"><Check className="mt-0.5 size-3.5 shrink-0 text-emerald-600 dark:text-emerald-300" />{feature}</div>)}</div></div><div className="lg:text-right"><LeadCaptureModalTrigger endpoint={leadsEndpoint} source={`pricing-${plan.name.toLowerCase()}-page`} leadType="pricing" buttonLabel={plan.highlighted ? "Discuss this plan" : "Check plan fit"} ctaLabel={`Pricing enquiry - ${plan.name}`} modalTitle="Tell us about your academy" modalEyebrow={`${plan.name} plan enquiry`} icon={<Sparkles className="size-4" />} buttonClassName={siteButtonClasses({ size: "sm", className: "w-full justify-center lg:w-auto" })} /></div></article>)}</div>
           </div>
-        </div>
-      </section>
+        </section>
+
+        <section className="px-4 py-14 sm:px-6 sm:py-16 lg:px-8"><div className="mx-auto max-w-7xl"><div className="max-w-3xl"><p className="text-xs font-semibold uppercase tracking-[.22em] text-primary dark:text-emerald-300">What changes the final scope</p><h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-4xl">The plan is only one part of the buying decision.</h2><p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-300">Clarify these six variables against a real program or batch before expecting an exact implementation estimate.</p></div><div className="mt-9 grid gap-px overflow-hidden rounded-2xl border border-blue-950/10 bg-blue-950/10 sm:grid-cols-2 lg:grid-cols-3 dark:border-white/10 dark:bg-white/10">{costDrivers.map(([Icon, title, text], index) => <article key={title} className="bg-white p-5 dark:bg-[#0b1931]"><div className="flex items-center justify-between"><Icon className="size-5 text-primary dark:text-emerald-300" /><span className="font-mono text-[.62rem] text-primary/40">0{index + 1}</span></div><h3 className="mt-6 font-heading text-lg font-semibold">{title}</h3><p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{text}</p></article>)}</div></div></section>
+
+        <section className="bg-[#0a2852] px-4 py-14 text-white sm:px-6 sm:py-16 lg:px-8"><div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[.44fr_.56fr]"><div><p className="text-xs font-semibold uppercase tracking-[.2em] text-emerald-300">Included versus scoped</p><h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-4xl">Know which conversation you are having.</h2><p className="mt-4 text-sm leading-7 text-blue-100">A product-plan discussion confirms access to KASA capabilities and limits. An implementation discussion confirms the work needed to make those capabilities reliable for your academy.</p></div><div className="grid gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 sm:grid-cols-2"><div className="bg-[#0c3063] p-5"><Layers3 className="size-5 text-emerald-300" /><h3 className="mt-5 font-heading text-xl font-semibold">Read directly from the plan</h3><div className="mt-4 space-y-2">{["Edition and billing term", "Published price", "Enabled feature summary", "User, course, faculty, and installation limits", "Certificate rule shown for the edition"].map((item) => <div key={item} className="flex gap-2 text-sm leading-6 text-blue-100"><Check className="mt-1 size-4 shrink-0 text-emerald-300" />{item}</div>)}</div></div><div className="bg-[#0c3063] p-5"><Route className="size-5 text-amber-300" /><h3 className="mt-5 font-heading text-xl font-semibold">Confirm during scope review</h3><div className="mt-4 space-y-2">{["Data and media migration", "Custom domains and environment setup", "Payment, email, live-class, and API integrations", "Exceptional storage or usage", "Training, support, and custom workflow work"].map((item) => <div key={item} className="flex gap-2 text-sm leading-6 text-blue-100"><ArrowRight className="mt-1 size-4 shrink-0 text-amber-300" />{item}</div>)}</div></div></div></div></section>
+
+        <section className="border-b border-blue-950/8 bg-[#eef4fb] px-4 py-12 sm:px-6 lg:px-8 dark:border-white/8 dark:bg-[#08172e]"><div className="mx-auto grid max-w-7xl gap-7 lg:grid-cols-[.42fr_.58fr] lg:items-center"><div><p className="text-xs font-semibold uppercase tracking-[.2em] text-primary dark:text-emerald-300">Price your own course first</p><h2 className="mt-3 font-heading text-3xl font-semibold leading-tight">Free planning tools before the product conversation.</h2><p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">Estimate course economics and operating volume before choosing software scope.</p></div><div className="grid gap-3 sm:grid-cols-2">{[["Course pricing calculator", "/tools/course-pricing-calculator", "Model price, costs, margin, and enrolment targets."], ["Profit calculator", "/tools/profit-calculator", "Compare revenue, costs, and operating profit."], ["Batch capacity calculator", "/tools/batch-capacity-calculator", "Estimate seats, batches, faculty load, and capacity."], ["Fee receipt generator", "/tools/fee-receipt-generator", "Prepare a clean fee record for offline or manual collection."]].map(([title, href, text]) => <Link key={title} href={href} className="group rounded-xl border border-blue-950/10 bg-white p-4 transition hover:border-primary/30 dark:border-white/10 dark:bg-white/[.04]"><div className="flex items-center justify-between"><h3 className="font-heading text-base font-semibold">{title}</h3><ArrowRight className="size-4 text-primary transition group-hover:translate-x-1" /></div><p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">{text}</p></Link>)}</div></div></section>
+
+        <section className="px-4 py-14 sm:px-6 sm:py-16 lg:px-8"><div className="mx-auto grid max-w-7xl gap-9 lg:grid-cols-[.34fr_.66fr]"><div><p className="text-xs font-semibold uppercase tracking-[.2em] text-primary dark:text-emerald-300">Pricing questions</p><h2 className="mt-3 font-heading text-3xl font-semibold leading-tight">Clear boundaries before purchase.</h2><div className="mt-6 rounded-2xl border border-blue-950/10 bg-white p-5 dark:border-white/10 dark:bg-white/[.04]"><MessageCircleMore className="size-5 text-primary dark:text-emerald-300" /><p className="mt-4 text-sm font-semibold">Need a number for your exact academy?</p><p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">Share one active program, expected users, media, integrations, migration needs, and support expectations.</p><ProductTourTrigger label="Request a scoped conversation" variant="solid" size="sm" className="mt-5 w-full justify-center" /></div></div><div className="border-t border-blue-950/10 dark:border-white/10">{pricingFaqs.map(([question, answer], index) => <details key={question} open={index === 0} className="group border-b border-blue-950/10 py-5 dark:border-white/10"><summary className="flex cursor-pointer list-none items-start justify-between gap-5"><span className="flex gap-3"><span className="mt-1 font-mono text-[.62rem] text-primary/45">0{index + 1}</span><span className="font-heading text-base font-semibold leading-7 sm:text-lg">{question}</span></span><span className="grid size-8 shrink-0 place-items-center rounded-full border border-blue-950/15 text-primary transition group-open:rotate-45 dark:border-white/15 dark:text-emerald-300">+</span></summary><p className="mt-3 max-w-3xl pl-10 pr-10 text-sm leading-7 text-slate-600 dark:text-slate-300">{answer}</p></details>)}</div></div></section>
+      </main>
     </>
   );
 }

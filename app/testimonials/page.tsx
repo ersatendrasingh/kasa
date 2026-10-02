@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
-import { PageHero } from "@/components/site/page-hero";
-import { TestimonialsSection } from "@/components/site/testimonials-section";
-import {
-  BreadcrumbStructuredData,
-  WebPageStructuredData,
-} from "@/components/site/structured-data";
+import Link from "next/link";
+import { ArrowRight, BadgeIndianRupee, BookOpenCheck, Check, CircleDot, ClipboardCheck, GraduationCap, Layers3, MessageCircleMore, PlayCircle, Radio, Route, ShieldCheck, Sparkles, Store, UsersRound } from "lucide-react";
+import { ProductTourTrigger } from "@/components/site/product-tour-trigger";
+import { BreadcrumbStructuredData, WebPageStructuredData } from "@/components/site/structured-data";
 
 export const metadata: Metadata = {
   title: "KASA LMS Use Cases for Coaching Institutes and Academies",
@@ -16,37 +14,65 @@ export const metadata: Metadata = {
 };
 
 export default function TestimonialsPage() {
+  const startingPoints = [
+    { number: "01", icon: Store, title: "Sell under your own brand", text: "Replace marketplace pages and manual payment links with a branded catalogue, checkout, order, and learner-access flow.", href: "/features/course-selling-platform", tone: "bg-[#eaf3ff] dark:bg-blue-400/10" },
+    { number: "02", icon: Radio, title: "Run repeatable live batches", text: "Keep schedules, faculty, joining details, attendance context, resources, and replays attached to the right batch.", href: "/features/live-class-management", tone: "bg-[#eafaf4] dark:bg-emerald-400/10" },
+    { number: "03", icon: MessageCircleMore, title: "Turn enquiries into admissions", text: "Give counsellors the source, program interest, notes, ownership, and follow-up state before a lead becomes a learner.", href: "/features/education-crm-leads", tone: "bg-[#f4efff] dark:bg-violet-400/10" },
+    { number: "04", icon: ClipboardCheck, title: "Connect learning with proof", text: "Bring tests, assignment review, completion rules, results, and branded certificates into the learner record.", href: "/features/exams-assignments-certificates", tone: "bg-[#fff4e5] dark:bg-amber-400/10" },
+    { number: "05", icon: UsersRound, title: "Give every role the right view", text: "Admins, faculty, counsellors, and learners work differently without losing the shared context behind the academy.", href: "/features/student-faculty-management", tone: "bg-[#eef5ff] dark:bg-sky-400/10" },
+    { number: "06", icon: Layers3, title: "Replace scattered operations", text: "Connect programs, people, payments, permissions, communication, and reporting instead of rebuilding data across tools.", href: "/features/admin-dashboard-reporting", tone: "bg-[#edf8ef] dark:bg-green-400/10" },
+  ];
+
   return (
     <>
-      <BreadcrumbStructuredData
-        items={[
-          { name: "Home", href: "/" },
-          { name: "Use cases", href: "/testimonials" },
-        ]}
-      />
-      <WebPageStructuredData
-        name="KASA LMS Use Cases"
-        description="Use cases for academy teams using KASA to sell courses, run live batches, manage learners, and issue certificates."
-        href="/testimonials"
-        pageType="WebPage"
-      />
-      <PageHero
-        eyebrow="Use cases"
-        title="Academy teams can use KASA to run cleaner, faster learning operations."
-        description="See how coaching institutes, trainers, and EdTech teams can move from scattered course links, payment follow-ups, and manual learner tracking to one branded LMS workspace."
-        points={[
-          "Course storefront, checkout, and learner access work together",
-          "Live batches, replays, reminders, and certificates stay connected",
-          "Admins get clearer visibility across courses, payments, and progress",
-        ]}
-        primaryLabel="Book a Demo"
-        variant="solution"
-        breadcrumbs={[
-          { label: "Home", href: "/" },
-          { label: "Use cases" },
-        ]}
-      />
-      <TestimonialsSection />
+      <BreadcrumbStructuredData items={[{ name: "Home", href: "/" }, { name: "Use cases", href: "/testimonials" }]} />
+      <WebPageStructuredData name="KASA LMS Use Cases" description="Practical KASA workflows for academy teams selling courses, running batches, managing learners, and proving outcomes." href="/testimonials" pageType="WebPage" />
+
+      <main className="overflow-hidden bg-[#f8fafc] text-slate-950 dark:bg-[#061126] dark:text-white">
+        <section className="relative px-4 pb-14 pt-32 sm:px-6 sm:pb-16 sm:pt-36 lg:px-8">
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,#eef5ff_0%,#ffffff_48%,#eafaf4_100%)] dark:bg-[linear-gradient(115deg,#08172e_0%,#071126_48%,#09241f_100%)]" />
+          <div className="pointer-events-none absolute -right-28 top-24 size-[28rem] rounded-full border-[4rem] border-emerald-300/10" />
+          <div className="relative mx-auto max-w-7xl">
+            <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400"><Link href="/" className="hover:text-primary">Home</Link><span>/</span><span className="text-slate-900 dark:text-white">Use cases</span></nav>
+
+            <div className="mt-8 grid gap-10 lg:grid-cols-[.8fr_1.2fr] lg:items-center xl:gap-16">
+              <div><div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[.22em] text-primary dark:text-emerald-300"><Route className="size-4" />Use-case library</div><h1 className="mt-5 max-w-xl font-heading text-[2.45rem] font-semibold leading-[1.05] tracking-[-.04em] sm:text-5xl lg:text-[3.45rem]">Do not start with every feature.<span className="mt-1 block bg-[image:var(--stat-gradient)] bg-clip-text text-transparent">Start with the work that breaks first.</span></h1><p className="mt-6 max-w-xl text-base leading-8 text-slate-600 dark:text-slate-300">KASA use cases begin with a real operating problem: selling a program, running a batch, following up an enquiry, managing learner access, or proving completion.</p><div className="mt-7 flex flex-col gap-3 sm:flex-row"><ProductTourTrigger label="Map my use case" variant="solid" size="sm" className="justify-center" /><Link href="/contact" className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-primary/20 bg-white/70 px-5 text-sm font-semibold text-primary transition hover:bg-white dark:border-white/15 dark:bg-white/5 dark:text-white">Discuss a workflow <ArrowRight className="size-4" /></Link></div></div>
+
+              <div className="relative">
+                <div className="absolute -left-3 top-8 hidden h-[calc(100%-4rem)] w-px bg-blue-950/10 sm:block dark:bg-white/10" />
+                <div className="overflow-hidden rounded-[1.6rem] border border-blue-950/10 bg-white/85 shadow-[0_28px_80px_-45px_rgba(20,65,130,.45)] backdrop-blur dark:border-white/10 dark:bg-white/[.045]">
+                  <div className="flex items-center justify-between border-b border-blue-950/10 px-5 py-4 dark:border-white/10"><span className="text-[.65rem] font-semibold uppercase tracking-[.2em] text-primary dark:text-emerald-300">Choose the first broken handoff</span><span className="font-mono text-[.62rem] text-slate-400">01—05</span></div>
+                  {[['Enquiry', 'Admission', 'Who follows up, with what context?'], ['Payment', 'Access', 'What should unlock after an order?'], ['Schedule', 'Class', 'Who sees the right session and resources?'], ['Learning', 'Review', 'What needs faculty attention?'], ['Completion', 'Proof', 'What makes a certificate credible?']].map(([from, to, question], index) => <div key={from} className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 border-b border-blue-950/[.07] px-5 py-3.5 last:border-0 dark:border-white/8"><div><span className="mr-2 font-mono text-[.62rem] text-primary/45">0{index + 1}</span><span className="text-sm font-semibold">{from}</span></div><ArrowRight className="size-4 text-emerald-500" /><div><span className="text-sm font-semibold">{to}</span><p className="mt-0.5 text-[.68rem] leading-4 text-slate-500 dark:text-slate-400">{question}</p></div></div>)}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="border-y border-blue-950/8 bg-white px-4 py-14 sm:px-6 sm:py-16 lg:px-8 dark:border-white/8 dark:bg-[#08152a]">
+          <div className="mx-auto max-w-7xl"><div className="grid gap-6 lg:grid-cols-[.35fr_.65fr] lg:items-end"><div><p className="text-xs font-semibold uppercase tracking-[.22em] text-primary dark:text-emerald-300">Find your starting point</p><h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-4xl">Six reasons teams look for KASA.</h2></div><p className="max-w-3xl text-sm leading-7 text-slate-600 dark:text-slate-300">These are practical scenarios, not customer claims. Select the operating problem closest to yours, then explore the feature and implementation details behind it.</p></div>
+            <div className="mt-9 grid gap-3 md:grid-cols-2 lg:grid-cols-3">{startingPoints.map((item) => <Link key={item.number} href={item.href} className={`group relative overflow-hidden rounded-2xl border border-blue-950/10 p-5 transition hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-950/8 dark:border-white/10 ${item.tone}`}><div className="flex items-center justify-between"><span className="font-mono text-[.65rem] text-primary/55 dark:text-emerald-300/60">{item.number}</span><item.icon className="size-5 text-primary dark:text-emerald-300" /></div><h3 className="mt-8 font-heading text-xl font-semibold">{item.title}</h3><p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">{item.text}</p><span className="mt-5 inline-flex items-center gap-2 text-xs font-semibold text-primary dark:text-emerald-300">Explore this workflow <ArrowRight className="size-3.5 transition group-hover:translate-x-1" /></span></Link>)}</div>
+          </div>
+        </section>
+
+        <section className="px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
+          <div className="mx-auto max-w-7xl"><div className="max-w-3xl"><p className="text-xs font-semibold uppercase tracking-[.22em] text-primary dark:text-emerald-300">Three operating stories</p><h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-4xl">See the workflow before and after the software.</h2></div>
+            <div className="mt-9 space-y-4">
+              <CaseFile number="01" icon={PlayCircle} audience="Recorded-course academy" title="A purchase should become a learning journey—not an admin ticket." before="A learner pays through a link, sends a screenshot, waits for confirmation, receives credentials manually, and asks where the course lives." flow={["Branded program page", "Payment and order record", "Automatic learner access", "Progress and support context"]} outcome="The team spends less time proving who paid and more time improving activation, completion, and learner support." href="/features/course-selling-platform" />
+              <CaseFile number="02" icon={Radio} audience="Coaching institute" title="A live class should leave a usable record after it ends." before="Schedules move in chat, joining links get buried, absent learners ask for replays, and faculty resources sit in separate folders." flow={["Batch and faculty ownership", "Visible class schedule", "Session resources and replay", "Attendance and next action"]} outcome="Every learner and team member can return to the same batch context before, during, and after the class." href="/features/live-class-management" reverse />
+              <CaseFile number="03" icon={BookOpenCheck} audience="Skill or certification program" title="A certificate should point back to real completion evidence." before="Course access, assignment files, test results, manual review, and certificate creation happen in separate workflows." flow={["Defined completion rule", "Submission or assessment", "Faculty review and result", "Branded completion proof"]} outcome="The institute can explain why a credential was issued instead of treating the certificate as a decorative download." href="/features/exams-assignments-certificates" />
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-[#08234a] px-4 py-14 text-white sm:px-6 sm:py-16 lg:px-8"><div className="mx-auto max-w-7xl"><div className="grid gap-8 lg:grid-cols-[.42fr_.58fr]"><div><div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[.2em] text-emerald-300"><ShieldCheck className="size-4" />What a useful outcome looks like</div><h2 className="mt-4 font-heading text-3xl font-semibold leading-tight sm:text-4xl">Better visibility—not imaginary guarantees.</h2><p className="mt-4 text-sm leading-7 text-blue-100">KASA cannot promise admissions, revenue, attendance, or academic results. It can make the work behind those outcomes more connected, visible, and accountable.</p></div><div className="grid gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 sm:grid-cols-2">{[[BadgeIndianRupee, "Commercial clarity", "Orders, fees, access, and program context refer to the same learner journey."], [GraduationCap, "Academic continuity", "Schedules, resources, submissions, progress, and proof remain attached to learning."], [UsersRound, "Role clarity", "Each team member sees the work they own without sharing one overloaded dashboard."], [CircleDot, "Operational signals", "Exceptions and next actions become easier to spot before they turn into support chaos."]].map(([Icon, title, text]) => { const ItemIcon = Icon as typeof Sparkles; return <article key={String(title)} className="bg-[#0b2b59] p-5"><ItemIcon className="size-5 text-emerald-300" /><h3 className="mt-5 font-heading text-lg font-semibold">{String(title)}</h3><p className="mt-2 text-sm leading-6 text-blue-100">{String(text)}</p></article>; })}</div></div></div></section>
+
+        <section className="px-4 py-14 sm:px-6 sm:py-16 lg:px-8"><div className="mx-auto flex max-w-7xl flex-col gap-7 border-b border-t border-blue-950/10 py-9 lg:flex-row lg:items-center lg:justify-between dark:border-white/10"><div><p className="text-xs font-semibold uppercase tracking-[.2em] text-primary dark:text-emerald-300">Bring your real scenario</p><h2 className="mt-3 max-w-3xl font-heading text-3xl font-semibold leading-tight">We will map one use case before showing the platform.</h2><p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 dark:text-slate-300">Share the current tools, people involved, broken handoff, expected users, and the first result that matters.</p></div><div className="flex shrink-0 flex-col gap-3 sm:flex-row"><ProductTourTrigger label="Map my workflow" variant="solid" size="sm" className="justify-center" /><Link href="/contact" className="inline-flex h-10 items-center justify-center gap-2 rounded-full border border-primary/20 px-5 text-sm font-semibold text-primary dark:border-white/15 dark:text-white">Contact KASA <ArrowRight className="size-4" /></Link></div></div></section>
+      </main>
     </>
   );
+}
+
+function CaseFile({ number, icon: Icon, audience, title, before, flow, outcome, href, reverse = false }: { number: string; icon: typeof PlayCircle; audience: string; title: string; before: string; flow: string[]; outcome: string; href: string; reverse?: boolean }) {
+  return <article className="overflow-hidden rounded-[1.5rem] border border-blue-950/10 bg-white dark:border-white/10 dark:bg-white/[.035]"><div className={`grid lg:grid-cols-[.38fr_.62fr] ${reverse ? "lg:[&>*:first-child]:order-2" : ""}`}><div className="relative border-b border-blue-950/10 bg-[#edf4fc] p-6 lg:border-b-0 lg:border-r dark:border-white/10 dark:bg-white/[.045]"><div className="flex items-center justify-between"><span className="font-mono text-xs text-primary/55 dark:text-emerald-300/60">CASE / {number}</span><Icon className="size-5 text-primary dark:text-emerald-300" /></div><p className="mt-8 text-xs font-semibold uppercase tracking-[.18em] text-primary dark:text-emerald-300">{audience}</p><h3 className="mt-3 font-heading text-2xl font-semibold leading-tight">{title}</h3><p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-300"><strong className="text-slate-950 dark:text-white">Before:</strong> {before}</p></div><div className="p-6"><p className="text-[.65rem] font-semibold uppercase tracking-[.2em] text-slate-400">Connected operating path</p><div className="mt-5 grid gap-2 sm:grid-cols-4">{flow.map((step, index) => <div key={step} className="relative rounded-xl border border-blue-950/10 p-3 dark:border-white/10"><span className="font-mono text-[.6rem] text-primary/50">0{index + 1}</span><p className="mt-3 text-sm font-semibold leading-5">{step}</p>{index < flow.length - 1 ? <ArrowRight className="absolute -right-3 top-1/2 z-10 hidden size-4 -translate-y-1/2 rounded-full bg-white text-emerald-500 sm:block dark:bg-[#09162c]" /> : null}</div>)}</div><div className="mt-5 flex items-start gap-3 border-t border-blue-950/10 pt-5 dark:border-white/10"><span className="grid size-8 shrink-0 place-items-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-300/10 dark:text-emerald-300"><Check className="size-4" /></span><div><p className="text-[.65rem] font-semibold uppercase tracking-[.16em] text-slate-400">Useful outcome</p><p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{outcome}</p><Link href={href} className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-primary dark:text-emerald-300">See implementation details <ArrowRight className="size-3.5" /></Link></div></div></div></div></article>;
 }
