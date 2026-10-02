@@ -52,13 +52,12 @@ export default function WhyKasaPage() {
       <WebPageStructuredData name="Why KASA" description="The product thinking behind KASA and the connected academy workflow it is built to support." href="/why-kasa" />
 
       <main className="overflow-hidden bg-[#f8f7f2] text-slate-950 dark:bg-[#061126] dark:text-white">
-        <section className="relative px-4 pb-14 pt-28 sm:px-6 sm:pb-16 sm:pt-32 lg:px-8">
+        <section className="relative px-4 pb-14 pt-32 sm:px-6 sm:pb-16 sm:pt-36 lg:px-8">
           <div className="pointer-events-none absolute inset-0 overflow-hidden"><div className="absolute -left-48 top-16 size-[30rem] rounded-full bg-blue-200/55 blur-[120px] dark:bg-blue-500/10" /><div className="absolute -right-40 top-20 size-[34rem] rounded-full bg-emerald-200/55 blur-[130px] dark:bg-emerald-400/10" /></div>
           <div className="relative mx-auto max-w-7xl">
-            <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400"><Link href="/" className="transition hover:text-primary">Home</Link><span aria-hidden="true">/</span><span className="text-slate-800 dark:text-white">Why KASA</span></nav>
-
-            <div className="mt-9 grid gap-8 border-b border-blue-950/10 pb-9 dark:border-white/10 lg:grid-cols-[.28fr_.72fr] lg:items-end">
+            <div className="grid gap-8 border-b border-blue-950/10 pb-9 dark:border-white/10 lg:grid-cols-[.28fr_.72fr] lg:items-end">
               <div>
+                <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400"><Link href="/" className="transition hover:text-primary">Home</Link><span aria-hidden="true">/</span><span className="text-slate-800 dark:text-white">Why KASA</span></nav>
                 <p className="text-xs font-semibold uppercase tracking-[.24em] text-primary dark:text-emerald-300">Company thesis · 01</p>
                 <p className="mt-4 max-w-xs text-sm leading-6 text-slate-500 dark:text-slate-400">We did not build another place to upload videos. We built continuity for the institution around them.</p>
               </div>
