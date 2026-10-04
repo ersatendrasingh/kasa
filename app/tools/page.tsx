@@ -1,224 +1,29 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
-import { CheckCircle2, Search, Sparkles } from "lucide-react";
+import { ArrowRight, BookOpenCheck, Calculator, Clock3, FileText, GraduationCap, Sparkles, WandSparkles } from "lucide-react";
 import { siteContainerClasses } from "@/components/site/site-container";
 import { ToolBreadcrumb } from "@/components/tools/tool-hero-extras";
 import { ToolsDirectory } from "@/components/tools/tools-directory";
 
 export const metadata: Metadata = {
   title: "Free AI Tools for Students and Teachers - Calculators, Planners, Question Papers",
-  description:
-    "Use free AI tools and education calculators including attendance calculator, GPA calculator, study timetable generator, AI question paper generator, marks calculator, and exam planning tools.",
-  keywords: [
-    "free AI tools",
-    "AI tools for teachers",
-    "AI tools for students",
-    "AI question paper generator",
-    "AI quiz generator",
-    "AI lesson plan generator",
-    "AI worksheet generator",
-    "AI report card generator",
-    "AI assignment generator",
-    "AI final year project kit generator",
-    "final year project ideas",
-    "BTech project ideas",
-    "BCA project with documentation",
-    "project viva questions",
-    "project zip download",
-    "online quiz generator",
-    "free student tools",
-    "attendance calculator",
-    "marks percentage calculator",
-    "GPA calculator",
-    "CGPA calculator",
-    "grade calculator",
-    "study timetable generator",
-    "exam study planner",
-    "course pricing calculator",
-    "course fee calculator",
-    "online course pricing calculator",
-    "academy profit calculator",
-    "coaching institute profit calculator",
-    "AI profit strategy",
-    "fee receipt generator",
-    "coaching fee receipt generator",
-    "tuition fee receipt generator",
-    "admission form generator",
-    "student admission form generator",
-    "coaching admission form",
-    "batch capacity calculator",
-    "coaching seats calculator",
-    "classroom capacity calculator",
-    "certificate generator",
-    "course completion certificate generator",
-    "printable certificate maker",
-  ],
-  alternates: {
-    canonical: "/tools",
-  },
+  description: "Use free AI tools and education calculators including attendance calculator, GPA calculator, study timetable generator, AI question paper generator, marks calculator, and exam planning tools.",
+  keywords: ["free AI tools", "AI tools for teachers", "AI tools for students", "AI question paper generator", "attendance calculator", "GPA calculator", "study timetable generator", "course pricing calculator", "certificate generator"],
+  alternates: { canonical: "/tools" },
 };
 
-const popularSearches = [
-  { label: "final year project ideas", href: "/tools/final-year-project-kit-generator" },
-  { label: "AI project kit generator", href: "/tools/final-year-project-kit-generator" },
-  { label: "BTech project with documentation", href: "/tools/final-year-project-kit-generator" },
-  { label: "free ATS checker", href: "/tools/resume-ats-checker" },
-  { label: "AI resume checker", href: "/tools/resume-ats-checker" },
-  { label: "75% attendance calculator", href: "/tools/attendance-calculator" },
-  { label: "marks percentage calculator", href: "/tools/marks-percentage-calculator" },
-  { label: "CGPA calculator", href: "/tools/cgpa-percentage-converter" },
-  { label: "weighted grade calculator", href: "/tools/grade-calculator" },
-  { label: "final exam calculator", href: "/tools/final-exam-calculator" },
-  { label: "study timetable generator", href: "/tools/study-timetable-generator" },
-  { label: "CGPA to percentage converter", href: "/tools/cgpa-percentage-converter" },
-  { label: "board percentage calculator", href: "/tools/board-percentage-calculator" },
-  { label: "scholarship eligibility calculator", href: "/tools/scholarship-eligibility-calculator" },
-  { label: "AI quiz generator", href: "/tools/quiz-generator" },
-  { label: "AI lesson plan generator", href: "/tools/lesson-plan-generator" },
-  { label: "AI worksheet generator", href: "/tools/worksheet-generator" },
-  { label: "AI report card generator", href: "/tools/report-card-generator" },
-  { label: "AI assignment generator", href: "/tools/assignment-generator" },
-  { label: "AI question paper generator", href: "/tools/question-paper-generator" },
-  { label: "exam study planner", href: "/tools/study-hours-calculator" },
-  { label: "course pricing calculator", href: "/tools/course-pricing-calculator" },
-  { label: "academy profit calculator", href: "/tools/profit-calculator" },
-  { label: "fee receipt generator", href: "/tools/fee-receipt-generator" },
-  { label: "admission form generator", href: "/tools/admission-form-generator" },
-  { label: "batch capacity calculator", href: "/tools/batch-capacity-calculator" },
-  { label: "certificate generator", href: "/tools/certificate-generator" },
-];
+const starts = [
+  [Calculator, "Calculate", "Attendance, marks, GPA and exam scores", "/tools/attendance-calculator", "bg-[#e7f0ff] text-[#2874d4]"],
+  [Clock3, "Plan", "Study hours, timetables and revision", "/tools/study-timetable-generator", "bg-[#edf9f4] text-[#16886f]"],
+  [WandSparkles, "Generate", "Questions, quizzes, worksheets and more", "/tools/question-paper-generator", "bg-[#fff0f7] text-[#d64b88]"],
+  [FileText, "Prepare", "Receipts, forms and certificates", "/tools/certificate-generator", "bg-[#fff7e6] text-[#b96b13]"],
+] as const;
 
 export default function ToolsPage() {
-  return (
-    <div className="relative overflow-hidden bg-[#eef7ff] text-slate-950 dark:bg-surface-strong dark:text-white">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_18%,rgba(43,168,255,0.24),transparent_25rem),radial-gradient(circle_at_18%_78%,rgba(34,181,115,0.08),transparent_22rem),linear-gradient(180deg,#ffffff_0%,#eef7ff_48%,#f8fbff_100%)] dark:bg-[radial-gradient(circle_at_74%_24%,rgba(88,201,138,0.2),transparent_23rem),linear-gradient(180deg,rgba(18,35,67,0.96),rgba(6,17,38,1))]" />
-
-      <section className="relative pb-10 pt-[9.25rem] sm:pt-[10.25rem] lg:pb-14 lg:pt-[10.75rem]">
-        <div
-          className={siteContainerClasses({
-            className:
-              "grid gap-8 text-center lg:grid-cols-[0.88fr_1.12fr] lg:items-center lg:text-left",
-          })}
-        >
-          <div className="mx-auto max-w-3xl lg:mx-0">
-            <div className="inline-flex max-w-full items-center justify-center gap-2 rounded-full border border-blue-950/10 bg-white/78 px-3.5 py-2 text-center text-[0.68rem] font-semibold uppercase leading-5 tracking-[0.16em] text-primary shadow-sm shadow-blue-950/5 dark:border-primary/25 dark:bg-primary/10 sm:px-4 sm:text-xs sm:leading-none sm:tracking-[0.18em]">
-              <Sparkles className="size-3.5 animate-pulse" aria-hidden="true" />
-              <span>Free AI education tools</span>
-            </div>
-            <ToolBreadcrumb current="Free AI Tools" />
-            <h1 className="mt-6 max-w-3xl font-heading text-4xl font-semibold leading-[1.08] text-slate-950 sm:text-5xl lg:text-[3.25rem] xl:text-[3.7rem] dark:text-white">
-              Free AI tools that help students and teachers work faster.
-            </h1>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-slate-700 sm:text-lg dark:text-muted">
-              Fast calculators, planners, converters, and AI generators for attendance, marks percentage, GPA, CGPA, weighted
-              grades, final exam scores, study planning, and printable teacher question papers. No signup, no clutter, just useful outputs
-              students and teachers can save, print, and share.
-            </p>
-
-            <div className="mx-auto mt-7 flex max-w-2xl flex-wrap justify-center gap-2 lg:mx-0 lg:justify-start">
-              {popularSearches.map((search) => (
-                <Link
-                  key={search.label}
-                  href={search.href}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-blue-950/10 bg-white/70 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:-translate-y-0.5 hover:border-primary/35 hover:bg-white hover:text-primary dark:border-white/10 dark:bg-white/6 dark:text-white/70 dark:hover:text-emerald-200"
-                >
-                  <Search className="size-3.5 text-primary dark:text-emerald-300" aria-hidden="true" />
-                  {search.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <div className="relative mx-auto w-full max-w-[42rem] lg:max-w-none">
-            <div className="relative min-h-[22rem] overflow-hidden rounded-[2rem] border border-white/80 bg-white/70 p-4 shadow-2xl shadow-blue-950/12 backdrop-blur dark:border-white/10 dark:bg-white/[0.04] dark:shadow-black/25 sm:min-h-[28rem] sm:p-6">
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_22%,rgba(43,168,255,0.15),transparent_16rem),radial-gradient(circle_at_78%_70%,rgba(34,181,115,0.12),transparent_18rem)]" />
-              <div className="relative z-10 flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-primary dark:text-emerald-200">
-                    AI tools hub
-                  </p>
-                  <h2 className="mt-2 max-w-sm font-heading text-2xl font-semibold leading-tight text-slate-950 dark:text-white">
-                    Calculate, plan, generate, save, and share in one place.
-                  </h2>
-                </div>
-                <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-200">
-                  Free to use
-                </span>
-              </div>
-
-              <div className="relative z-0 mx-auto mt-2 flex justify-center sm:mt-0">
-                <Image
-                  src="/student-tools-hero.png"
-                  alt="Student using online calculators and study planning tools"
-                  width={980}
-                  height={760}
-                  priority
-                  className="w-full max-w-[42rem] object-contain drop-shadow-[0_24px_36px_rgba(15,40,80,0.12)]"
-                  sizes="(min-width: 1024px) 42rem, 92vw"
-                />
-              </div>
-
-              <div className="absolute left-5 top-[8.75rem] z-20 hidden max-w-[12rem] rounded-2xl border border-blue-950/10 bg-white/92 p-3 shadow-xl shadow-blue-950/12 backdrop-blur dark:border-white/10 dark:bg-slate-950/70 sm:block">
-                <div className="text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-300">
-                  Study plan
-                </div>
-                <div className="mt-1 font-heading text-2xl font-semibold text-slate-950 dark:text-white">
-                  3 sessions
-                </div>
-              </div>
-
-              <div className="absolute bottom-6 right-5 z-20 grid w-[13.5rem] gap-2 rounded-2xl border border-blue-950/10 bg-white/92 p-3 shadow-xl shadow-blue-950/12 backdrop-blur dark:border-white/10 dark:bg-slate-950/70">
-                {[
-                  ["GPA", "8.4"],
-                  ["Board %", "86.2%"],
-                  ["AI paper", "Ready"],
-                ].map(([label, value]) => (
-                  <div key={label} className="flex items-center justify-between gap-3 rounded-xl bg-blue-50/75 px-3 py-2 dark:bg-white/[0.06]">
-                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-300">{label}</span>
-                    <span className="text-sm font-semibold text-slate-950 dark:text-white">{value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="relative pb-12">
-        <div className={siteContainerClasses()}>
-          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-primary dark:text-emerald-200">
-                Choose a tool
-              </p>
-              <h2 className="mt-2 font-heading text-3xl font-semibold text-slate-950 dark:text-white">
-                Free tools library
-              </h2>
-            </div>
-            <p className="max-w-xl text-sm leading-6 text-slate-600 dark:text-slate-300">
-              Calculate attendance, marks, GPA, weighted grades, study plans, and generate teacher-ready AI papers without creating an account.
-            </p>
-          </div>
-
-          <ToolsDirectory />
-        </div>
-      </section>
-
-      <section className="relative border-y border-blue-950/10 bg-white/72 py-10 backdrop-blur dark:border-white/10 dark:bg-white/[0.04]">
-        <div className={siteContainerClasses({ className: "grid gap-4 md:grid-cols-3" })}>
-          {[
-            "AI-powered and student-first tools for attendance, marks, grades, GPA, question papers, and exam planning.",
-            "Useful outputs students can copy, download, print, email, and share.",
-            "SEO-focused tools built around real student and teacher search intent.",
-          ].map((point) => (
-            <div key={point} className="flex gap-3 rounded-[1.1rem] border border-blue-950/10 bg-white p-5 dark:border-white/10 dark:bg-slate-950/40">
-              <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-primary dark:text-emerald-300" aria-hidden="true" />
-              <p className="text-sm leading-6 text-slate-700 dark:text-slate-200">{point}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-    </div>
-  );
+  return <main className="overflow-hidden bg-[#f9fcff] text-slate-950 dark:bg-[#071226] dark:text-white">
+    <section className="relative isolate px-4 pb-18 pt-28 sm:px-6 sm:pt-34 lg:px-8"><div className="absolute inset-0 -z-20 bg-[radial-gradient(circle_at_10%_18%,rgba(75,145,255,.18),transparent_27rem),radial-gradient(circle_at_85%_12%,rgba(72,202,160,.16),transparent_27rem),linear-gradient(180deg,#f9fcff_0%,#edf6ff_100%)] dark:bg-[radial-gradient(circle_at_10%_18%,rgba(75,145,255,.22),transparent_27rem),radial-gradient(circle_at_85%_12%,rgba(72,202,160,.14),transparent_27rem),linear-gradient(180deg,#071226_0%,#0a1931_100%)]" /><div className="pointer-events-none absolute inset-0 -z-10 opacity-45 [background-image:radial-gradient(rgba(38,114,211,.16)_1px,transparent_1px)] [background-size:18px_18px] dark:opacity-20" /><div className={siteContainerClasses({ className: "relative" })}><ToolBreadcrumb current="Free AI Tools" /><div className="mt-10 grid gap-10 lg:grid-cols-[.9fr_1.1fr] lg:items-center"><div><p className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/80 px-3.5 py-2 text-[.68rem] font-bold uppercase tracking-[.18em] text-primary shadow-sm dark:border-white/10 dark:bg-white/[.06] dark:text-emerald-200"><Sparkles className="size-3.5" />Free tools for learning</p><h1 className="mt-6 max-w-3xl font-heading text-4xl font-semibold leading-[1.04] tracking-[-.045em] sm:text-6xl">Your everyday <span className="text-primary dark:text-emerald-200">study sidekick.</span></h1><p className="mt-6 max-w-xl text-base leading-8 text-slate-600 sm:text-lg dark:text-slate-300">Fast calculators, focused planners and practical AI generators for the little academic tasks that should not take all day.</p><div className="mt-8 flex flex-col gap-3 sm:flex-row"><Link href="#tool-library" className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-semibold text-white shadow-xl shadow-blue-900/15">Explore free tools <ArrowRight className="size-4" /></Link><Link href="/tools/final-year-project-kit-generator" className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-primary/20 bg-white/75 px-6 text-sm font-semibold text-primary transition hover:bg-white dark:border-white/15 dark:bg-white/[.06] dark:text-white">Try project kit <ArrowRight className="size-4" /></Link></div><div className="mt-10 grid max-w-xl grid-cols-3 gap-2 text-center text-xs font-semibold text-slate-600 dark:text-slate-300"><span className="rounded-xl border border-blue-950/8 bg-white/65 p-3 dark:border-white/10 dark:bg-white/[.05]">No signup</span><span className="rounded-xl border border-blue-950/8 bg-white/65 p-3 dark:border-white/10 dark:bg-white/[.05]">Always free</span><span className="rounded-xl border border-blue-950/8 bg-white/65 p-3 dark:border-white/10 dark:bg-white/[.05]">Ready to share</span></div></div><div className="relative mx-auto w-full max-w-2xl"><div className="absolute -inset-5 -z-10 rounded-[3rem] bg-[#cde8ff]/65 blur-2xl dark:bg-primary/20" /><div className="relative rounded-[2rem] border border-white bg-white/85 p-4 shadow-[0_30px_80px_-45px_rgba(22,83,160,.6)] backdrop-blur dark:border-white/10 dark:bg-[#10213d]/80 sm:p-6"><div className="flex items-center justify-between"><div><p className="text-xs font-bold uppercase tracking-[.16em] text-primary dark:text-emerald-200">Today&apos;s study board</p><p className="mt-1 text-sm text-slate-500 dark:text-slate-300">One clear next step at a time.</p></div><span className="grid size-10 place-items-center rounded-2xl bg-[#eaf6f2] text-[#16886f] dark:bg-emerald-300/10 dark:text-emerald-200"><BookOpenCheck className="size-5" /></span></div><div className="mt-6 grid gap-3 sm:grid-cols-[1.12fr_.88fr]"><div className="rounded-[1.35rem] bg-[#eaf4ff] p-5 dark:bg-[#12345d]"><p className="text-xs font-bold uppercase tracking-[.15em] text-primary dark:text-blue-200">Study plan</p><h2 className="mt-3 font-heading text-2xl font-semibold leading-tight">3 focused sessions for your next exam.</h2><div className="mt-7 space-y-2">{[["Maths revision", "45 min", "w-[82%]"], ["Physics practice", "35 min", "w-[64%]"], ["Chemistry notes", "25 min", "w-[48%]"]].map(([title, time, width]) => <div key={title}><div className="flex justify-between text-xs font-semibold"><span>{title}</span><span className="text-slate-500 dark:text-blue-200">{time}</span></div><div className="mt-2 h-2 rounded-full bg-white/75 dark:bg-white/15"><div className={`h-full rounded-full bg-primary ${width}`} /></div></div>)}</div></div><div className="grid gap-3">{[["Attendance", "74%", "bg-[#edf9f4] text-[#16886f]"], ["GPA", "8.4", "bg-[#fff0f7] text-[#d64b88]"], ["Question paper", "Ready", "bg-[#fff7e6] text-[#b96b13]"]].map(([label, value, tone]) => <div key={label} className={`flex flex-col justify-between rounded-[1.2rem] p-4 dark:bg-white/[.06] ${tone}`}><p className="text-xs font-semibold opacity-80">{label}</p><p className="mt-4 font-heading text-2xl font-semibold">{value}</p></div>)}</div></div><div className="mt-4 grid grid-cols-3 gap-2 text-center text-[.65rem] font-bold uppercase tracking-[.12em] text-slate-500 dark:text-slate-300"><span className="rounded-lg bg-slate-100 px-2 py-2 dark:bg-white/[.06]">Calculate</span><span className="rounded-lg bg-slate-100 px-2 py-2 dark:bg-white/[.06]">Create</span><span className="rounded-lg bg-slate-100 px-2 py-2 dark:bg-white/[.06]">Share</span></div></div></div></div></div></section>
+    <section className="bg-white px-4 py-16 sm:px-6 sm:py-22 lg:px-8 dark:bg-[#0a1830]"><div className={siteContainerClasses()}><div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between"><div><p className="text-xs font-bold uppercase tracking-[.2em] text-primary dark:text-emerald-200">Find your starting point</p><h2 className="mt-3 font-heading text-3xl font-semibold sm:text-4xl">What would make today easier?</h2></div><p className="max-w-lg text-sm leading-7 text-slate-600 dark:text-slate-300">Pick a work mode and go straight to the tool. This page stays light, quick and useful.</p></div><div className="mt-9 grid gap-4 md:grid-cols-2 xl:grid-cols-4">{starts.map(([Icon, label, detail, href, tone]) => <Link key={label} href={href} className="group rounded-[1.5rem] border border-blue-950/10 bg-[#f9fcff] p-5 transition hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-950/8 dark:border-white/10 dark:bg-white/[.045]"><span className={`grid size-11 place-items-center rounded-2xl ${tone}`}><Icon className="size-5" /></span><h3 className="mt-7 font-heading text-xl font-semibold">{label}</h3><p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{detail}</p><span className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary dark:text-emerald-200">Start now <ArrowRight className="size-4 transition group-hover:translate-x-1" /></span></Link>)}</div></div></section>
+    <section id="tool-library" className="scroll-mt-20 bg-[#f2f8ff] px-4 py-16 sm:px-6 sm:py-22 lg:px-8 dark:bg-[#071226]"><div className={siteContainerClasses()}><div className="grid gap-5 border-b border-blue-950/10 pb-8 lg:grid-cols-[.42fr_.58fr] lg:items-end dark:border-white/10"><div><p className="text-xs font-bold uppercase tracking-[.2em] text-primary dark:text-emerald-200">The free toolbox</p><h2 className="mt-3 font-heading text-3xl font-semibold sm:text-4xl">Pick a tool. Get moving.</h2></div><p className="text-sm leading-7 text-slate-600 dark:text-slate-300">Calculators for students, generators for teachers, and practical admin tools for academies—all searchable in one place.</p></div><div className="mt-8"><ToolsDirectory /></div></div></section>
+    <section className="bg-white px-4 py-14 sm:px-6 sm:py-18 lg:px-8 dark:bg-[#0a1830]"><div className={siteContainerClasses({ className: "grid gap-4 md:grid-cols-3" })}>{[["Useful, not noisy", "Start with a clear input and leave with a usable result."], ["Made around learning", "Tools follow real student, teacher and academy moments."], ["Keep the momentum", "Copy, save, print or share when you are ready."]].map(([title, text]) => <div key={title} className="flex gap-4 border-l-2 border-primary bg-[#f7fbff] p-5 dark:bg-white/[.04]"><GraduationCap className="size-5 shrink-0 text-primary dark:text-emerald-200" /><div><h3 className="font-heading text-lg font-semibold">{title}</h3><p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{text}</p></div></div>)}</div></section>
+  </main>;
 }
