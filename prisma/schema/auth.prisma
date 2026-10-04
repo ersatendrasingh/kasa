@@ -1,23 +1,26 @@
 model User {
-  id                 String              @id @default(cuid())
-  name               String?
-  email              String?             @unique
-  emailVerified      DateTime?
-  image              String?
-  passwordHash       String?
-  role               UserRole            @default(USER)
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  accounts           Account[]
-  sessions           Session[]
-  assignedLeads      Lead[]              @relation("LeadAssignee")
-  leadActivities     LeadActivity[]      @relation("LeadActivityAuthor")
-  interviewQuestions InterviewQuestion[]
-  interviewAnswers   InterviewAnswer[]
-  interviewComments  InterviewComment[]
-  interviewVotes     InterviewVote[]
-  articles           Article[]
-  passwordResetTokens PasswordResetToken[]
+  id                       String              @id @default(cuid())
+  name                     String?
+  email                    String?             @unique
+  emailVerified            DateTime?
+  image                    String?
+  passwordHash             String?
+  role                     UserRole            @default(USER)
+  createdAt                DateTime            @default(now())
+  updatedAt                DateTime            @updatedAt
+  accounts                 Account[]
+  sessions                 Session[]
+  assignedLeads            Lead[]              @relation("LeadAssignee")
+  leadActivities           LeadActivity[]      @relation("LeadActivityAuthor")
+  interviewQuestions       InterviewQuestion[]
+  interviewAnswers         InterviewAnswer[]
+  interviewComments        InterviewComment[]
+  interviewVotes           InterviewVote[]
+  articles                 Article[]
+  articleComments          ArticleComment[]    @relation("ArticleCommentAuthor")
+  moderatedArticleComments ArticleComment[]    @relation("ArticleCommentModerator")
+  articleCommentLikes      ArticleCommentLike[]
+  passwordResetTokens      PasswordResetToken[]
 }
 
 model PasswordResetToken {

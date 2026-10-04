@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArticleCommentStatus, type Prisma } from "@prisma/client";
 import {
   ArrowLeft,
   ArrowRight,
@@ -12,6 +13,8 @@ import {
   Sparkles,
   Tag,
 } from "lucide-react";
+import { auth } from "@/auth";
+import { ArticleDiscussion } from "@/components/site/article-discussion";
 import { ArticleShare } from "@/components/site/article-share";
 import { ArticleMobileToc } from "@/components/site/article-mobile-toc";
 import { ArticleViewCounter } from "@/components/site/article-view-counter";
@@ -37,6 +40,7 @@ import {
   SITE_URL,
   type BlogArticle,
 } from "@/lib/blog";
+import { prisma } from "@/lib/admin/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -202,7 +206,52 @@ export default async function BlogArticlePage({ params }: BlogDetailProps) {
 
   if (!article) notFound();
 
-  const [relatedArticles] = await Promise.all([getRelatedBlogArticles(article, 4)]);
+  const [relatedArticles, session] = await Promise.all([getRelatedBlogArticles(article, 4), auth()]);
+  const currentUserId = session?.user?.id;
+  const visibleCommentWhere: Prisma.ArticleCommentWhereInput[] = [
+    { status: ArticleCommentStatus.APPROVED },
+    ...(currentUserId ? [{ status: ArticleCommentStatus.PENDING, userId: currentUserId }] : []),
+  ];
+  const comments = await prisma.articleComment.findMany({
+    where: {
+      articleId: article.id,
+      parentId: null,
+      OR: visibleCommentWhere,
+    },
+    orderBy: { createdAt: "desc" },
+    include: {
+      user: { select: { id: true, name: true, image: true } },
+      likes: { where: { userId: currentUserId || "" }, select: { id: true } },
+      replies: {
+        where: {
+          OR: visibleCommentWhere,
+        },
+        orderBy: { createdAt: "asc" },
+        include: {
+          user: { select: { id: true, name: true, image: true } },
+          likes: { where: { userId: currentUserId || "" }, select: { id: true } },
+        },
+      },
+    },
+  });
+  const discussionComments = comments.map((comment) => ({
+    id: comment.id,
+    body: comment.body,
+    createdAt: comment.createdAt.toISOString(),
+    likeCount: comment.likeCount,
+    likedByCurrentUser: currentUserId ? comment.likes.length > 0 : false,
+    author: comment.user,
+    status: comment.status,
+    replies: comment.replies.map((reply) => ({
+      id: reply.id,
+      body: reply.body,
+      createdAt: reply.createdAt.toISOString(),
+      likeCount: reply.likeCount,
+      likedByCurrentUser: currentUserId ? reply.likes.length > 0 : false,
+      author: reply.user,
+      status: reply.status,
+    })),
+  }));
   const description = articleDescription(article);
   const faqs = parseArticleFaqs(article.faqs);
   const canonicalUrl = article.canonicalUrl || `${SITE_URL}${articleHref(article)}`;
@@ -465,6 +514,14 @@ export default async function BlogArticlePage({ params }: BlogDetailProps) {
                 </div>
               </section>
             ) : null}
+
+            <ArticleDiscussion
+        key={discussionComments.map((comment) => `${comment.id}:${comment.status}:${comment.likeCount}:${comment.replies.map((reply) => `${reply.id}:${reply.status}:${reply.likeCount}`).join(",")}`).join("|")}
+              articleId={article.id}
+              slug={article.slug}
+              comments={discussionComments}
+              currentUser={currentUserId ? { id: currentUserId, name: session.user?.name || null } : null}
+            />
 
             <footer className="mx-auto mt-12 flex max-w-3xl flex-col gap-5 border-t border-border pt-8 sm:flex-row sm:items-center sm:justify-between">
               <div>

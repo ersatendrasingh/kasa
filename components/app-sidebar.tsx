@@ -9,6 +9,7 @@ import {
   ChartNoAxesCombinedIcon,
   KeyRoundIcon,
   LayoutDashboardIcon,
+  MessageCircleMoreIcon,
   PackageIcon,
   Settings2Icon,
   UsersIcon,
@@ -71,6 +72,11 @@ export function AppSidebar({
               title: "Articles",
               url: "/admin/articles",
               icon: <FileTextIcon />,
+            },
+            {
+              title: "Comments",
+              url: "/admin/comments",
+              icon: <MessageCircleMoreIcon />,
             },
             {
               title: "Leads",
