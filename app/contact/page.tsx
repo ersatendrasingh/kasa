@@ -44,7 +44,7 @@ export default function ContactPage() {
                   ))}
                 </div>
 
-                <a href="mailto:getkasalms@gmail.com" className="group mt-6 inline-flex items-center gap-3 text-sm font-semibold text-primary sm:mt-6 dark:text-white"><span className="grid size-10 place-items-center rounded-full border border-primary/15 bg-white/70 transition group-hover:bg-white dark:border-white/15 dark:bg-white/5 dark:group-hover:bg-white/10"><Mail className="size-4" /></span><span><span className="block text-[.62rem] uppercase tracking-[.16em] text-slate-400">Prefer email?</span>getkasalms@gmail.com</span></a>
+                <a href="mailto:contact@getkasa.in" className="group mt-6 inline-flex items-center gap-3 text-sm font-semibold text-primary sm:mt-6 dark:text-white"><span className="grid size-10 place-items-center rounded-full border border-primary/15 bg-white/70 transition group-hover:bg-white dark:border-white/15 dark:bg-white/5 dark:group-hover:bg-white/10"><Mail className="size-4" /></span><span><span className="block text-[.62rem] uppercase tracking-[.16em] text-slate-400">Prefer email?</span>contact@getkasa.in</span></a>
               </div>
 
               <div className="relative lg:pl-4">
@@ -76,7 +76,7 @@ export default function ContactPage() {
 
         <section className="px-4 pb-16 sm:px-6 sm:pb-20 lg:px-8">
           <div className="mx-auto grid max-w-7xl gap-4 md:grid-cols-3">
-            {[[Route, "Workflow before features", "We map how information moves between sales, teaching, learning, and proof."], [ShieldCheck, "Honest scope", "Fit, dependencies, limits, and rollout responsibilities belong in the conversation."], [Mail, "One direct channel", "Use the form or email getkasalms@gmail.com—both reach the KASA team."]].map(([Icon, title, text]) => { const ItemIcon = Icon as typeof Route; return <article key={String(title)} className="rounded-2xl border border-blue-950/10 bg-white p-5 dark:border-white/10 dark:bg-white/[.035]"><ItemIcon className="size-5 text-primary dark:text-emerald-300" /><h3 className="mt-4 font-heading text-lg font-semibold">{String(title)}</h3><p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{String(text)}</p></article>; })}
+            {[[Route, "Workflow before features", "We map how information moves between sales, teaching, learning, and proof."], [ShieldCheck, "Honest scope", "Fit, dependencies, limits, and rollout responsibilities belong in the conversation."], [Mail, "One direct channel", "Use the form or email contact@getkasa.in—both reach the KASA team."]].map(([Icon, title, text]) => { const ItemIcon = Icon as typeof Route; return <article key={String(title)} className="rounded-2xl border border-blue-950/10 bg-white p-5 dark:border-white/10 dark:bg-white/[.035]"><ItemIcon className="size-5 text-primary dark:text-emerald-300" /><h3 className="mt-4 font-heading text-lg font-semibold">{String(title)}</h3><p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{String(text)}</p></article>; })}
           </div>
         </section>
       </main>

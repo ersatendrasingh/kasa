@@ -191,11 +191,11 @@ export function CompanyPageTemplate({
                 team context is clear.
               </p>
               <div className="grid gap-3 text-sm text-slate-700 dark:text-slate-200">
-                <a href="mailto:getkasalms@gmail.com" className="mt-5 flex items-center gap-3 rounded-2xl bg-slate-50 p-3 dark:bg-white/[0.05]">
+                <a href="mailto:hello@getkasa.in" className="mt-5 flex items-center gap-3 rounded-2xl bg-slate-50 p-3 dark:bg-white/[0.05]">
                   <Mail className="size-4 text-primary" aria-hidden="true" />
-                  getkasalms@gmail.com
+                  hello@getkasa.in
                 </a>
-                <a href="mailto:getkasalms@gmail.com" className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3 dark:bg-white/[0.05]">
+                <a href="mailto:support@getkasa.in" className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3 dark:bg-white/[0.05]">
                   <Mail className="size-4 text-primary" aria-hidden="true" />
                   Demo and support email
                 </a>

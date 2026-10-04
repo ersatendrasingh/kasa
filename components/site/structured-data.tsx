@@ -26,7 +26,7 @@ export function SiteStructuredData() {
           name: "KASA",
           url: SITE_URL,
           logo: `${SITE_URL}/kasa-logo-light.png`,
-          email: "getkasalms@gmail.com",
+          email: "hello@getkasa.in",
           sameAs: [
             "https://www.instagram.com/getkasalms",
             "https://www.youtube.com/@codewithkasa751",

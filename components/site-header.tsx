@@ -428,11 +428,11 @@ export default function SiteHeader() {
               Built for institutes, trainers, and EdTech teams
             </span>
             <a
-              href="mailto:getkasalms@gmail.com"
+              href="mailto:hello@getkasa.in"
               className="hidden cursor-pointer items-center gap-2 text-[var(--topbar-foreground)] transition hover:opacity-75 lg:inline-flex"
             >
               <Mail className="size-3.5" aria-hidden="true" />
-              getkasalms@gmail.com
+              hello@getkasa.in
             </a>
           </div>
         </div>

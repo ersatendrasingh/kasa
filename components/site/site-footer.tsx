@@ -395,7 +395,7 @@ export function SiteFooter() {
   return (
     <>
       <a
-        href="mailto:getkasalms@gmail.com"
+        href="mailto:hello@getkasa.in"
         className="fixed bottom-4 right-4 z-40 inline-flex size-13 items-center justify-center rounded-full border border-white/25 bg-[#25D366] text-white shadow-2xl shadow-emerald-950/25 transition hover:-translate-y-0.5 hover:bg-[#20bd5a] focus:outline-none focus:ring-4 focus:ring-emerald-300/35 sm:bottom-5 sm:right-5 md:h-13 md:w-auto md:gap-2.5 md:px-4"
         aria-label="Email KASA"
       >
@@ -429,18 +429,25 @@ export function SiteFooter() {
 
               <div className="mt-6 grid gap-3 text-sm text-slate-300">
                 <a
-                  href="mailto:getkasalms@gmail.com"
+                  href="mailto:hello@getkasa.in"
                   className="inline-flex items-center gap-3 transition hover:text-white"
                 >
                   <Mail className="size-4 text-emerald-300" />
-                  getkasalms@gmail.com
+                  hello@getkasa.in
+                </a>
+                <a
+                  href="mailto:support@getkasa.in"
+                  className="inline-flex items-center gap-3 transition hover:text-white"
+                >
+                  <Mail className="size-4 text-emerald-300" />
+                  Demo and support email
                 </a>
                 <a
                   href="mailto:getkasalms@gmail.com"
                   className="inline-flex items-center gap-3 transition hover:text-white"
                 >
                   <Mail className="size-4 text-emerald-300" />
-                  Demo and support email
+                  Alternate: getkasalms@gmail.com
                 </a>
                 <span className="inline-flex items-center gap-3">
                   <MapPin className="size-4 text-emerald-300" />

@@ -94,7 +94,7 @@ export function ContactEnquiryForm() {
           if (!response.ok) throw new Error("Unable to submit enquiry");
           setSubmitted(true);
         } catch {
-          setSubmitError("We could not send this enquiry right now. Please try again or email getkasalms@gmail.com.");
+          setSubmitError("We could not send this enquiry right now. Please try again or email contact@getkasa.in.");
         } finally {
           setSubmitting(false);
         }
