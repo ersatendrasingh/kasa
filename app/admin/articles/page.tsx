@@ -240,6 +240,7 @@ export default async function AdminArticlesPage({
       coverImage: article.coverImage,
       coverImageAlt: article.coverImageAlt,
       featured: article.featured,
+      viewCount: article.viewCount,
       seoReady: seo.ready,
       seoMissing: seo.missing,
       publishedAt: article.publishedAt?.toISOString() || null,

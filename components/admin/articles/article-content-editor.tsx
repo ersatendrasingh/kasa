@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
-import { CheckCircle2Icon, LoaderCircleIcon, SaveIcon } from "lucide-react";
+import { SaveIcon } from "lucide-react";
+import { startAdminNavigation, stopAdminNavigation } from "@/components/admin/admin-navigation-progress";
 import { ArticleRichEditor } from "@/components/admin/articles/article-rich-editor";
 import { ArticleTitleSlugFields } from "@/components/admin/articles/article-title-slug-fields";
 import { adminTextareaClass } from "@/components/admin/articles/article-admin-primitives";
@@ -59,13 +60,14 @@ export function ArticleContentEditor({
     localStorage.setItem(draftKey, JSON.stringify({ ...next, storedAt: new Date().toISOString() }));
   }, [draftKey]);
 
-  const save = useCallback((next: ContentValues) => {
+  const save = useCallback((next: ContentValues, showGlobalLoader = false) => {
     const signature = contentSignature(next);
     if (signature === lastSavedSignature.current) {
       setSaveState("saved");
       return;
     }
     if (next.title.trim().length < 2 || next.content.replace(/<[^>]+>/g, " ").trim().length < 20) return;
+    if (showGlobalLoader) startAdminNavigation();
     const requestId = ++saveRequest.current;
     setSaveState("saving");
     const formData = new FormData();
@@ -88,6 +90,8 @@ export function ArticleContentEditor({
         }
       } catch {
         if (requestId === saveRequest.current) setSaveState("error");
+      } finally {
+        if (showGlobalLoader) stopAdminNavigation();
       }
     });
   }, [articleId, draftKey, saveAction, startTransition]);
@@ -116,15 +120,13 @@ export function ArticleContentEditor({
   }, [changeVersion, save, values]); // Save only after the user stops editing.
 
   const saving = isPending || saveState === "saving";
-  const status = saving ? "Saving…" : saveState === "saved" ? "Saved" : saveState === "error" ? "Save failed" : "Unsaved";
-
   return (
     <form
       className="grid gap-4"
       onSubmit={(event) => {
         event.preventDefault();
         if (timer.current) clearTimeout(timer.current);
-        save(latestValues.current);
+        save(latestValues.current, true);
       }}
     >
       <ArticleTitleSlugFields
@@ -138,18 +140,12 @@ export function ArticleContentEditor({
         <Textarea id="excerpt" name="excerpt" rows={3} value={values.excerpt} onChange={(event) => update({ excerpt: event.target.value })} className={adminTextareaClass} />
       </div>
       <div className="grid gap-2">
-        <div className="flex items-center justify-between gap-3">
-          <Label htmlFor="content">Story body</Label>
-          <span className="flex items-center gap-1.5 text-xs font-medium text-slate-500" aria-live="polite">
-            {saving ? <LoaderCircleIcon className="size-3.5 animate-spin text-primary" /> : <CheckCircle2Icon className="size-3.5 text-emerald-600" />}
-            {status}
-          </span>
-        </div>
+        <Label htmlFor="content">Story body</Label>
         <ArticleRichEditor name="content" defaultValue={initialContent} onChange={(content) => update({ content })} />
       </div>
       <div className="flex justify-end">
         <Button type="submit" disabled={saving} className="h-11 min-w-36 !text-white">
-          {saving ? <LoaderCircleIcon className="animate-spin" /> : <SaveIcon />}
+          <SaveIcon />
           {saving ? "Saving" : "Save now"}
         </Button>
       </div>
