@@ -238,6 +238,7 @@ export default async function BlogArticlePage({ params }: BlogDetailProps) {
     id: comment.id,
     body: comment.body,
     createdAt: comment.createdAt.toISOString(),
+    editedAt: comment.editedAt?.toISOString() || null,
     likeCount: comment.likeCount,
     likedByCurrentUser: currentUserId ? comment.likes.length > 0 : false,
     author: comment.user,
@@ -246,6 +247,7 @@ export default async function BlogArticlePage({ params }: BlogDetailProps) {
       id: reply.id,
       body: reply.body,
       createdAt: reply.createdAt.toISOString(),
+      editedAt: reply.editedAt?.toISOString() || null,
       likeCount: reply.likeCount,
       likedByCurrentUser: currentUserId ? reply.likes.length > 0 : false,
       author: reply.user,
@@ -516,7 +518,7 @@ export default async function BlogArticlePage({ params }: BlogDetailProps) {
             ) : null}
 
             <ArticleDiscussion
-        key={discussionComments.map((comment) => `${comment.id}:${comment.status}:${comment.likeCount}:${comment.replies.map((reply) => `${reply.id}:${reply.status}:${reply.likeCount}`).join(",")}`).join("|")}
+        key={discussionComments.map((comment) => `${comment.id}:${comment.status}:${comment.likeCount}:${comment.editedAt}:${comment.replies.map((reply) => `${reply.id}:${reply.status}:${reply.likeCount}:${reply.editedAt}`).join(",")}`).join("|")}
               articleId={article.id}
               slug={article.slug}
               comments={discussionComments}

@@ -95,6 +95,7 @@ model ArticleComment {
   likeCount     Int                  @default(0)
   likes         ArticleCommentLike[]
   createdAt     DateTime             @default(now())
+  editedAt      DateTime?
   updatedAt     DateTime             @updatedAt
 
   @@index([articleId, parentId, status, createdAt])

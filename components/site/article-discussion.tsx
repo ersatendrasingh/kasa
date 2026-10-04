@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 import {
   CheckCircle2Icon,
@@ -9,6 +10,7 @@ import {
   LogInIcon,
   MessageCircleIcon,
   MessageSquareReplyIcon,
+  PencilIcon,
   SendIcon,
   ShieldCheckIcon,
   SparklesIcon,
@@ -17,6 +19,7 @@ import {
 import {
   createArticleCommentAction,
   toggleArticleCommentLikeAction,
+  updateOwnArticleCommentAction,
   type ArticleCommentActionState,
 } from "@/actions/article-comments";
 
@@ -24,6 +27,7 @@ type DiscussionReply = {
   id: string;
   body: string;
   createdAt: string;
+  editedAt: string | null;
   likeCount: number;
   likedByCurrentUser: boolean;
   status: "PENDING" | "APPROVED" | "REJECTED";
@@ -122,6 +126,25 @@ function CommentComposer({
   );
 }
 
+function EditCommentForm({ commentId, slug, body, onCancel }: { commentId: string; slug: string; body: string; onCancel: () => void }) {
+  const router = useRouter();
+  const updateComment = updateOwnArticleCommentAction.bind(null, commentId, slug);
+  const [state, formAction, isSubmitting] = useActionState(updateComment, initialState);
+
+  useEffect(() => {
+    if (state.success) router.refresh();
+  }, [router, state.success]);
+
+  return (
+    <form action={formAction} className="mt-4 rounded-2xl border border-primary/20 bg-primary/5 p-3">
+      <label className="block"><span className="sr-only">Edit your contribution</span><textarea name="body" required minLength={2} maxLength={1500} rows={3} defaultValue={body} className="w-full resize-y rounded-xl border border-border bg-card px-3 py-2.5 text-sm leading-6 text-foreground outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10" /></label>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2"><p className="text-xs text-muted-foreground">Edits are marked and reviewed before appearing publicly.</p><div className="flex gap-2"><button type="button" onClick={onCancel} className="h-9 rounded-full px-3 text-xs font-semibold text-muted-foreground hover:bg-background">Cancel</button><button type="submit" disabled={isSubmitting} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-primary px-4 text-xs font-semibold text-primary-foreground disabled:opacity-60">{isSubmitting ? <LoaderIcon className="size-3.5 animate-spin" /> : <PencilIcon className="size-3.5" />}{isSubmitting ? "Saving…" : "Save edit"}</button></div></div>
+      {state.error ? <p role="alert" className="mt-3 text-sm font-medium text-destructive">{state.error}</p> : null}
+      {state.success ? <p role="status" className="mt-3 text-sm font-medium text-emerald-700 dark:text-emerald-300">{state.message}</p> : null}
+    </form>
+  );
+}
+
 function CommentCard({
   comment,
   articleId,
@@ -136,6 +159,7 @@ function CommentCard({
   onLike: (commentId: string) => void;
 }) {
   const [isReplying, setIsReplying] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const isPending = comment.status === "PENDING";
 
   const renderEntry = (entry: DiscussionReply, isReply = false) => {
@@ -151,6 +175,7 @@ function CommentCard({
               <p className="font-semibold text-foreground">{entry.author.name || "KASA member"}</p>
               {currentUser?.id === entry.author.id ? <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">You</span> : null}
               <span className="text-xs text-muted-foreground">{relativeDate(entry.createdAt)}</span>
+              {entry.editedAt ? <span className="text-xs font-medium text-muted-foreground">Edited</span> : null}
             </div>
             <p className="mt-2 whitespace-pre-wrap text-sm leading-7 text-muted-foreground">{entry.body}</p>
             {isEntryPending ? <PendingNotice /> : null}
@@ -158,8 +183,11 @@ function CommentCard({
               <div className="mt-3 flex items-center gap-2">
                 {currentUser ? <button type="button" onClick={() => onLike(entry.id)} aria-pressed={entry.likedByCurrentUser} className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold transition ${entry.likedByCurrentUser ? "bg-rose-50 text-rose-600 dark:bg-rose-400/10 dark:text-rose-300" : "bg-surface-muted text-muted-foreground hover:text-rose-600"}`}><HeartIcon className={`size-3.5 ${entry.likedByCurrentUser ? "fill-current" : ""}`} />{entry.likeCount || "Like"}</button> : <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground"><HeartIcon className="size-3.5" />{entry.likeCount || "Be the first to like"}</span>}
                 {!isReply && currentUser ? <button type="button" onClick={() => setIsReplying((value) => !value)} className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold text-muted-foreground transition hover:bg-primary/10 hover:text-primary"><MessageSquareReplyIcon className="size-3.5" />Reply</button> : null}
+                {currentUser?.id === entry.author.id ? <button type="button" onClick={() => setEditingCommentId(entry.id)} className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold text-muted-foreground transition hover:bg-primary/10 hover:text-primary"><PencilIcon className="size-3.5" />Edit</button> : null}
               </div>
             ) : null}
+            {currentUser?.id === entry.author.id && !canInteract ? <div className="mt-3"><button type="button" onClick={() => setEditingCommentId(entry.id)} className="inline-flex items-center gap-1.5 rounded-full bg-surface-muted px-2.5 py-1 text-xs font-semibold text-muted-foreground transition hover:text-primary"><PencilIcon className="size-3.5" />Edit</button></div> : null}
+            {editingCommentId === entry.id ? <EditCommentForm commentId={entry.id} slug={slug} body={entry.body} onCancel={() => setEditingCommentId(null)} /> : null}
           </div>
         </div>
       </div>

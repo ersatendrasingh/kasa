@@ -98,3 +98,51 @@ export async function toggleArticleCommentLikeAction(commentId: string, slug: st
   revalidatePath(articlePath(slug));
   return result;
 }
+
+export async function updateOwnArticleCommentAction(
+  commentId: string,
+  slug: string,
+  _previousState: ArticleCommentActionState,
+  formData: FormData,
+): Promise<ArticleCommentActionState> {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Please log in before editing your contribution." };
+
+  const parsed = commentSchema.safeParse({ body: formData.get("body") });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message || "Your update could not be saved." };
+
+  const comment = await prisma.articleComment.findFirst({
+    where: {
+      id: commentId,
+      userId: session.user.id,
+      status: { not: "REJECTED" },
+      article: { slug, status: "PUBLISHED" },
+    },
+    select: { id: true, status: true },
+  });
+  if (!comment) return { error: "This contribution is no longer available to edit." };
+
+  const editedAt = new Date();
+  await prisma.$transaction([
+    prisma.articleCommentLike.deleteMany({ where: { commentId: comment.id } }),
+    prisma.articleComment.update({
+      where: { id: comment.id },
+      data: {
+        body: parsed.data.body,
+        status: "PENDING",
+        editedAt,
+        moderatedAt: null,
+        moderatedById: null,
+        likeCount: 0,
+      },
+    }),
+  ]);
+
+  revalidatePath(articlePath(slug));
+  return {
+    success: true,
+    message: comment.status === "APPROVED"
+      ? "Your edit is waiting for approval before it is public again."
+      : "Your edit has been saved and is waiting for approval.",
+  };
+}
