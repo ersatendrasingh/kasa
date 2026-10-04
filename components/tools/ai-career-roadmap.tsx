@@ -263,41 +263,48 @@ export function AiCareerRoadmap() {
   };
 
   return (
-    <section className="relative bg-[#eef7ff] px-4 py-12 text-slate-950 dark:bg-surface-strong dark:text-white sm:px-6 lg:px-8">
-      <div className="mx-auto grid w-full max-w-[108rem] gap-6 xl:grid-cols-[0.78fr_1.22fr]">
-        <div className="rounded-[1.25rem] border border-blue-950/10 bg-white p-5 shadow-xl shadow-blue-950/8 dark:border-white/10 dark:bg-white/[0.04]">
+    <section className="relative bg-[#f7fbf7] px-4 py-14 text-[#122c28] dark:bg-surface-strong dark:text-white sm:px-6 sm:py-16 lg:px-8">
+      <div className="mx-auto grid w-full max-w-[96rem] gap-6 xl:grid-cols-[0.82fr_1.18fr] xl:items-start">
+        <div className="rounded-[1.4rem] border border-[#173d36]/10 bg-white/90 p-5 shadow-[0_20px_55px_rgba(24,68,59,0.08)] dark:border-white/10 dark:bg-white/[0.045] xl:sticky xl:top-28">
           <div className="flex items-start gap-3">
-            <span className="grid size-11 place-items-center rounded-2xl bg-blue-50 text-primary dark:bg-primary/12 dark:text-emerald-200">
+            <span className="grid size-11 place-items-center rounded-2xl bg-[#e2f6ed] text-[#177e70] dark:bg-primary/12 dark:text-emerald-200">
               <Route className="size-5" aria-hidden="true" />
             </span>
             <div>
-              <h2 className="font-heading text-2xl font-semibold text-slate-950 dark:text-white">
-                Build your roadmap
+              <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-[#177e70] dark:text-emerald-200">Your inputs · about 2 minutes</p>
+              <h2 className="mt-1 font-heading text-2xl font-semibold text-[#15342e] dark:text-white">
+                Design your career route
               </h2>
-              <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                Tell KASA your target role, current skills, and available time. The roadmap will turn that into weekly actions.
+              <p className="mt-1 text-sm leading-6 text-[#617871] dark:text-slate-300">
+                Be specific about where you are now. The plan adapts to your time, experience and learning style.
               </p>
             </div>
           </div>
 
           <div className="mt-6 grid gap-4">
             <label className="grid gap-2">
-              <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Target role</span>
-              <select value={targetRole} onChange={(event) => setTargetRole(event.target.value)} className="h-12 rounded-xl border border-blue-950/10 bg-white px-3 text-sm outline-none transition focus:border-primary dark:border-white/10 dark:bg-slate-950/50">
+              <span className="flex items-center justify-between text-sm font-semibold text-[#35534c] dark:text-slate-200"><span>1. Target role</span><span className="text-xs font-medium text-[#80938e]">Where do you want to go?</span></span>
+              <select value={targetRole} onChange={(event) => setTargetRole(event.target.value)} className="h-12 rounded-xl border border-[#173d36]/12 bg-[#fbfdfb] px-3 text-sm font-medium outline-none transition focus:border-[#1a9a7f] focus:ring-2 focus:ring-[#1a9a7f]/10 dark:border-white/10 dark:bg-slate-950/50">
                 {roleOptions.map((role) => <option key={role}>{role}</option>)}
               </select>
             </label>
 
+            <div className="flex flex-wrap gap-2">
+              {["Frontend Developer", "Data Analyst", "Java Developer", "UI/UX Designer"].map((role) => (
+                <button key={role} type="button" onClick={() => setTargetRole(role)} className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${targetRole === role ? "border-[#177e70] bg-[#177e70] text-white" : "border-[#173d36]/12 bg-white text-[#587069] hover:border-[#177e70]/45 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-300"}`}>{role}</button>
+              ))}
+            </div>
+
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="grid gap-2">
-                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Course / branch</span>
-                <select value={course} onChange={(event) => setCourse(event.target.value)} className="h-12 rounded-xl border border-blue-950/10 bg-white px-3 text-sm outline-none transition focus:border-primary dark:border-white/10 dark:bg-slate-950/50">
+                <span className="text-sm font-semibold text-[#35534c] dark:text-slate-200">2. Course / branch</span>
+                <select value={course} onChange={(event) => setCourse(event.target.value)} className="h-12 rounded-xl border border-[#173d36]/12 bg-[#fbfdfb] px-3 text-sm outline-none transition focus:border-[#1a9a7f] dark:border-white/10 dark:bg-slate-950/50">
                   {courseOptions.map((item) => <option key={item}>{item}</option>)}
                 </select>
               </label>
               <label className="grid gap-2">
-                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">College year</span>
-                <select value={year} onChange={(event) => setYear(event.target.value)} className="h-12 rounded-xl border border-blue-950/10 bg-white px-3 text-sm outline-none transition focus:border-primary dark:border-white/10 dark:bg-slate-950/50">
+                <span className="text-sm font-semibold text-[#35534c] dark:text-slate-200">College year</span>
+                <select value={year} onChange={(event) => setYear(event.target.value)} className="h-12 rounded-xl border border-[#173d36]/12 bg-[#fbfdfb] px-3 text-sm outline-none transition focus:border-[#1a9a7f] dark:border-white/10 dark:bg-slate-950/50">
                   {yearOptions.map((item) => <option key={item}>{item}</option>)}
                 </select>
               </label>
@@ -306,50 +313,50 @@ export function AiCareerRoadmap() {
             <SkillPicker selectedSkills={selectedSkills} onAdd={addSkill} onRemove={removeSkill} />
 
             <label className="grid gap-2">
-              <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Goal</span>
-              <input value={goal} onChange={(event) => setGoal(event.target.value)} className="h-12 rounded-xl border border-blue-950/10 bg-white px-3 text-sm outline-none transition focus:border-primary dark:border-white/10 dark:bg-slate-950/50" />
+              <span className="text-sm font-semibold text-[#35534c] dark:text-slate-200">4. Your immediate goal</span>
+              <input value={goal} onChange={(event) => setGoal(event.target.value)} className="h-12 rounded-xl border border-[#173d36]/12 bg-[#fbfdfb] px-3 text-sm outline-none transition focus:border-[#1a9a7f] focus:ring-2 focus:ring-[#1a9a7f]/10 dark:border-white/10 dark:bg-slate-950/50" />
             </label>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label className="grid gap-2">
-                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Daily study time: {dailyHours}h</span>
-                <input type="range" min={1} max={10} value={dailyHours} onChange={(event) => setDailyHours(Number(event.target.value))} />
+            <div className="grid gap-3 rounded-xl bg-[#f0f8f4] p-4 dark:bg-white/[0.04] sm:grid-cols-2">
+              <label className="grid gap-3">
+                <span className="flex items-center justify-between text-sm font-semibold text-[#35534c] dark:text-slate-200"><span>Daily time</span><strong className="rounded-full bg-white px-2.5 py-1 text-xs text-[#177e70] shadow-sm dark:bg-white/10 dark:text-emerald-200">{dailyHours}h</strong></span>
+                <input className="accent-[#177e70]" type="range" min={1} max={10} value={dailyHours} onChange={(event) => setDailyHours(Number(event.target.value))} />
               </label>
-              <label className="grid gap-2">
-                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Timeline: {timelineMonths} months</span>
-                <input type="range" min={1} max={12} value={timelineMonths} onChange={(event) => setTimelineMonths(Number(event.target.value))} />
+              <label className="grid gap-3">
+                <span className="flex items-center justify-between text-sm font-semibold text-[#35534c] dark:text-slate-200"><span>Timeline</span><strong className="rounded-full bg-white px-2.5 py-1 text-xs text-[#177e70] shadow-sm dark:bg-white/10 dark:text-emerald-200">{timelineMonths} months</strong></span>
+                <input className="accent-[#177e70]" type="range" min={1} max={12} value={timelineMonths} onChange={(event) => setTimelineMonths(Number(event.target.value))} />
               </label>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="grid gap-2">
-                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Experience level</span>
-                <select value={experienceLevel} onChange={(event) => setExperienceLevel(event.target.value)} className="h-12 rounded-xl border border-blue-950/10 bg-white px-3 text-sm outline-none transition focus:border-primary dark:border-white/10 dark:bg-slate-950/50">
+                <span className="text-sm font-semibold text-[#35534c] dark:text-slate-200">Experience level</span>
+                <select value={experienceLevel} onChange={(event) => setExperienceLevel(event.target.value)} className="h-12 rounded-xl border border-[#173d36]/12 bg-[#fbfdfb] px-3 text-sm outline-none transition focus:border-[#1a9a7f] dark:border-white/10 dark:bg-slate-950/50">
                   {experienceLevels.map((item) => <option key={item}>{item}</option>)}
                 </select>
               </label>
               <label className="grid gap-2">
-                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Learning style</span>
-                <select value={learningStyle} onChange={(event) => setLearningStyle(event.target.value)} className="h-12 rounded-xl border border-blue-950/10 bg-white px-3 text-sm outline-none transition focus:border-primary dark:border-white/10 dark:bg-slate-950/50">
+                <span className="text-sm font-semibold text-[#35534c] dark:text-slate-200">Learning style</span>
+                <select value={learningStyle} onChange={(event) => setLearningStyle(event.target.value)} className="h-12 rounded-xl border border-[#173d36]/12 bg-[#fbfdfb] px-3 text-sm outline-none transition focus:border-[#1a9a7f] dark:border-white/10 dark:bg-slate-950/50">
                   {learningStyles.map((item) => <option key={item}>{item}</option>)}
                 </select>
               </label>
               <label className="grid gap-2">
-                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Language</span>
-                <select value={language} onChange={(event) => setLanguage(event.target.value)} className="h-12 rounded-xl border border-blue-950/10 bg-white px-3 text-sm outline-none transition focus:border-primary dark:border-white/10 dark:bg-slate-950/50">
+                <span className="text-sm font-semibold text-[#35534c] dark:text-slate-200">Language</span>
+                <select value={language} onChange={(event) => setLanguage(event.target.value)} className="h-12 rounded-xl border border-[#173d36]/12 bg-[#fbfdfb] px-3 text-sm outline-none transition focus:border-[#1a9a7f] dark:border-white/10 dark:bg-slate-950/50">
                   {languageOptions.map((item) => <option key={item}>{item}</option>)}
                 </select>
               </label>
             </div>
 
-            <button type="button" onClick={generateRoadmap} disabled={isGenerating} className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[image:var(--button-solid)] px-5 text-sm font-semibold !text-white shadow-xl shadow-blue-900/18 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70">
+            <button type="button" onClick={generateRoadmap} disabled={isGenerating} className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[image:var(--button-solid)] px-5 text-sm font-bold !text-white shadow-[0_14px_30px_rgba(20,112,96,0.2)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70">
               {isGenerating ? <LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> : <Sparkles className="size-4" aria-hidden="true" />}
               {isGenerating ? "Creating roadmap..." : "Generate AI roadmap"}
             </button>
           </div>
         </div>
 
-        <div className="min-h-[42rem] rounded-[1.25rem] border border-blue-950/10 bg-white p-5 shadow-xl shadow-blue-950/8 dark:border-white/10 dark:bg-white/[0.04]">
+        <div className="min-h-[42rem] rounded-[1.4rem] border border-[#173d36]/10 bg-white p-5 shadow-[0_20px_55px_rgba(24,68,59,0.08)] dark:border-white/10 dark:bg-white/[0.04]">
           {roadmap ? (
             <div ref={resultRef}>
               <div className="flex flex-col gap-4 border-b border-blue-950/10 pb-5 dark:border-white/10">
@@ -439,17 +446,28 @@ export function AiCareerRoadmap() {
               </div>
             </div>
           ) : (
-            <div className="grid h-full min-h-[38rem] place-items-center rounded-[1rem] border border-dashed border-blue-950/15 bg-[#f8fbff] p-8 text-center dark:border-white/15 dark:bg-slate-950/30">
-              <div className="max-w-xl">
-                <div className="mx-auto grid size-16 place-items-center rounded-[1.25rem] bg-blue-50 text-primary dark:bg-primary/12 dark:text-emerald-200">
-                  <Route className="size-8" aria-hidden="true" />
+            <div className="min-h-[38rem] overflow-hidden rounded-[1.1rem] border border-[#173d36]/10 bg-[linear-gradient(145deg,#f8fcf9,#eef8f3)] dark:border-white/10 dark:bg-[linear-gradient(145deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))]">
+              <div className="border-b border-[#173d36]/10 bg-white/70 p-5 dark:border-white/10 dark:bg-white/[0.03]">
+                <div className="flex items-center justify-between gap-4">
+                  <div><p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-[#177e70] dark:text-emerald-200">Roadmap preview</p><h2 className="mt-1 font-heading text-2xl font-semibold text-[#17342e] dark:text-white">Your plan will take shape here</h2></div>
+                  <span className="rounded-full bg-[#e4f5ed] px-3 py-1.5 text-xs font-bold text-[#177e70] dark:bg-emerald-300/10 dark:text-emerald-200">Personalised</span>
                 </div>
-                <h2 className="mt-5 font-heading text-3xl font-semibold text-slate-950 dark:text-white">
-                  Your roadmap will appear here.
-                </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">
-                  Generate a roadmap to see skills, weekly tasks, project ideas, portfolio work, interview prep, and job search actions.
-                </p>
+              </div>
+              <div className="grid gap-5 p-5 sm:p-6">
+                <div className="grid grid-cols-3 gap-3">
+                  {[['Role', targetRole], ['Time', `${dailyHours}h / day`], ['Timeline', `${timelineMonths} months`]].map(([label, value]) => (
+                    <div key={label} className="rounded-xl border border-[#173d36]/10 bg-white/75 p-3 dark:border-white/10 dark:bg-white/[0.035]"><p className="text-[0.62rem] font-bold uppercase tracking-[0.15em] text-[#81958f]">{label}</p><p className="mt-1 line-clamp-2 text-sm font-bold text-[#23443c] dark:text-white">{value}</p></div>
+                  ))}
+                </div>
+                <div className="relative ml-3 border-l border-dashed border-[#7ac6b4] pl-7">
+                  {[['Skills gap', 'Priority skills ordered by what your target role needs first.'], ['Weekly sprints', 'Focused tasks sized to your available study time.'], ['Portfolio proof', 'Projects, GitHub tasks and honest resume bullet ideas.'], ['Interview & applications', 'Questions, checkpoints and practical job-search actions.']].map(([title, body], index) => (
+                    <div key={title} className="relative pb-5 last:pb-0"><span className="absolute -left-[2.2rem] top-0 grid size-4 place-items-center rounded-full bg-[#177e70] text-[0.5rem] font-bold text-white ring-4 ring-[#eef8f3] dark:ring-[#173029]">{index + 1}</span><h3 className="text-sm font-bold text-[#24463e] dark:text-white">{title}</h3><p className="mt-1 text-xs leading-5 text-[#697f78] dark:text-slate-300">{body}</p></div>
+                  ))}
+                </div>
+                <div className="rounded-xl border border-[#e7ad86]/35 bg-[#fff2e8] p-4 dark:border-[#e7ad86]/20 dark:bg-[#e7ad86]/10">
+                  <p className="text-sm font-bold text-[#71442d] dark:text-[#ffc4a1]">Ready when your inputs feel honest.</p>
+                  <p className="mt-1 text-xs leading-5 text-[#86604c] dark:text-slate-300">Generate once, review the result, then return whenever your skills or timeline changes.</p>
+                </div>
               </div>
             </div>
           )}
@@ -476,11 +494,11 @@ function SkillPicker({
 
   return (
     <div className="grid gap-2">
-      <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Current skills</span>
-      <div className="rounded-xl border border-blue-950/10 bg-white p-3 dark:border-white/10 dark:bg-slate-950/50">
+      <span className="flex items-center justify-between text-sm font-semibold text-[#35534c] dark:text-slate-200"><span>3. Current skills</span><span className="text-xs font-medium text-[#80938e]">Add at least two</span></span>
+      <div className="rounded-xl border border-[#173d36]/12 bg-[#fbfdfb] p-3 dark:border-white/10 dark:bg-slate-950/50">
         <div className="flex min-h-12 flex-wrap gap-2">
           {selectedSkills.map((skill) => (
-            <span key={skill} className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-primary dark:bg-primary/12 dark:text-emerald-200">
+            <span key={skill} className="inline-flex items-center gap-2 rounded-full bg-[#e3f5ed] px-3 py-1.5 text-xs font-semibold text-[#177e70] dark:bg-primary/12 dark:text-emerald-200">
               {skill}
               <button type="button" onClick={() => onRemove(skill)} className="grid size-4 place-items-center rounded-full bg-white/80 text-slate-500 hover:text-red-600 dark:bg-white/10 dark:text-slate-200" aria-label={`Remove ${skill}`}>
                 <X className="size-3" aria-hidden="true" />
@@ -489,8 +507,8 @@ function SkillPicker({
           ))}
         </div>
         <div className="relative mt-3">
-          <div className="flex items-center gap-2 rounded-xl border border-blue-950/10 bg-[#f8fbff] px-3 dark:border-white/10 dark:bg-white/[0.04]">
-            <Search className="size-4 text-primary dark:text-emerald-200" aria-hidden="true" />
+          <div className="flex items-center gap-2 rounded-xl border border-[#173d36]/10 bg-white px-3 dark:border-white/10 dark:bg-white/[0.04]">
+            <Search className="size-4 text-[#177e70] dark:text-emerald-200" aria-hidden="true" />
             <input
               value={query}
               onChange={(event) => {
@@ -506,7 +524,7 @@ function SkillPicker({
             </button>
           </div>
           {open ? (
-            <div className="absolute left-0 right-0 top-full z-20 mt-2 max-h-72 overflow-y-auto rounded-xl border border-blue-950/10 bg-white p-2 shadow-2xl shadow-blue-950/12 dark:border-white/10 dark:bg-slate-950">
+            <div className="absolute left-0 right-0 top-full z-20 mt-2 max-h-72 overflow-y-auto rounded-xl border border-[#173d36]/10 bg-white p-2 shadow-2xl shadow-[#173d36]/12 dark:border-white/10 dark:bg-slate-950">
               {(filteredSkills.length ? filteredSkills : sampleSkills.filter((skill) => !selectedSkills.includes(skill)).slice(0, 12)).map((skill) => (
                 <button
                   key={skill}

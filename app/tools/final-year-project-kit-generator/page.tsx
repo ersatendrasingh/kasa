@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
-  ArrowLeft,
+  ArrowRight,
   Archive,
   Blocks,
   BookOpenCheck,
@@ -25,8 +25,7 @@ import {
 import { JsonLd } from "@/components/site/structured-data";
 import { siteContainerClasses } from "@/components/site/site-container";
 import { FinalYearProjectKitGenerator } from "@/components/tools/final-year-project-kit-generator";
-import { ToolBreadcrumb, ToolHeroFeatureCard, ToolHeroKeywords } from "@/components/tools/tool-hero-extras";
-import { ToolSeoSection } from "@/components/tools/tool-seo-section";
+import { ToolBreadcrumb } from "@/components/tools/tool-hero-extras";
 
 export const metadata: Metadata = {
   title: "AI Final Year Project Kit Generator | Ideas, Source Code, Report & Viva",
@@ -331,112 +330,156 @@ export default function FinalYearProjectKitGeneratorPage() {
         },
       ],
     },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "@id": `${pageUrl}#faq`,
+      mainEntity: projectFaqs.map((faq) => ({
+        "@type": "Question",
+        name: faq.question,
+        acceptedAnswer: { "@type": "Answer", text: faq.answer },
+      })),
+    },
   ];
 
   return (
-    <div className="relative overflow-hidden bg-[#eef7ff] text-slate-950 dark:bg-surface-strong dark:text-white">
+    <div className="relative overflow-hidden bg-[#fbfdf9] text-[#122c28] dark:bg-surface-strong dark:text-white">
       <JsonLd data={jsonLd} />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_14%,rgba(43,168,255,0.24),transparent_26rem),radial-gradient(circle_at_14%_76%,rgba(34,181,115,0.11),transparent_24rem),linear-gradient(180deg,#ffffff_0%,#eef7ff_48%,#f8fbff_100%)] dark:bg-[radial-gradient(circle_at_74%_24%,rgba(88,201,138,0.18),transparent_23rem),linear-gradient(180deg,rgba(18,35,67,0.96),rgba(6,17,38,1))]" />
-
-      <section className="relative pb-8 pt-[9.25rem] sm:pt-[10.25rem] lg:pb-10 lg:pt-[10.75rem]">
-        <div className={siteContainerClasses({ className: "grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center" })}>
-          <div>
-            <Link href="/tools" className="inline-flex items-center gap-2 rounded-full border border-blue-950/10 bg-white/72 px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm shadow-blue-950/5 transition hover:border-primary/35 hover:text-primary dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-300 dark:hover:text-white">
-              <ArrowLeft className="size-4" aria-hidden="true" />
-              All AI tools
-            </Link>
+      <section className="relative border-b border-white/10 bg-[#153f37] pb-12 pt-[8.75rem] text-white dark:bg-[#0b1c19] sm:pt-[9.5rem] lg:pt-[10rem]">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_25%,rgba(112,223,188,0.17),transparent_28rem),radial-gradient(circle_at_4%_90%,rgba(255,182,136,0.12),transparent_24rem)]" />
+        <div className={siteContainerClasses({ className: "relative" })}>
+          <div className="[&_nav]:!mt-0 [&_nav]:!text-white/42 [&_nav_a:hover]:!text-[#8ce8c8] [&_nav_span]:!text-white/70">
             <ToolBreadcrumb current="AI Final Year Project Kit Generator" />
-            <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white/76 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary shadow-sm shadow-blue-950/5 dark:border-emerald-300/25 dark:bg-emerald-400/10 dark:text-emerald-200">
+          </div>
+          <div className="mt-6 grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#77dfbd]/25 bg-[#77dfbd]/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.17em] text-[#8ce8c8]">
               <Sparkles className="size-3.5 animate-pulse" aria-hidden="true" />
-              Final year project in 2 minutes
+              AI project lab · free for students
             </div>
-            <h1 className="mt-5 max-w-3xl font-heading text-4xl font-semibold leading-[1.08] text-slate-950 sm:text-5xl lg:text-[3.35rem] dark:text-white">
-              Generate your final year project kit in 2 minutes.
+            <h1 className="mt-5 max-w-3xl font-heading text-[2.75rem] font-semibold leading-[1.02] tracking-[-0.035em] sm:text-[3.5rem] lg:text-[4rem]">
+              Go from project idea to a build you can defend.
             </h1>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-slate-700 sm:text-lg dark:text-muted">
-              Get project ideas, architecture, folder structure, APIs, database schema, documentation, viva questions,
-              resume bullets, and a downloadable starter ZIP for BTech, BCA, MCA, and diploma projects.
+            <p className="mt-5 max-w-xl text-base leading-7 text-white/68 sm:text-lg sm:leading-8">
+              Generate a practical final year project kit with problem statement, architecture, database schema, APIs, documentation, viva preparation, resume bullets and a downloadable source-code starter.
             </p>
-            <ToolHeroKeywords
-              keywords={[
-                "final year project ideas",
-                "project with source code",
-                "BTech project ideas",
-                "BCA project with documentation",
-                "mini project source code",
-                "project viva questions",
-                "project ZIP download",
-              ]}
-            />
+            <Link href="#project-lab" className="mt-7 inline-flex h-12 items-center gap-2 rounded-full bg-[#7ce0bf] px-6 text-sm font-bold text-[#123c33] shadow-[0_16px_38px_rgba(75,200,158,0.18)] transition hover:-translate-y-0.5 hover:bg-[#91e8cc]">Open project lab <ArrowRight className="size-4" /></Link>
+            <div className="mt-7 flex flex-wrap gap-x-6 gap-y-3 text-sm font-medium text-white/65">
+              {["BTech, BCA, MCA & diploma", "Mini and major projects", "Starter ZIP + documentation"].map((item) => <span key={item} className="inline-flex items-center gap-2"><CheckCircle2 className="size-4 text-[#7ce0bf]" />{item}</span>)}
+            </div>
           </div>
 
-          <ToolHeroFeatureCard
-            icon={Archive}
-            title="Idea + docs + starter ZIP"
-            description="Generate a college-ready project kit instead of searching random project topics for hours."
-            points={[
-              "Choose stack, domain, difficulty, team size, and time left.",
-              "Get synopsis, architecture, APIs, schema, setup guide, and viva prep.",
-              "Download a ZIP with documentation and starter source-code structure.",
-            ]}
-          />
+          <div className="relative mx-auto w-full max-w-[48rem]">
+            <div className="overflow-hidden rounded-[1.6rem] border border-white/12 bg-[#0f2e28] shadow-[0_30px_85px_rgba(0,0,0,0.28)]">
+              <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+                <div className="flex items-center gap-2"><span className="size-2.5 rounded-full bg-[#ff9a77]" /><span className="size-2.5 rounded-full bg-[#ffd37c]" /><span className="size-2.5 rounded-full bg-[#70d8b4]" /></div>
+                <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-white/45">project-kit / ready</p>
+              </div>
+              <div className="grid sm:grid-cols-[0.8fr_1.2fr]">
+                <div className="border-b border-white/10 p-5 sm:border-b-0 sm:border-r">
+                  <p className="text-[0.62rem] font-bold uppercase tracking-[0.18em] text-[#7ce0bf]">Project brief</p>
+                  <h2 className="mt-2 font-heading text-2xl font-semibold">Smart Campus Issue Tracker</h2>
+                  <p className="mt-2 text-sm leading-6 text-white/55">MERN · Education · 2-member team · 1 month</p>
+                  <div className="mt-5 grid gap-2">
+                    {[['01', 'Problem & objectives'], ['02', 'System architecture'], ['03', 'Database & APIs'], ['04', 'Build & test plan']].map(([number, label]) => (
+                      <div key={number} className="flex items-center gap-3 rounded-lg bg-white/[0.045] px-3 py-2.5"><span className="text-xs font-bold text-[#7ce0bf]">{number}</span><span className="text-xs font-semibold text-white/72">{label}</span></div>
+                    ))}
+                  </div>
+                </div>
+                <div className="p-5">
+                  <p className="text-[0.62rem] font-bold uppercase tracking-[0.18em] text-[#ffba91]">Submission bundle</p>
+                  <div className="mt-4 grid grid-cols-2 gap-3">
+                    {[
+                      { icon: FileText, title: 'Synopsis', meta: 'Abstract + scope' },
+                      { icon: Database, title: 'Schema', meta: 'Tables + relations' },
+                      { icon: Code2, title: 'Code starter', meta: 'Files + setup' },
+                      { icon: Presentation, title: 'Viva prep', meta: 'Q&A + demo flow' },
+                    ].map((item) => { const Icon = item.icon; return <div key={item.title} className="rounded-xl border border-white/10 bg-white/[0.055] p-3"><Icon className="size-4 text-[#7ce0bf]" /><h3 className="mt-3 text-sm font-bold">{item.title}</h3><p className="mt-1 text-[0.7rem] text-white/45">{item.meta}</p></div>; })}
+                  </div>
+                  <div className="mt-3 rounded-xl border border-[#7ce0bf]/20 bg-[#7ce0bf]/10 p-3"><div className="flex items-center justify-between"><span className="text-xs font-bold text-[#a2efd5]">Downloadable ZIP</span><Archive className="size-4 text-[#7ce0bf]" /></div><p className="mt-1 text-[0.7rem] text-white/48">README, docs, source structure and environment sample.</p></div>
+                </div>
+              </div>
+            </div>
+            <div className="absolute -bottom-5 -left-4 hidden -rotate-2 rounded-2xl bg-[#ffcfac] px-4 py-3 text-[#4d2c20] shadow-xl sm:block"><p className="text-[0.62rem] font-bold uppercase tracking-[0.18em] text-[#8b4e2d]">Built to explain</p><p className="mt-1 text-sm font-bold">Not a random ZIP to submit blindly.</p></div>
+          </div>
+          </div>
         </div>
       </section>
 
-      <FinalYearProjectKitGenerator />
+      <div id="project-lab"><FinalYearProjectKitGenerator /></div>
 
       <FinalYearProjectSeoContent />
 
-      <ToolSeoSection
-        eyebrow="Final year project FAQ"
-        title="AI Final Year Project Kit Generator FAQ"
-        description="Learn how to turn the generated kit into a practical build plan, faculty-ready documentation, and confident viva preparation."
-        keywords={[
-          "final year project generator",
-          "final year project ideas",
-          "final year project with source code",
-          "final year project report",
-          "final year project documentation",
-          "final year project synopsis",
-          "BTech final year project",
-          "BTech CSE project with source code",
-          "BCA project with documentation",
-          "MCA project with documentation",
-          "major project report generator",
-          "mini project source code",
-          "AI project generator",
-          "project synopsis generator",
-          "project viva questions",
-          "MERN stack project ideas",
-          "Python project for students",
-        ]}
-        faqs={projectFaqs}
-        relatedTools={[
-          { href: "/tools/resume-ats-checker", label: "AI Resume ATS Checker" },
-          { href: "/tools/ai-resume-builder", label: "AI Resume Builder" },
-          { href: "/tools/resume-builder-studio", label: "Free Resume Builder" },
-          { href: "/tools/study-timetable-generator", label: "Study Timetable Generator" },
-          { href: "/tools/study-hours-calculator", label: "Study Hours Calculator" },
-          { href: "/tools/assignment-deadline-planner", label: "Assignment Deadline Planner" },
-        ]}
-      />
+      <section className="bg-[#153f37] py-14 text-white dark:bg-[#0b1c19] sm:py-16">
+        <div className={siteContainerClasses()}>
+          <div className="grid gap-8 lg:grid-cols-[0.62fr_1.38fr]">
+            <div className="lg:sticky lg:top-28 lg:self-start">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#7ce0bf]">Final year project FAQ</p>
+              <h2 className="mt-3 max-w-xl font-heading text-3xl font-semibold leading-[1.08] sm:text-[2.6rem]">Questions students ask before choosing, building and presenting a project.</h2>
+              <p className="mt-4 max-w-lg text-sm leading-7 text-white/65">These answers cover BTech CSE, BCA, MCA, mini projects, major projects, source-code starters, documentation, project reports and viva preparation.</p>
+              <div className="mt-6 flex flex-wrap gap-2">
+                {["BTech CSE", "BCA & MCA", "MERN", "Python", "AI/ML", "Java"].map((keyword) => <span key={keyword} className="rounded-full border border-white/12 bg-white/[0.045] px-3 py-1.5 text-xs font-semibold text-white/70">{keyword}</span>)}
+              </div>
+            </div>
+            <div className="divide-y divide-white/10 border-y border-white/10">
+              {projectFaqs.map((faq, index) => (
+                <details key={faq.question} className="group py-4 open:pb-5">
+                  <summary className="flex cursor-pointer list-none items-start justify-between gap-4 text-left">
+                    <span className="flex gap-4"><span className="mt-0.5 text-xs font-bold text-[#7ce0bf]">{String(index + 1).padStart(2, "0")}</span><span className="text-base font-bold leading-6 text-white/90">{faq.question}</span></span>
+                    <span className="grid size-7 shrink-0 place-items-center rounded-full border border-white/15 text-[#7ce0bf] transition group-open:rotate-45">+</span>
+                  </summary>
+                  <p className="ml-10 mt-3 max-w-3xl text-sm leading-7 text-white/62">{faq.answer}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-[#fffaf4] py-14 dark:bg-surface sm:py-16">
+        <div className={siteContainerClasses()}>
+          <div className="grid gap-8 lg:grid-cols-[0.68fr_1.32fr] lg:items-start">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#c66a42] dark:text-[#ffb791]">Continue the student workflow</p>
+              <h2 className="mt-3 max-w-xl font-heading text-3xl font-semibold leading-[1.1] text-[#193832] dark:text-white">Turn the completed project into marks, proof and placement value.</h2>
+              <p className="mt-4 max-w-lg text-sm leading-7 text-[#687b74] dark:text-slate-300">After you generate the kit, plan the deadline, build the modules, test the project, prepare your presentation and add only your real contribution to the resume.</p>
+            </div>
+            <div className="grid overflow-hidden rounded-[1.25rem] border border-[#5a3f2c]/15 sm:grid-cols-2 dark:border-white/10">
+              {[
+                { href: "/tools/assignment-deadline-planner", label: "Plan the submission deadline", text: "Break documentation, coding, testing and presentation work into daily tasks." },
+                { href: "/tools/study-timetable-generator", label: "Create a project timetable", text: "Fit project work around classes, exams and other college commitments." },
+                { href: "/tools/ai-career-roadmap", label: "Connect it to a career roadmap", text: "Choose projects that prove the skills required by your target role." },
+                { href: "/tools/resume-builder-studio", label: "Add the project to your resume", text: "Convert real features, stack and outcomes into honest resume bullets." },
+                { href: "/tools/resume-ats-checker", label: "Check project keywords", text: "Compare your resume with the target job and find missing technical proof." },
+                { href: "/students/interview-questions", label: "Practice project interviews", text: "Prepare to explain architecture, trade-offs, testing and your contribution." },
+              ].map((item, index) => (
+                <Link key={item.href} href={item.href} className="group border-[#5a3f2c]/15 bg-white/55 p-5 transition hover:bg-white sm:even:border-l sm:[&:nth-child(n+3)]:border-t dark:border-white/10 dark:bg-white/[0.035] dark:hover:bg-white/[0.06]">
+                  <div className="flex items-center justify-between"><span className="text-xs font-bold text-[#c66a42] dark:text-[#ffb791]">0{index + 1}</span><ArrowRight className="size-4 text-[#9a7560] transition group-hover:translate-x-1" /></div>
+                  <h3 className="mt-3 text-base font-bold text-[#2d443d] dark:text-white">{item.label}</h3>
+                  <p className="mt-2 text-sm leading-6 text-[#6b7b75] dark:text-slate-300">{item.text}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
 
 function FinalYearProjectSeoContent() {
   return (
-    <section className="relative py-12 sm:py-16">
+    <section className="relative bg-white py-14 dark:bg-surface sm:py-16">
       <div className={siteContainerClasses()}>
-        <div className="grid gap-6 lg:grid-cols-[0.72fr_0.28fr] lg:items-start">
-          <div className="rounded-[1.25rem] border border-blue-950/10 bg-white/88 p-5 shadow-xl shadow-blue-950/8 dark:border-white/10 dark:bg-surface/90 sm:p-7">
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-primary dark:text-emerald-200">
+        <div className="grid gap-8 lg:grid-cols-[0.7fr_0.3fr] lg:items-start">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#177e70] dark:text-emerald-200">
               How AI Final Year Project Kit Generator Works
             </p>
-            <h2 className="mt-2 font-heading text-3xl font-semibold leading-tight text-slate-950 dark:text-white">
-              Generate project ideas, source-code starter, report, synopsis, and viva prep
+            <h2 className="mt-3 max-w-4xl font-heading text-3xl font-semibold leading-[1.1] text-[#193832] sm:text-[2.55rem] dark:text-white">
+              A final year project needs more than an idea. It needs a finishable system and a clear explanation.
             </h2>
-            <div className="mt-5 space-y-4 text-sm leading-7 text-slate-600 dark:text-slate-300 sm:text-base">
+            <div className="mt-6 max-w-4xl space-y-4 border-l border-[#177e70]/25 pl-5 text-sm leading-7 text-[#5e746d] dark:text-slate-300 sm:text-base">
               <p>
                 KASA&apos;s AI Final Year Project Kit Generator helps students move from confusion to a complete project direction in minutes. Choose your course, project type, tech stack, domain, difficulty, time left, team size, and goal. The generator then prepares a practical kit with a project title, abstract, problem statement, objectives, features, architecture, folder structure, database schema, API endpoints, screen plan, setup steps, documentation outline, viva questions, resume bullets, and future scope.
               </p>
@@ -445,18 +488,18 @@ function FinalYearProjectSeoContent() {
               </p>
               <p>
                 A good final year project should be practical, explainable, and finishable. Many students choose a topic that sounds advanced but becomes difficult to complete before submission. This project kit generator balances ambition with time left. If you have only a few days, generate an easy mini project with clear modules. If you have one or two months, choose a major project with better architecture, database design, authentication, dashboard screens, APIs, and future scope. For placement, choose a stack that matches your resume goal and then use the generated resume bullets in the{" "}
-                <Link href="/tools/resume-ats-checker" className="font-semibold text-primary hover:underline dark:text-emerald-200">
+                <Link href="/tools/resume-ats-checker" className="font-semibold text-[#177e70] hover:underline dark:text-emerald-200">
                   AI Resume ATS Checker
                 </Link>
                 .
               </p>
               <p>
                 Use the generated kit as a roadmap, not as blind copy-paste material. Read the abstract, understand the problem statement, build the modules step by step, and prepare the viva answers in your own words. If your faculty asks for documentation, expand the generated synopsis into chapters such as introduction, literature survey, proposed system, requirements, system design, implementation, testing, results, conclusion, and future scope. To manage your deadline, combine this page with the{" "}
-                <Link href="/tools/study-timetable-generator" className="font-semibold text-primary hover:underline dark:text-emerald-200">
+                <Link href="/tools/study-timetable-generator" className="font-semibold text-[#177e70] hover:underline dark:text-emerald-200">
                   Study Timetable Generator
                 </Link>
                 {" "}and{" "}
-                <Link href="/tools/assignment-deadline-planner" className="font-semibold text-primary hover:underline dark:text-emerald-200">
+                <Link href="/tools/assignment-deadline-planner" className="font-semibold text-[#177e70] hover:underline dark:text-emerald-200">
                   Assignment Deadline Planner
                 </Link>
                 .
@@ -464,17 +507,17 @@ function FinalYearProjectSeoContent() {
             </div>
           </div>
 
-          <aside className="rounded-[1.25rem] border border-blue-950/10 bg-white/80 p-5 shadow-xl shadow-blue-950/8 dark:border-white/10 dark:bg-white/[0.06]">
-            <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[image:var(--button-solid)] !text-white">
+          <aside className="rounded-[1.25rem] bg-[#153f37] p-5 text-white shadow-[0_22px_55px_rgba(21,63,55,0.18)] dark:bg-[#102721]">
+            <div className="inline-flex size-11 items-center justify-center rounded-2xl bg-[#7ce0bf]/12 text-[#7ce0bf]">
               <Lightbulb className="size-5 !text-white [stroke:white]" aria-hidden="true" />
             </div>
-            <h3 className="mt-4 font-heading text-xl font-semibold text-slate-950 dark:text-white">
+            <h3 className="mt-4 font-heading text-xl font-semibold">
               Project kit includes
             </h3>
-            <div className="mt-4 grid gap-3 text-sm font-semibold text-slate-700 dark:text-slate-200">
+            <div className="mt-4 grid gap-3 text-sm font-semibold text-white/72">
               {["Project idea", "Synopsis and report plan", "Architecture", "Source-code structure", "Viva questions", "Resume bullets"].map((item) => (
                 <div key={item} className="flex items-center gap-2">
-                  <CheckCircle2 className="size-4 text-primary dark:text-emerald-200" aria-hidden="true" />
+                  <CheckCircle2 className="size-4 text-[#7ce0bf]" aria-hidden="true" />
                   {item}
                 </div>
               ))}
@@ -482,24 +525,24 @@ function FinalYearProjectSeoContent() {
           </aside>
         </div>
 
-        <div className="mt-6 rounded-[1.25rem] border border-blue-950/10 bg-white/82 p-5 shadow-xl shadow-blue-950/8 dark:border-white/10 dark:bg-surface/88 sm:p-7">
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-primary dark:text-emerald-200">
+        <div className="mt-12 border-y border-[#173d36]/10 py-8 dark:border-white/10">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#177e70] dark:text-emerald-200">
             Use Cases
           </p>
-          <h2 className="mt-2 font-heading text-3xl font-semibold text-slate-950 dark:text-white">
+          <h2 className="mt-3 font-heading text-3xl font-semibold text-[#193832] dark:text-white">
             Final year project generator for every student deadline
           </h2>
-          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          <div className="mt-7 grid md:grid-cols-2 xl:grid-cols-5">
             {useCases.map((useCase) => {
               const Icon = useCase.icon;
 
               return (
-                <div key={useCase.title} className="rounded-[1rem] border border-blue-950/10 bg-blue-50/70 p-4 dark:border-white/10 dark:bg-white/[0.05]">
-                  <Icon className="size-5 text-primary dark:text-emerald-200" aria-hidden="true" />
-                  <h3 className="mt-3 text-sm font-semibold text-slate-950 dark:text-white">
+                <div key={useCase.title} className="border-b border-r border-[#173d36]/10 p-4 transition hover:bg-[#f4faf6] dark:border-white/10 dark:hover:bg-white/[0.04]">
+                  <Icon className="size-5 text-[#177e70] dark:text-emerald-200" aria-hidden="true" />
+                  <h3 className="mt-3 text-sm font-semibold text-[#24463e] dark:text-white">
                     {useCase.title}
                   </h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                  <p className="mt-2 text-sm leading-6 text-[#657a74] dark:text-slate-300">
                     {useCase.description}
                   </p>
                 </div>
@@ -508,11 +551,11 @@ function FinalYearProjectSeoContent() {
           </div>
         </div>
 
-        <div className="mt-6 rounded-[1.25rem] border border-blue-950/10 bg-white/82 p-5 shadow-xl shadow-blue-950/8 dark:border-white/10 dark:bg-surface/88 sm:p-7">
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-primary dark:text-emerald-200">
+        <div className="mt-12 rounded-[1.4rem] bg-[#edf8f3] p-5 dark:bg-white/[0.035] sm:p-7">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#177e70] dark:text-emerald-200">
             Project Deliverables
           </p>
-          <h2 className="mt-2 font-heading text-3xl font-semibold text-slate-950 dark:text-white">
+          <h2 className="mt-3 font-heading text-3xl font-semibold text-[#193832] dark:text-white">
             Everything students need for project submission and viva
           </h2>
           <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -520,12 +563,12 @@ function FinalYearProjectSeoContent() {
               const Icon = item.icon;
 
               return (
-                <div key={item.title} className="rounded-[1rem] border border-blue-950/10 bg-blue-50/70 p-4 dark:border-white/10 dark:bg-white/[0.05]">
-                  <Icon className="size-5 text-primary dark:text-emerald-200" aria-hidden="true" />
-                  <h3 className="mt-3 text-sm font-semibold text-slate-950 dark:text-white">
+                <div key={item.title} className="rounded-[1rem] border border-[#173d36]/10 bg-white/70 p-4 dark:border-white/10 dark:bg-white/[0.05]">
+                  <Icon className="size-5 text-[#177e70] dark:text-emerald-200" aria-hidden="true" />
+                  <h3 className="mt-3 text-sm font-semibold text-[#24463e] dark:text-white">
                     {item.title}
                   </h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                  <p className="mt-2 text-sm leading-6 text-[#657a74] dark:text-slate-300">
                     {item.text}
                   </p>
                 </div>
@@ -629,7 +672,7 @@ function FinalYearProjectSeoContent() {
                   <Icon className="size-4 text-primary dark:text-emerald-200" aria-hidden="true" />
                   {item.label}
                 </span>
-                <ArrowLeft className="size-4 rotate-180 text-primary dark:text-emerald-200" aria-hidden="true" />
+                <ArrowRight className="size-4 text-primary dark:text-emerald-200" aria-hidden="true" />
               </Link>
             );
           })}

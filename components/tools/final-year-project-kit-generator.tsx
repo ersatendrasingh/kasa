@@ -303,25 +303,25 @@ export function FinalYearProjectKitGenerator() {
   };
 
   return (
-    <section className="relative px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto grid w-full max-w-[108rem] gap-5 lg:grid-cols-[0.9fr_1.1fr]">
-        <div className="rounded-[1.35rem] border border-blue-950/10 bg-white/92 p-5 shadow-xl shadow-blue-950/8 backdrop-blur dark:border-white/10 dark:bg-surface/90 sm:p-7">
+    <section className="relative bg-[#f4f8f4] px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
+      <div className="mx-auto grid w-full max-w-[96rem] gap-6 lg:grid-cols-[0.88fr_1.12fr] lg:items-start">
+        <div className="rounded-[1.4rem] border border-[#173d36]/10 bg-white/94 p-5 shadow-[0_20px_55px_rgba(23,61,54,0.09)] dark:border-white/10 dark:bg-surface/90 sm:p-6 lg:sticky lg:top-28">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-primary dark:text-emerald-200">2 minute project kit</p>
-              <h2 className="mt-2 font-heading text-3xl font-semibold text-slate-950 dark:text-white">Build your project brief</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">Select your course, stack, difficulty, and requirement. AI creates a college-ready starter kit.</p>
+              <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-[#177e70] dark:text-emerald-200">Project brief · about 2 minutes</p>
+              <h2 className="mt-1 font-heading text-2xl font-semibold text-[#16352f] dark:text-white">Set the project constraints</h2>
+              <p className="mt-2 text-sm leading-6 text-[#657a74] dark:text-slate-300">A finishable project starts with an honest deadline, team size and stack.</p>
             </div>
-            <button type="button" onClick={reset} className="grid size-10 cursor-pointer place-items-center rounded-full border border-blue-950/10 bg-white text-slate-700 shadow-sm transition hover:border-primary/35 hover:text-primary dark:border-white/10 dark:bg-white/7 dark:text-white" aria-label="Reset project kit">
+            <button type="button" onClick={reset} className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-full border border-[#173d36]/10 bg-[#f7fbf8] text-[#47645d] shadow-sm transition hover:border-[#177e70]/40 hover:text-[#177e70] dark:border-white/10 dark:bg-white/7 dark:text-white" aria-label="Reset project kit">
               <RefreshCcw className="size-4" aria-hidden="true" />
             </button>
           </div>
 
-          <div className="mt-6 grid gap-4">
-            <ChoiceGrid label="Course" value={course} options={courses} onChange={(value) => { setCourse(value); clearGenerated(); }} />
-            <ChoiceGrid label="Project type" value={projectType} options={projectTypes} onChange={(value) => { setProjectType(value); clearGenerated(); }} />
-            <ChoiceGrid label="Tech stack" value={techStack} options={stacks} onChange={(value) => { setTechStack(value); clearGenerated(); }} />
-            <ChoiceGrid label="Domain" value={domain} options={domains} onChange={(value) => { setDomain(value); clearGenerated(); }} />
+          <div className="mt-6 grid gap-3">
+            <ChoiceGrid label="1. Course" value={course} options={courses} onChange={(value) => { setCourse(value); clearGenerated(); }} />
+            <ChoiceGrid label="2. Project type" value={projectType} options={projectTypes} onChange={(value) => { setProjectType(value); clearGenerated(); }} />
+            <ChoiceGrid label="3. Tech stack" value={techStack} options={stacks} onChange={(value) => { setTechStack(value); clearGenerated(); }} />
+            <ChoiceGrid label="4. Domain" value={domain} options={domains} onChange={(value) => { setDomain(value); clearGenerated(); }} />
             <div className="grid gap-4 sm:grid-cols-2">
               <ChoiceGrid label="Difficulty" value={difficulty} options={difficulties} onChange={(value) => { setDifficulty(value); clearGenerated(); }} compact />
               <ChoiceGrid label="Time left" value={timeLeft} options={timeOptions} onChange={(value) => { setTimeLeft(value); clearGenerated(); }} compact />
@@ -330,23 +330,23 @@ export function FinalYearProjectKitGenerator() {
               <NumberField label="Team size" value={teamSize} onChange={(value) => { setTeamSize(value); clearGenerated(); }} min={1} max={6} suffix={teamSize === 1 ? " member" : " members"} />
               <ChoiceGrid label="Goal" value={goal} options={goals} onChange={(value) => { setGoal(value); clearGenerated(); }} compact />
             </div>
-            <label className="rounded-[1.1rem] border border-blue-950/10 bg-white/82 p-4 shadow-sm shadow-blue-950/5 dark:border-white/10 dark:bg-white/[0.04]">
-              <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">Your requirement</span>
+            <label className="rounded-[1rem] border border-[#173d36]/10 bg-[#f9fcfa] p-4 dark:border-white/10 dark:bg-white/[0.04]">
+              <span className="text-sm font-semibold text-[#35534c] dark:text-slate-100">Anything the project must include?</span>
               <textarea
                 value={requirement}
                 onChange={(event) => { setRequirement(event.target.value); clearGenerated(); }}
                 rows={4}
                 placeholder="Example: I need a face recognition attendance project with admin panel and student dashboard..."
-                className="mt-3 w-full resize-y rounded-xl border border-blue-950/10 bg-blue-50/60 px-4 py-3 text-sm font-medium leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-primary/50 dark:border-white/10 dark:bg-white/[0.06] dark:text-white"
+                className="mt-3 w-full resize-y rounded-xl border border-[#173d36]/10 bg-white px-4 py-3 text-sm font-medium leading-6 text-[#17342e] outline-none transition placeholder:text-[#95a59f] focus:border-[#177e70]/50 focus:ring-2 focus:ring-[#177e70]/10 dark:border-white/10 dark:bg-white/[0.06] dark:text-white"
               />
             </label>
             <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={generateKit} className="inline-flex h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-[image:var(--button-solid)] px-5 text-sm font-semibold !text-white shadow-xl shadow-primary/20 transition hover:-translate-y-0.5 sm:flex-none">
-                <Sparkles className="size-4 animate-pulse" aria-hidden="true" />
-                Generate Project Kit
+              <button type="button" onClick={generateKit} disabled={isGenerating} className="inline-flex h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-[image:var(--button-solid)] px-5 text-sm font-bold !text-white shadow-[0_14px_30px_rgba(20,112,96,0.2)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-65 sm:flex-none">
+                {isGenerating ? <LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> : <Sparkles className="size-4" aria-hidden="true" />}
+                {isGenerating ? "Building project kit..." : "Generate project kit"}
               </button>
               {savedAvailable ? (
-                <button type="button" onClick={restoreLast} className="inline-flex h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-full border border-blue-950/10 bg-white px-5 text-sm font-semibold text-slate-700 shadow-sm shadow-blue-950/5 transition hover:border-primary/35 hover:text-primary sm:flex-none dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200 dark:hover:text-white">
+                <button type="button" onClick={restoreLast} className="inline-flex h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-full border border-[#173d36]/12 bg-white px-5 text-sm font-semibold text-[#426159] shadow-sm transition hover:border-[#177e70]/40 hover:text-[#177e70] sm:flex-none dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200 dark:hover:text-white">
                   <Sparkles className="size-4" aria-hidden="true" />
                   {kit ? "Reload saved kit" : "See last kit"}
                 </button>
@@ -355,7 +355,7 @@ export function FinalYearProjectKitGenerator() {
           </div>
         </div>
 
-        <div className="rounded-[1.35rem] border border-blue-950/10 bg-white/94 p-5 shadow-2xl shadow-blue-950/12 backdrop-blur dark:border-white/10 dark:bg-surface/92 sm:p-7">
+        <div className="rounded-[1.4rem] border border-[#173d36]/10 bg-white/96 p-5 shadow-[0_20px_55px_rgba(23,61,54,0.09)] dark:border-white/10 dark:bg-surface/92 sm:p-6">
           {kit ? (
             <div className="grid gap-5">
               <div className="overflow-hidden rounded-[1.25rem] border border-blue-950/10 bg-[image:var(--architecture-panel-background)] shadow-xl shadow-blue-950/10 dark:border-white/10">
@@ -452,14 +452,28 @@ export function FinalYearProjectKitGenerator() {
               </div>
             </div>
           ) : (
-            <div className="grid min-h-[42rem] place-items-center rounded-[1.25rem] border border-dashed border-blue-950/15 bg-blue-50/60 p-8 text-center dark:border-white/10 dark:bg-white/[0.05]">
-              <div>
-                <div className="mx-auto grid size-16 place-items-center rounded-2xl bg-white text-primary shadow-sm dark:bg-white/10 dark:text-emerald-200">
-                  <Archive className="size-8" aria-hidden="true" />
+            <div className="min-h-[42rem] overflow-hidden rounded-[1.2rem] border border-[#173d36]/10 bg-[linear-gradient(145deg,#f8fcf9,#edf7f2)] dark:border-white/10 dark:bg-[linear-gradient(145deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))]">
+              <div className="flex items-center justify-between border-b border-[#173d36]/10 bg-white/70 p-5 dark:border-white/10 dark:bg-white/[0.03]">
+                <div><p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-[#177e70] dark:text-emerald-200">Submission bundle preview</p><h3 className="mt-1 font-heading text-2xl font-semibold text-[#17342e] dark:text-white">Your project kit will appear here</h3></div>
+                <span className="rounded-full bg-[#e4f5ed] px-3 py-1.5 text-xs font-bold text-[#177e70] dark:bg-emerald-300/10 dark:text-emerald-200">10+ files</span>
+              </div>
+              <div className="grid gap-5 p-5 sm:p-6">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {[['Course', course], ['Stack', techStack], ['Team', `${teamSize} member${teamSize === 1 ? '' : 's'}`], ['Deadline', timeLeft]].map(([label, value]) => <div key={label} className="rounded-xl border border-[#173d36]/10 bg-white/75 p-3 dark:border-white/10 dark:bg-white/[0.035]"><p className="text-[0.6rem] font-bold uppercase tracking-[0.15em] text-[#849790]">{label}</p><p className="mt-1 line-clamp-2 text-sm font-bold text-[#24463e] dark:text-white">{value}</p></div>)}
                 </div>
-                <h3 className="mt-5 font-heading text-3xl font-semibold text-slate-950 dark:text-white">Your project kit will appear here.</h3>
-                <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-600 dark:text-slate-300">Generate a project idea, architecture, documentation, APIs, setup guide, viva questions, resume bullets, and downloadable ZIP.</p>
-                {savedAvailable ? <button type="button" onClick={restoreLast} className="mt-5 inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-[image:var(--button-solid)] px-5 text-sm font-semibold !text-white shadow-lg shadow-primary/15 transition hover:-translate-y-0.5"><Sparkles className="size-4" />See last kit</button> : null}
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {[
+                    { icon: Lightbulb, title: 'Idea & synopsis', text: 'Title, abstract, objectives, scope and future direction.' },
+                    { icon: Code2, title: 'Build architecture', text: 'Modules, screens, APIs, database and folder structure.' },
+                    { icon: FolderTree, title: 'Starter source ZIP', text: 'Stack-specific files, setup guide and environment sample.' },
+                    { icon: BookOpenCheck, title: 'Viva & portfolio', text: 'Questions, demo flow, resume bullets and presentation outline.' },
+                  ].map((item) => { const Icon = item.icon; return <div key={item.title} className="rounded-xl border border-[#173d36]/10 bg-white/70 p-4 dark:border-white/10 dark:bg-white/[0.035]"><Icon className="size-5 text-[#177e70] dark:text-emerald-200" /><h4 className="mt-3 text-sm font-bold text-[#24463e] dark:text-white">{item.title}</h4><p className="mt-1 text-xs leading-5 text-[#6a8079] dark:text-slate-300">{item.text}</p></div>; })}
+                </div>
+                <div className="rounded-xl border border-[#e4a77d]/35 bg-[#fff0e6] p-4 dark:border-[#e4a77d]/20 dark:bg-[#e4a77d]/10">
+                  <p className="text-sm font-bold text-[#70452f] dark:text-[#ffc19b]">The generator creates a starter, not a submission shortcut.</p>
+                  <p className="mt-1 text-xs leading-5 text-[#865f4b] dark:text-slate-300">Build the modules yourself, test the flow, add screenshots and explain every decision in your own words.</p>
+                </div>
+                {savedAvailable ? <button type="button" onClick={restoreLast} className="mx-auto inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-[image:var(--button-solid)] px-5 text-sm font-semibold !text-white shadow-lg shadow-primary/15 transition hover:-translate-y-0.5"><Sparkles className="size-4" />See last kit</button> : null}
               </div>
             </div>
           )}
@@ -473,11 +487,11 @@ export function FinalYearProjectKitGenerator() {
 
 function ChoiceGrid<T extends string>({ label, value, options, onChange, compact }: { label: string; value: T; options: readonly T[]; onChange: (value: T) => void; compact?: boolean }) {
   return (
-    <div className="rounded-[1.1rem] border border-blue-950/10 bg-white/82 p-4 shadow-sm shadow-blue-950/5 dark:border-white/10 dark:bg-white/[0.04]">
-      <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">{label}</div>
+    <div className="rounded-[1rem] border border-[#173d36]/10 bg-[#f9fcfa] p-4 dark:border-white/10 dark:bg-white/[0.04]">
+      <div className="text-sm font-semibold text-[#35534c] dark:text-slate-100">{label}</div>
       <div className={`mt-3 flex flex-wrap gap-2 ${compact ? "" : "max-h-44 overflow-y-auto pr-1"}`}>
         {options.map((option) => (
-          <button key={option} type="button" onClick={() => onChange(option)} className={`cursor-pointer rounded-full border px-3 py-2 text-sm font-semibold transition ${value === option ? "border-emerald-500 bg-emerald-50 text-emerald-800 dark:border-emerald-300 dark:bg-emerald-300 dark:text-slate-950" : "border-blue-950/10 bg-white text-slate-700 hover:border-emerald-300 hover:text-emerald-700 dark:border-white/10 dark:bg-white/7 dark:text-slate-200"}`}>
+          <button key={option} type="button" onClick={() => onChange(option)} className={`cursor-pointer rounded-full border px-3 py-2 text-sm font-semibold transition ${value === option ? "border-[#177e70] bg-[#177e70] text-white shadow-sm" : "border-[#173d36]/10 bg-white text-[#587069] hover:border-[#177e70]/45 hover:text-[#177e70] dark:border-white/10 dark:bg-white/7 dark:text-slate-200"}`}>
             {option}
           </button>
         ))}
@@ -489,12 +503,12 @@ function ChoiceGrid<T extends string>({ label, value, options, onChange, compact
 function NumberField({ label, value, onChange, min, max, suffix }: { label: string; value: number; onChange: (value: number) => void; min: number; max: number; suffix: string }) {
   const percent = ((value - min) / Math.max(1, max - min)) * 100;
   return (
-    <div className="rounded-[1.1rem] border border-blue-950/10 bg-white/82 p-4 shadow-sm shadow-blue-950/5 dark:border-white/10 dark:bg-white/[0.04]">
+    <div className="rounded-[1rem] border border-[#173d36]/10 bg-[#f9fcfa] p-4 dark:border-white/10 dark:bg-white/[0.04]">
       <div className="flex items-center justify-between gap-3">
-        <div className="text-sm font-semibold text-slate-800 dark:text-slate-100">{label}</div>
-        <div className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-200">{value}{suffix}</div>
+        <div className="text-sm font-semibold text-[#35534c] dark:text-slate-100">{label}</div>
+        <div className="rounded-full bg-[#e3f5ed] px-3 py-1 text-sm font-semibold text-[#177e70] dark:bg-emerald-400/10 dark:text-emerald-200">{value}{suffix}</div>
       </div>
-      <input type="range" min={min} max={max} value={value} onChange={(event) => onChange(Number(event.target.value))} className="mt-4 h-2 w-full cursor-pointer accent-[#22b573]" style={{ background: `linear-gradient(90deg,#22b573 ${percent}%,#d8e4ef ${percent}%)` }} />
+      <input type="range" min={min} max={max} value={value} onChange={(event) => onChange(Number(event.target.value))} className="mt-4 h-2 w-full cursor-pointer accent-[#177e70]" style={{ background: `linear-gradient(90deg,#177e70 ${percent}%,#d8e4df ${percent}%)` }} />
     </div>
   );
 }

@@ -5,12 +5,9 @@ import {
   ArrowRight,
   BookOpenCheck,
   CheckCircle2,
-  FileSearch,
   GraduationCap,
   LayoutTemplate,
-  Route,
   Sparkles,
-  Target,
   Trophy,
   type LucideIcon,
 } from "lucide-react";
@@ -53,13 +50,6 @@ export const metadata: Metadata = {
   },
 };
 
-type HighlightTool = {
-  title: string;
-  description: string;
-  href: string;
-  icon: LucideIcon;
-};
-
 type Workflow = {
   title: string;
   description: string;
@@ -91,37 +81,6 @@ const priorityToolSlugs = [
 ];
 
 const priorityTools = priorityToolSlugs.map(pickTool).filter(Boolean) as ToolItem[];
-
-const highlights: HighlightTool[] = [
-  {
-    title: "Resume and ATS preparation",
-    description:
-      "Create a fresher resume, check ATS gaps, improve bullets, and prepare a cleaner profile before applying.",
-    href: "/tools/resume-builder-studio",
-    icon: FileSearch,
-  },
-  {
-    title: "Career roadmap planning",
-    description:
-      "Choose a target role and turn it into a weekly learning plan with skills, projects, and interview focus areas.",
-    href: "/tools/ai-career-roadmap",
-    icon: Route,
-  },
-  {
-    title: "Final year project support",
-    description:
-      "Generate project ideas, modules, documentation outline, viva questions, and resume points from one topic.",
-    href: "/tools/final-year-project-kit-generator",
-    icon: GraduationCap,
-  },
-  {
-    title: "Exam and college calculators",
-    description:
-      "Check attendance, GPA, CGPA, marks percentage, final exam targets, deadlines, and daily study hours.",
-    href: "/tools/attendance-calculator",
-    icon: Target,
-  },
-];
 
 const workflows: Workflow[] = [
   {
@@ -211,30 +170,27 @@ function ToolLinkCard({ tool }: { tool: ToolItem }) {
   return (
     <Link
       href={`/tools/${tool.slug}`}
-      className="group flex min-h-[13rem] flex-col rounded-[1.15rem] border border-blue-950/10 bg-white p-5 shadow-sm shadow-blue-950/5 transition hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-lg hover:shadow-blue-950/10 dark:border-white/10 dark:bg-white/[0.04] dark:shadow-black/15"
+      className="group flex min-h-[11.5rem] flex-col border-b border-r border-[#193c36]/10 bg-white/70 p-5 transition hover:z-10 hover:bg-white hover:shadow-[0_20px_50px_rgba(25,60,54,0.10)] dark:border-white/10 dark:bg-white/[0.035] dark:hover:bg-white/[0.07]"
     >
       <div className="flex items-start justify-between gap-4">
-        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-blue-50 text-primary transition group-hover:bg-primary group-hover:text-white dark:bg-primary/12 dark:text-emerald-200">
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#e8f8f0] text-[#177e70] transition group-hover:-rotate-3 group-hover:bg-[#177e70] group-hover:text-white dark:bg-primary/15 dark:text-emerald-200">
           <Icon className="size-5" aria-hidden="true" />
         </span>
+        <ArrowRight className="size-4 text-[#8ba49f] transition group-hover:translate-x-1 group-hover:text-[#177e70]" aria-hidden="true" />
       </div>
-      <h3 className="mt-5 font-heading text-xl font-semibold leading-tight text-slate-950 dark:text-white">
+      <h3 className="mt-4 font-heading text-lg font-semibold leading-tight text-[#122c28] dark:text-white">
         {tool.title}
       </h3>
-      <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
+      <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#58706b] dark:text-slate-300">
         {tool.description}
       </p>
-      <span className="mt-auto inline-flex items-center gap-2 pt-5 text-sm font-semibold text-primary dark:text-emerald-200">
-        Open tool
-        <ArrowRight className="size-4 transition group-hover:translate-x-0.5" aria-hidden="true" />
-      </span>
     </Link>
   );
 }
 
 export default function StudentsPage() {
   return (
-    <div className="relative overflow-hidden bg-[#f7fbff] text-slate-950 dark:bg-surface-strong dark:text-white">
+    <div className="relative overflow-hidden bg-[#fbfdf9] text-[#122c28] dark:bg-surface-strong dark:text-white">
       <WebPageStructuredData
         name={pageTitle}
         description={pageDescription}
@@ -251,118 +207,109 @@ export default function StudentsPage() {
       />
       <FaqStructuredData faqs={faqs} />
 
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[45rem] bg-[linear-gradient(180deg,#eef7ff_0%,#ffffff_58%,rgba(255,255,255,0)_100%)] dark:bg-[linear-gradient(180deg,rgba(18,35,67,0.96),rgba(6,17,38,0.96)_58%,rgba(6,17,38,0)_100%)]" />
-
-      <section className="relative pb-12 pt-[8.75rem] sm:pt-[9.75rem] lg:pb-16 lg:pt-[10.25rem]">
-        <div className={siteContainerClasses({ className: "grid gap-10 lg:grid-cols-[0.94fr_1.06fr] lg:items-center" })}>
-          <div>
-            <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-blue-950/10 bg-white/80 px-3.5 py-2 text-[0.68rem] font-semibold uppercase leading-5 tracking-[0.16em] text-primary shadow-sm shadow-blue-950/5 dark:border-primary/25 dark:bg-primary/10 dark:text-emerald-200 sm:text-xs">
-              <Sparkles className="size-3.5" aria-hidden="true" />
-              <span>Free student tools</span>
-            </div>
-            <ToolBreadcrumb current="Students" />
-            <h1 className="mt-6 max-w-4xl font-heading text-4xl font-semibold leading-[1.08] text-slate-950 sm:text-5xl lg:text-[3rem] xl:text-[3.45rem] dark:text-white">
-              Free student tools for resume, ATS score, projects, attendance, CGPA and exams.
-            </h1>
-            <p className="mt-5 max-w-2xl text-base leading-8 text-slate-700 sm:text-lg dark:text-slate-300">
-              Build a fresher resume, check ATS score, plan a career path, prepare final year project work,
-              calculate attendance, convert CGPA, calculate GPA, and plan exam study time from one simple student hub.
-            </p>
-
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <Link href="#student-tools" className={siteButtonClasses({ size: "lg" })}>
-                Explore student tools
-                <ArrowRight className="size-4" aria-hidden="true" />
-              </Link>
-              <Link href="/students/interview-questions" className={siteButtonClasses({ variant: "outline", size: "lg" })}>
-                Interview questions
-              </Link>
-            </div>
-
-            <div className="mt-8 grid gap-3 sm:grid-cols-3">
-              {studentOutcomes.map((item) => (
-                <div key={item.title} className="rounded-[1rem] border border-blue-950/10 bg-white/78 p-4 shadow-sm shadow-blue-950/5 dark:border-white/10 dark:bg-white/[0.04]">
-                  <div className="text-base font-semibold text-slate-950 dark:text-white">{item.title}</div>
-                  <div className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{item.description}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="relative mx-auto w-full max-w-[44rem] lg:max-w-none">
-            <div className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/76 p-5 shadow-2xl shadow-blue-950/12 backdrop-blur dark:border-white/10 dark:bg-white/[0.04] dark:shadow-black/25">
-              <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-primary dark:text-emerald-200">
-                    KASA for students
-                  </p>
-                  <h2 className="mt-2 max-w-md font-heading text-2xl font-semibold leading-tight text-slate-950 dark:text-white">
-                    Pick the right tool for the next student task.
-                  </h2>
-                </div>
-                <Link
-                  href="/tools"
-                  className="inline-flex w-fit items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100 dark:bg-emerald-400/10 dark:text-emerald-200"
-                >
-                  Browse tools
-                  <ArrowRight className="size-3.5" aria-hidden="true" />
+      <section className="relative border-b border-[#173d36]/10 bg-[radial-gradient(circle_at_82%_15%,rgba(112,219,190,0.28),transparent_28%),radial-gradient(circle_at_8%_72%,rgba(255,190,150,0.22),transparent_25%),linear-gradient(135deg,#f8fff9_0%,#f6fbf4_48%,#eefaf7_100%)] pb-10 pt-[8.75rem] dark:border-white/10 dark:bg-[radial-gradient(circle_at_82%_15%,rgba(52,181,146,0.16),transparent_28%),linear-gradient(135deg,#10211e,#122923)] sm:pt-[9.75rem] lg:pb-14 lg:pt-[10rem]">
+        <div className={siteContainerClasses()}>
+          <ToolBreadcrumb current="Students" />
+          <div className="mt-5 grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
+            <div className="relative z-10">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#177e70]/20 bg-white/75 px-3.5 py-2 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-[#177e70] shadow-sm backdrop-blur dark:border-emerald-300/20 dark:bg-white/5 dark:text-emerald-200 sm:text-xs">
+                <Sparkles className="size-3.5" aria-hidden="true" />
+                Your free student launchpad
+              </div>
+              <h1 className="mt-5 max-w-3xl font-heading text-[2.65rem] font-semibold leading-[1.02] tracking-[-0.035em] text-[#102a26] sm:text-[3.4rem] lg:text-[3.8rem] dark:text-white">
+                College is busy. Your next step should be clear.
+              </h1>
+              <p className="mt-5 max-w-xl text-base leading-7 text-[#506b65] sm:text-lg sm:leading-8 dark:text-slate-300">
+                Build a placement-ready resume, plan your final year project, protect attendance, calculate grades and prepare for exams—without jumping between random websites.
+              </p>
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                <Link href="#student-tools" className={siteButtonClasses({ size: "lg" })}>
+                  Find my next tool
+                  <ArrowRight className="size-4" aria-hidden="true" />
+                </Link>
+                <Link href="/students/interview-questions" className={siteButtonClasses({ variant: "outline", size: "lg" })}>
+                  Practice interviews
                 </Link>
               </div>
-
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                {highlights.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <Link
-                      key={item.title}
-                      href={item.href}
-                      className="group rounded-[1.1rem] border border-blue-950/10 bg-white p-4 transition hover:-translate-y-0.5 hover:border-primary/35 dark:border-white/10 dark:bg-slate-950/40"
-                    >
-                      <div className="grid size-10 place-items-center rounded-xl bg-blue-50 text-primary transition group-hover:bg-primary group-hover:text-white dark:bg-primary/12 dark:text-emerald-200">
-                        <Icon className="size-5" aria-hidden="true" />
-                      </div>
-                      <h3 className="mt-4 text-base font-semibold text-slate-950 dark:text-white">{item.title}</h3>
-                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{item.description}</p>
-                    </Link>
-                  );
-                })}
+              <div className="mt-7 flex flex-wrap gap-x-6 gap-y-3 border-t border-[#173d36]/10 pt-5 text-sm font-medium text-[#405f58] dark:border-white/10 dark:text-slate-300">
+                <span className="inline-flex items-center gap-2"><CheckCircle2 className="size-4 text-[#1a9a7f]" />No sign-up for calculators</span>
+                <span className="inline-flex items-center gap-2"><CheckCircle2 className="size-4 text-[#1a9a7f]" />Built for Indian students</span>
+                <span className="inline-flex items-center gap-2"><CheckCircle2 className="size-4 text-[#1a9a7f]" />Practical, not generic</span>
               </div>
+            </div>
 
-              <div className="mt-5 overflow-hidden rounded-[1.25rem] border border-blue-950/10 bg-[#f8fbff] dark:border-white/10 dark:bg-white/[0.04]">
-                <Image
-                  src="/student-tools-hero.png"
-                  alt="Student using KASA free tools for resume, projects, attendance and study planning"
-                  width={980}
-                  height={760}
-                  priority
-                  className="max-h-[22rem] w-full object-contain p-4"
-                  sizes="(min-width: 1024px) 44rem, 92vw"
-                />
+            <div className="relative mx-auto w-full max-w-[48rem] lg:max-w-none">
+              <div className="relative overflow-hidden rounded-[1.8rem] border border-white/80 bg-[#dff5ec] shadow-[0_28px_80px_rgba(27,94,82,0.18)] dark:border-white/10 dark:bg-[#17322d]">
+                <div className="relative h-[23rem] sm:h-[29rem]">
+                  <Image
+                    src="/academy-online-student.jpg"
+                    alt="Student preparing online with KASA study and career tools"
+                    fill
+                    priority
+                    className="object-cover object-center"
+                    sizes="(min-width: 1024px) 52vw, 94vw"
+                  />
+                  <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(10,44,38,0.05),transparent_48%,rgba(10,44,38,0.22))]" />
+                </div>
+                <div className="absolute inset-x-4 bottom-4 rounded-[1.25rem] border border-white/75 bg-white/90 p-3.5 shadow-xl backdrop-blur-md dark:border-white/10 dark:bg-[#10241f]/90 sm:inset-x-6 sm:bottom-6 sm:p-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-[#177e70] dark:text-emerald-200">Today&apos;s student plan</p>
+                      <p className="mt-1 font-heading text-lg font-semibold text-[#122c28] dark:text-white">One goal. Four useful steps.</p>
+                    </div>
+                    <span className="rounded-full bg-[#e7f8f0] px-3 py-1 text-xs font-bold text-[#177e70] dark:bg-emerald-300/10 dark:text-emerald-200">Free tools</span>
+                  </div>
+                  <div className="mt-3 grid grid-cols-4 gap-1.5 text-center text-[0.68rem] font-bold text-[#44655d] sm:gap-2 sm:text-xs dark:text-slate-300">
+                    {["Resume", "ATS check", "Project", "Interview"].map((label, index) => (
+                      <div key={label} className="rounded-lg bg-[#f2f8f5] px-1 py-2 dark:bg-white/5">
+                        <span className="mr-1 text-[#1a9a7f]">0{index + 1}</span>{label}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="absolute right-4 top-4 rounded-2xl border border-white/70 bg-white/88 px-4 py-3 shadow-lg backdrop-blur dark:border-white/10 dark:bg-[#10241f]/85 sm:right-6 sm:top-6">
+                  <p className="text-[0.62rem] font-bold uppercase tracking-[0.18em] text-[#6d8881]">Student toolkit</p>
+                  <p className="mt-1 text-xl font-bold text-[#153f37] dark:text-white">12 focused tools</p>
+                </div>
+              </div>
+              <div className="absolute -left-5 top-[43%] hidden w-44 rotate-[-3deg] rounded-2xl bg-[#ffcfac] p-4 shadow-xl lg:block">
+                <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-[#8b4e2d]">Start here</p>
+                <p className="mt-1 text-sm font-bold leading-5 text-[#4d2c20]">Pick the deadline closest to you.</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="student-tools" className="relative bg-white px-4 py-14 dark:bg-surface sm:px-6 sm:py-18 lg:px-8">
-        <div className="mx-auto w-full max-w-[108rem]">
-          <div className="grid gap-6 lg:grid-cols-[0.78fr_1.22fr] lg:items-end">
+      <section className="border-b border-[#173d36]/10 bg-white dark:border-white/10 dark:bg-surface">
+        <div className={siteContainerClasses({ className: "grid md:grid-cols-3" })}>
+          {studentOutcomes.map((item, index) => (
+            <div key={item.title} className="relative border-[#173d36]/10 px-0 py-6 md:border-l md:px-6 md:first:border-l-0 md:first:pl-0 dark:border-white/10">
+              <span className="text-xs font-bold tracking-[0.18em] text-[#1a9a7f]">0{index + 1}</span>
+              <h2 className="mt-2 font-heading text-xl font-semibold text-[#122c28] dark:text-white">{item.title}</h2>
+              <p className="mt-2 text-sm leading-6 text-[#617871] dark:text-slate-300">{item.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section id="student-tools" className="relative bg-[#f7fbf7] py-14 dark:bg-surface-strong sm:py-16">
+        <div className={siteContainerClasses()}>
+          <div className="grid gap-6 lg:grid-cols-[0.75fr_1.25fr] lg:items-end">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary dark:text-emerald-200">
-                Student toolkit
+              <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#177e70] dark:text-emerald-200">
+                Choose by deadline
               </p>
-              <h2 className="mt-3 font-heading text-3xl font-semibold leading-[1.12] text-slate-950 sm:text-5xl dark:text-white">
-                Tools for the problems students search before placements, exams and submissions.
+              <h2 className="mt-3 max-w-2xl font-heading text-3xl font-semibold leading-[1.08] text-[#122c28] sm:text-[2.65rem] dark:text-white">
+                What do you need to finish next?
               </h2>
             </div>
-            <p className="text-base leading-8 text-slate-600 dark:text-slate-300">
-              Use these free tools when you need a quick result: an ATS-friendly resume, a better resume score, a career
-              roadmap, final year project structure, 75% attendance calculation, CGPA to percentage conversion, GPA result,
-              marks percentage, final exam target, or a study timetable.
+            <p className="max-w-3xl text-base leading-7 text-[#5a726c] dark:text-slate-300">
+              Start from the task in front of you. Every tool is focused on a real student outcome—from clearing a resume screen to calculating how many classes you can miss.
             </p>
           </div>
 
-          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-8 overflow-hidden rounded-[1.35rem] border border-[#173d36]/10 bg-white/60 shadow-sm dark:border-white/10 dark:bg-white/[0.02] sm:grid sm:grid-cols-2 xl:grid-cols-4">
             {priorityTools.map((tool) => (
               <ToolLinkCard key={tool.slug} tool={tool} />
             ))}
@@ -370,79 +317,77 @@ export default function StudentsPage() {
         </div>
       </section>
 
-      <section className="relative bg-[#eef7ff] px-4 py-14 dark:bg-surface-strong sm:px-6 sm:py-18 lg:px-8">
-        <div className="mx-auto w-full max-w-[108rem]">
-          <div className="max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary dark:text-emerald-200">
-              Student workflows
-            </p>
-            <h2 className="mt-3 font-heading text-3xl font-semibold leading-[1.12] text-slate-950 sm:text-5xl dark:text-white">
-              A better path than opening ten random tabs before every deadline.
-            </h2>
-            <p className="mt-4 text-base leading-8 text-slate-600 dark:text-slate-300">
-              When deadlines stack up, students need a clear next step: improve the resume, prepare for placements,
-              organize the final year project, protect attendance, plan exam targets, or finish assignments on time.
-            </p>
-          </div>
+      <section className="relative bg-[#153f37] py-14 text-white dark:bg-[#0b1c19] sm:py-16">
+        <div className={siteContainerClasses()}>
+          <div className="grid gap-8 lg:grid-cols-[0.62fr_1.38fr]">
+            <div className="lg:sticky lg:top-32 lg:self-start">
+              <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#72dfbd]">Three student tracks</p>
+              <h2 className="mt-3 max-w-xl font-heading text-3xl font-semibold leading-[1.08] sm:text-[2.65rem]">
+                Stop collecting tabs. Follow one useful path.
+              </h2>
+              <p className="mt-4 max-w-lg text-base leading-7 text-white/68">
+                Each track connects the tools that naturally belong together, so the output of one step helps with the next.
+              </p>
+              <Image src="/student-tools-hero.png" alt="Student planning study and career tasks" width={560} height={470} className="mx-auto mt-7 hidden max-h-56 w-auto object-contain opacity-90 lg:block" />
+            </div>
 
-          <div className="mt-8 grid gap-4 lg:grid-cols-3">
+            <div className="grid gap-3">
             {workflows.map((workflow) => {
               const Icon = workflow.icon;
               return (
                 <article
                   key={workflow.title}
-                  className="rounded-[1.2rem] border border-blue-950/10 bg-white p-6 shadow-sm shadow-blue-950/5 dark:border-white/10 dark:bg-white/[0.04]"
+                  className="group grid gap-5 rounded-[1.2rem] border border-white/12 bg-white/[0.055] p-5 transition hover:border-[#72dfbd]/45 hover:bg-white/[0.08] sm:grid-cols-[auto_1fr_auto] sm:items-start sm:p-6"
                 >
-                  <div className="grid size-12 place-items-center rounded-2xl bg-blue-50 text-primary dark:bg-primary/12 dark:text-emerald-200">
+                  <div className="grid size-11 place-items-center rounded-xl bg-[#72dfbd]/12 text-[#72dfbd]">
                     <Icon className="size-5" aria-hidden="true" />
                   </div>
-                  <h3 className="mt-5 font-heading text-2xl font-semibold leading-tight text-slate-950 dark:text-white">
-                    {workflow.title}
-                  </h3>
-                  <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">{workflow.description}</p>
-                  <ul className="mt-5 space-y-3">
-                    {workflow.points.map((point) => (
-                      <li key={point} className="flex gap-3 text-sm leading-6 text-slate-700 dark:text-slate-300">
-                        <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-600 dark:text-emerald-300" aria-hidden="true" />
-                        <span>{point}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link href={workflow.href} className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-primary dark:text-emerald-200">
-                    {workflow.cta}
-                    <ArrowRight className="size-4" aria-hidden="true" />
+                  <div>
+                    <h3 className="font-heading text-xl font-semibold leading-tight">{workflow.title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-white/65">{workflow.description}</p>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {workflow.points.map((point, index) => (
+                        <span key={point} className="rounded-full border border-white/10 bg-black/10 px-3 py-1.5 text-xs font-medium text-white/75">
+                          {index + 1}. {point}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <Link href={workflow.href} className="inline-flex shrink-0 items-center gap-2 text-sm font-bold text-[#8aebc9] sm:pt-1">
+                    {workflow.cta}<ArrowRight className="size-4 transition group-hover:translate-x-1" aria-hidden="true" />
                   </Link>
                 </article>
               );
             })}
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="bg-white px-4 py-14 dark:bg-surface sm:px-6 sm:py-18 lg:px-8">
-        <div className="mx-auto grid w-full max-w-[108rem] gap-5 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
-          <div className="rounded-[1.25rem] border border-blue-950/10 bg-[#f8fbff] p-6 dark:border-white/10 dark:bg-white/[0.04]">
-            <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary dark:text-emerald-200">
-              <GraduationCap className="size-4" aria-hidden="true" />
-              Preparation guide
-            </div>
-            <h2 className="mt-3 font-heading text-3xl font-semibold leading-tight text-slate-950 dark:text-white">
-              What should students do with these tools?
-            </h2>
-            <p className="mt-4 text-base leading-8 text-slate-600 dark:text-slate-300">
-              A student tool page should not only list links. It should help students decide the next step for placement,
-              project work, semester marks, attendance recovery, and exam preparation.
-            </p>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-3">
-            {preparationGuide.map((item) => (
-              <div key={item.title} className="rounded-[1.15rem] border border-blue-950/10 bg-white p-5 shadow-sm shadow-blue-950/5 dark:border-white/10 dark:bg-white/[0.04]">
-                <CheckCircle2 className="size-5 text-emerald-600 dark:text-emerald-300" aria-hidden="true" />
-                <h3 className="mt-4 text-base font-semibold leading-6 text-slate-950 dark:text-white">{item.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">{item.description}</p>
+      <section className="bg-[#fffaf4] py-14 dark:bg-surface sm:py-16">
+        <div className={siteContainerClasses()}>
+          <div className="grid gap-8 lg:grid-cols-[0.7fr_1.3fr] lg:items-start">
+            <div>
+              <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-[#c66a42] dark:text-[#ffb791]">
+                <GraduationCap className="size-4" aria-hidden="true" />Preparation guide
               </div>
-            ))}
+              <h2 className="mt-3 max-w-xl font-heading text-3xl font-semibold leading-[1.1] text-[#122c28] sm:text-[2.5rem] dark:text-white">
+                Use the tool. Then use the result.
+              </h2>
+              <p className="mt-4 max-w-lg text-base leading-7 text-[#63766e] dark:text-slate-300">
+                A calculator gives a number; a good plan tells you what to do next. These three moments are where the toolkit becomes genuinely useful.
+              </p>
+            </div>
+
+            <div className="border-t border-[#4f392b]/15 dark:border-white/10">
+              {preparationGuide.map((item, index) => (
+                <div key={item.title} className="grid gap-3 border-b border-[#4f392b]/15 py-5 dark:border-white/10 sm:grid-cols-[3.5rem_0.8fr_1.2fr] sm:gap-5">
+                  <span className="font-heading text-2xl font-semibold text-[#e38a5e]">0{index + 1}</span>
+                  <h3 className="text-base font-bold leading-6 text-[#263e38] dark:text-white">{item.title}</h3>
+                  <p className="text-sm leading-7 text-[#687a73] dark:text-slate-300">{item.description}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -457,42 +402,45 @@ export default function StudentsPage() {
         className="py-14 sm:py-18"
       />
 
-      <section className="bg-white px-4 py-14 dark:bg-surface sm:px-6 sm:py-18 lg:px-8">
-        <div className="mx-auto w-full max-w-[108rem]">
+      <section className="bg-white py-14 dark:bg-surface sm:py-16">
+        <div className={siteContainerClasses()}>
           <div className="max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary dark:text-emerald-200">
+            <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#177e70] dark:text-emerald-200">
               Student FAQs
             </p>
-            <h2 className="mt-3 font-heading text-3xl font-semibold leading-[1.12] text-slate-950 sm:text-5xl dark:text-white">
-              Common questions students ask before using these tools.
+            <h2 className="mt-3 font-heading text-3xl font-semibold leading-[1.1] text-[#122c28] sm:text-[2.5rem] dark:text-white">
+              Useful answers before you begin.
             </h2>
           </div>
-          <div className="mt-8 grid gap-4 md:grid-cols-2">
-            {faqs.map(([question, answer]) => (
-              <article key={question} className="rounded-[1.15rem] border border-blue-950/10 bg-[#f8fbff] p-6 dark:border-white/10 dark:bg-white/[0.04]">
-                <h3 className="font-heading text-xl font-semibold leading-tight text-slate-950 dark:text-white">{question}</h3>
-                <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">{answer}</p>
+          <div className="mt-7 grid overflow-hidden rounded-[1.25rem] border border-[#173d36]/10 md:grid-cols-2 dark:border-white/10">
+            {faqs.map(([question, answer], index) => (
+              <article key={question} className="bg-[#f8fbf7] p-6 md:even:border-l md:[&:nth-child(n+3)]:border-t border-[#173d36]/10 dark:border-white/10 dark:bg-white/[0.035]">
+                <span className="text-xs font-bold text-[#1a9a7f]">0{index + 1}</span>
+                <h3 className="mt-3 font-heading text-lg font-semibold leading-tight text-[#122c28] dark:text-white">{question}</h3>
+                <p className="mt-3 text-sm leading-7 text-[#60766f] dark:text-slate-300">{answer}</p>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="bg-white px-4 pb-14 dark:bg-surface sm:px-6 sm:pb-18 lg:px-8">
-        <div className="mx-auto flex w-full max-w-[108rem] flex-col gap-4 rounded-[1.25rem] border border-blue-950/10 bg-[#f8fbff] p-5 dark:border-white/10 dark:bg-white/[0.04] md:flex-row md:items-center md:justify-between">
+      <section className="bg-white pb-14 dark:bg-surface sm:pb-16">
+        <div className={siteContainerClasses()}>
+          <div className="flex flex-col gap-5 rounded-[1.4rem] bg-[linear-gradient(110deg,#dff5ec,#e7f8f5_56%,#ffe9d8)] p-6 md:flex-row md:items-center md:justify-between md:p-8 dark:bg-[linear-gradient(110deg,#16342e,#153b35_56%,#403027)]">
           <div>
-            <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary dark:text-emerald-200">
+            <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-[#177e70] dark:text-emerald-200">
               <GraduationCap className="size-4" aria-hidden="true" />
-              For students and academies
+              Your next task starts here
             </div>
-            <h2 className="mt-2 font-heading text-2xl font-semibold text-slate-950 dark:text-white">
-              KASA keeps student tools useful, focused, and connected to real preparation.
+            <h2 className="mt-2 max-w-3xl font-heading text-2xl font-semibold text-[#122c28] dark:text-white">
+              Choose one useful tool, finish one real task, and move forward with clarity.
             </h2>
           </div>
           <Link href="/tools" className={siteButtonClasses({ size: "md" })}>
             Browse all tools
             <ArrowRight className="size-4" aria-hidden="true" />
           </Link>
+          </div>
         </div>
       </section>
     </div>

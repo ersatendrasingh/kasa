@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  ArrowRight,
   BookOpenCheck,
   ChevronDown,
   GraduationCap,
@@ -220,6 +221,34 @@ const primaryNav: NavItem[] = [
 
 const menuIcons = [BookOpenCheck, GraduationCap, Sparkles];
 
+const menuCopy: Record<string, { eyebrow: string; title: string; description: string }> = {
+  Students: {
+    eyebrow: "Student launchpad",
+    title: "Move from college work to career proof.",
+    description: "Resume, projects, interview preparation and practical study tools in one place.",
+  },
+  LMS: {
+    eyebrow: "KASA LMS",
+    title: "One operating system for your academy.",
+    description: "Sell courses, run live batches, manage learners and keep every team connected.",
+  },
+  Resources: {
+    eyebrow: "Practical playbooks",
+    title: "Build and grow an academy with fewer guesses.",
+    description: "Detailed guides for setup, delivery, pricing, certificates and organic growth.",
+  },
+  Tools: {
+    eyebrow: "Free utility desk",
+    title: "Finish the task in front of you.",
+    description: "AI generators, student planners, career tools and private browser-based PDF utilities.",
+  },
+  Company: {
+    eyebrow: "Inside KASA",
+    title: "Understand the product and the people behind it.",
+    description: "Read our product thinking, use cases, answers and ways to reach the team.",
+  },
+};
+
 type SiteHeaderUser = {
   name: string;
   email: string;
@@ -304,10 +333,13 @@ function HeaderUserMenu({ user, callbackUrl }: { user: SiteHeaderUser; callbackU
 
 export default function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const [mobileSection, setMobileSection] = useState<string | null>("Students");
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState<SiteHeaderUser>(null);
   const pathname = usePathname();
   const currentPath = pathname || "/";
+  const isActive = (href: string) =>
+    href === "/" ? currentPath === "/" : currentPath === href || currentPath.startsWith(href + "/");
 
   const refreshSession = useCallback(async () => {
     try {
@@ -340,6 +372,15 @@ export default function SiteHeader() {
   }, []);
 
   useEffect(() => {
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [open]);
+
+  useEffect(() => {
     queueMicrotask(() => {
       void refreshSession();
     });
@@ -367,11 +408,11 @@ export default function SiteHeader() {
   }
 
   return (
-    <div className="fixed inset-x-0 top-0 z-50 border-b border-[color:var(--header-border)] bg-[var(--header-background)] shadow-[0_16px_54px_rgba(22,71,163,0.09)] backdrop-blur-xl dark:shadow-none">
+    <div className="fixed inset-x-0 top-0 z-50 border-b border-emerald-950/10 bg-white/88 shadow-[0_12px_38px_-28px_rgba(20,90,80,0.42)] backdrop-blur-xl dark:border-white/10 dark:bg-[#0d1918]/92">
       <div
         className={[
-          "site-topbar overflow-hidden border-b border-white/15 text-[0.62rem] font-semibold transition-all duration-300 dark:border-white/10 sm:text-xs",
-          scrolled ? "max-h-0 py-0 opacity-0" : "max-h-9 py-1 opacity-100 sm:max-h-14 sm:py-1.5",
+          "site-topbar overflow-hidden border-b border-white/10 text-[0.62rem] font-semibold transition-all duration-300 sm:text-xs",
+          scrolled ? "max-h-0 py-0 opacity-0" : "max-h-9 py-1 opacity-100 sm:max-h-12 sm:py-1.5",
         ].join(" ")}
       >
         <div className={siteContainerClasses({ className: "flex items-center justify-center gap-2 sm:justify-between sm:gap-4" })}>
@@ -383,12 +424,12 @@ export default function SiteHeader() {
           />
 
           <div className="hidden items-center gap-4 sm:flex">
-            <span className="site-topbar-soft-pill hidden rounded-full px-3 py-1.5 opacity-95 lg:inline-flex">
+            <span className="site-topbar-soft-pill hidden rounded-full px-3 py-1.5 lg:inline-flex">
               Built for institutes, trainers, and EdTech teams
             </span>
             <a
               href="mailto:getkasalms@gmail.com"
-              className="hidden cursor-pointer items-center gap-2 text-[var(--topbar-foreground)] transition hover:opacity-80 lg:inline-flex"
+              className="hidden cursor-pointer items-center gap-2 text-[var(--topbar-foreground)] transition hover:opacity-75 lg:inline-flex"
             >
               <Mail className="size-3.5" aria-hidden="true" />
               getkasalms@gmail.com
@@ -397,10 +438,15 @@ export default function SiteHeader() {
         </div>
       </div>
 
-      <header className={siteContainerClasses({ className: "flex h-16 items-center justify-between sm:h-[4.9rem]" })}>
+      <header
+        className={siteContainerClasses({
+          className:
+            "flex h-16 items-center justify-between sm:h-[4.75rem]",
+        })}
+      >
         <Link
           href="/"
-          className="relative block h-8 w-[8rem] overflow-hidden sm:h-12 sm:w-[10.6rem]"
+          className="relative block h-8 w-[7.8rem] overflow-hidden sm:h-11 sm:w-[9.8rem]"
           aria-label="KASA home"
         >
           <Image
@@ -409,7 +455,7 @@ export default function SiteHeader() {
             width={760}
             height={260}
             priority
-            sizes="(min-width: 640px) 10.6rem, 8rem"
+            sizes="(min-width: 640px) 9.8rem, 7.8rem"
             className="h-full w-full object-contain object-left dark:hidden"
           />
           <Image
@@ -417,7 +463,7 @@ export default function SiteHeader() {
             alt="KASA"
             width={760}
             height={260}
-            sizes="(min-width: 640px) 10.6rem, 8rem"
+            sizes="(min-width: 640px) 9.8rem, 7.8rem"
             className="hidden h-full w-full object-contain object-left dark:block"
           />
         </Link>
@@ -428,7 +474,12 @@ export default function SiteHeader() {
               <div key={item.label} className="group relative flex h-full items-center">
                 <Link
                   href={item.href}
-                  className="inline-flex h-10 cursor-pointer items-center gap-1 px-3 text-sm font-semibold text-slate-900 transition hover:text-primary dark:font-medium dark:text-white/78 dark:hover:text-white"
+                  className={[
+                    "relative inline-flex h-10 cursor-pointer items-center gap-1 px-3 text-sm font-semibold transition hover:text-[#188f83] dark:font-medium dark:text-white/78 dark:hover:text-emerald-200",
+                    isActive(item.href)
+                      ? "text-[#188f83] after:absolute after:bottom-0 after:left-1/2 after:h-0.5 after:w-6 after:-translate-x-1/2 after:rounded-full after:bg-[#39a98a] dark:text-emerald-200"
+                      : "text-slate-900",
+                  ].join(" ")}
                 >
                   {item.label === "Tools" ? <Sparkles className="size-3.5 animate-pulse text-primary dark:text-emerald-200" aria-hidden="true" /> : null}
                   {item.label}
@@ -436,7 +487,7 @@ export default function SiteHeader() {
                 </Link>
                 <div
                   className={[
-                    "invisible absolute top-full w-[min(42rem,calc(100vw-2rem))] opacity-0 transition group-hover:visible group-hover:opacity-100",
+                    "invisible absolute top-full w-[min(48rem,calc(100vw-2rem))] translate-y-2 opacity-0 transition duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100",
                     item.label === "Students" || item.label === "LMS"
                       ? "left-0"
                       : item.label === "Company"
@@ -444,43 +495,44 @@ export default function SiteHeader() {
                         : "left-1/2 -translate-x-1/2",
                   ].join(" ")}
                 >
-                  <div className="overflow-hidden rounded-b-[1.6rem] border border-blue-950/10 bg-white shadow-2xl shadow-blue-950/12 dark:border-white/10 dark:bg-surface dark:shadow-black/30">
-                    <div className="site-topbar border-b border-white/15 px-6 py-3 text-center">
-                      <p className="font-heading text-sm font-semibold text-[var(--topbar-foreground)]">
-                        {item.label === "Students"
-                            ? "College resources and career tools"
-                          : item.label === "LMS"
-                            ? "KASA LMS for academies and trainers"
-                            : item.label === "Resources"
-                              ? "Guides for academy growth"
-                              : item.label === "Tools"
-                                ? "Popular tools for students and teachers"
-                              : "Company pages"}
-                      </p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-x-0 divide-x divide-dashed divide-sky-200 dark:divide-white/10">
+                  <div className="overflow-hidden rounded-b-[1.5rem] border border-t-0 border-[#173d36]/10 bg-[#fbfdfb] shadow-[0_28px_80px_rgba(17,58,50,0.2)] dark:border-white/10 dark:border-t-0 dark:bg-[#10211e] dark:shadow-black/35">
+                    <div className="grid md:grid-cols-[0.78fr_1.22fr]">
+                      <Link href={item.href} className="group/featured relative overflow-hidden bg-[#153f37] p-6 text-white dark:bg-[#17332d]">
+                        <div className="pointer-events-none absolute -bottom-14 -right-12 size-44 rounded-full border border-[#7ce0bf]/16" />
+                        <div className="pointer-events-none absolute -bottom-8 -right-6 size-28 rounded-full border border-[#7ce0bf]/18" />
+                        <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-[#7ce0bf]">{menuCopy[item.label].eyebrow}</p>
+                        <h2 className="mt-3 max-w-xs font-heading text-2xl font-semibold leading-[1.08]">{menuCopy[item.label].title}</h2>
+                        <p className="mt-3 max-w-xs text-sm leading-6 text-white/62">{menuCopy[item.label].description}</p>
+                        <span className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-[#8be7c7]">Explore {item.label}<ArrowRight className="size-4 transition group-hover/featured:translate-x-1" /></span>
+                      </Link>
+                      <div className="grid grid-cols-2 content-start p-2">
                       {item.items.map((child, index) => {
                         const Icon = menuIcons[index % menuIcons.length];
                         return (
                         <Link
                           key={child.href}
                           href={child.href}
-                          className="group/item flex min-h-28 cursor-pointer gap-4 px-8 py-6 transition hover:bg-blue-50/80 dark:hover:bg-white/7"
+                          className="group/item flex min-h-[6.4rem] cursor-pointer gap-3 rounded-xl p-3.5 transition hover:bg-[#edf8f3] dark:hover:bg-white/7"
                         >
-                          <span className="mt-0.5 grid size-11 shrink-0 place-items-center rounded-2xl bg-blue-50 text-primary transition group-hover/item:bg-primary group-hover/item:text-white dark:bg-primary/12 dark:text-primary">
-                            <Icon className="size-5" aria-hidden="true" />
+                          <span className="mt-0.5 grid size-9 shrink-0 place-items-center rounded-xl bg-[#e3f5ed] text-[#188f83] transition group-hover/item:-rotate-3 group-hover/item:bg-[#188f83] group-hover/item:text-white dark:bg-emerald-300/10 dark:text-emerald-200">
+                            <Icon className="size-4" aria-hidden="true" />
                           </span>
-                          <div>
-                            <div className="text-base font-semibold text-slate-950 dark:text-white">
+                          <div className="min-w-0">
+                            <div className="text-sm font-bold text-[#17342e] dark:text-white">
                               {child.label}
                             </div>
-                            <div className="mt-1 max-w-[17rem] text-sm leading-6 text-slate-500 dark:text-muted">
+                            <div className="mt-1 line-clamp-2 text-xs leading-5 text-[#687d76] dark:text-muted">
                               {child.description}
                             </div>
                           </div>
                         </Link>
                         );
                       })}
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between border-t border-[#173d36]/10 bg-white/70 px-5 py-3 text-xs dark:border-white/10 dark:bg-white/[0.025]">
+                      <span className="font-medium text-[#728780] dark:text-slate-400">Choose a destination or start from the {item.label.toLowerCase()} overview.</span>
+                      <Link href={item.href} className="inline-flex items-center gap-1.5 font-bold text-[#177e70] dark:text-emerald-200">View all <ArrowRight className="size-3.5" /></Link>
                     </div>
                   </div>
                 </div>
@@ -489,7 +541,12 @@ export default function SiteHeader() {
               <Link
                 key={item.label}
                 href={item.href}
-                className="inline-flex h-10 cursor-pointer items-center gap-1.5 px-4 text-sm font-semibold text-slate-900 transition hover:text-primary dark:font-medium dark:text-white/78 dark:hover:text-white"
+                className={[
+                  "relative inline-flex h-10 cursor-pointer items-center gap-1.5 px-4 text-sm font-semibold transition hover:text-[#188f83] dark:font-medium dark:text-white/78 dark:hover:text-emerald-200",
+                  isActive(item.href)
+                    ? "text-[#188f83] after:absolute after:bottom-0 after:left-1/2 after:h-0.5 after:w-6 after:-translate-x-1/2 after:rounded-full after:bg-[#39a98a] dark:text-emerald-200"
+                    : "text-slate-900",
+                ].join(" ")}
               >
                 {item.label === "Tools" ? <Sparkles className="size-3.5 animate-pulse text-primary dark:text-emerald-200" aria-hidden="true" /> : null}
                 {item.label}
@@ -499,7 +556,7 @@ export default function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-3 xl:flex">
-          <ProductTourTrigger className="h-11 px-5" />
+          <ProductTourTrigger className="h-11 rounded-full !border-emerald-900/15 !bg-white !text-[#176b68] px-5 shadow-sm hover:!bg-[#eefbf6] dark:!border-white/15 dark:!bg-white/6 dark:!text-white" />
           <HeaderUserMenu user={user} callbackUrl={currentPath} />
         </div>
 
@@ -514,70 +571,66 @@ export default function SiteHeader() {
       </header>
 
       {open ? (
-        <div className="fixed inset-0 z-[60] bg-slate-950/45 backdrop-blur-sm xl:hidden" onClick={() => setOpen(false)}>
+        <div className="fixed inset-0 z-[60] bg-[#071713]/55 backdrop-blur-sm xl:hidden" onClick={() => setOpen(false)}>
           <aside
-            className="ml-auto flex h-dvh w-[min(22rem,88vw)] flex-col border-l border-blue-950/10 bg-white p-4 shadow-2xl shadow-blue-950/20 dark:border-white/10 dark:bg-surface"
+            className="ml-auto flex h-dvh w-[min(25rem,94vw)] flex-col border-l border-[#173d36]/10 bg-[#f8fcf9] shadow-2xl shadow-black/25 dark:border-white/10 dark:bg-[#10211e]"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="flex shrink-0 items-center justify-between border-b border-blue-950/10 pb-4 dark:border-white/10">
-              <div>
-                <div className="font-heading text-lg font-semibold text-slate-950 dark:text-white">
-                  KASA Menu
-                </div>
-                <div className="text-xs text-slate-500 dark:text-muted">
-                  Explore product, pricing, resources, and company pages.
-                </div>
+            <div className="relative shrink-0 overflow-hidden bg-[#153f37] px-5 pb-5 pt-4 text-white dark:bg-[#17332d]">
+              <div className="pointer-events-none absolute -right-12 -top-14 size-40 rounded-full border border-[#7ce0bf]/15" />
+              <div className="flex items-center justify-between">
+                <Image src="/kasa-logo-dark.png" alt="KASA" width={180} height={62} className="h-9 w-auto object-contain" />
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="grid size-10 cursor-pointer place-items-center rounded-full border border-white/15 bg-white/8 text-white"
+                  aria-label="Close navigation"
+                >
+                  <X className="size-5" />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="grid size-10 cursor-pointer place-items-center rounded-full border border-blue-950/10 bg-blue-50 text-slate-950 dark:border-white/10 dark:bg-white/8 dark:text-white"
-                aria-label="Close navigation"
-              >
-                <X className="size-5" />
-              </button>
+              <p className="mt-4 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-[#7ce0bf]">Explore KASA</p>
+              <h2 className="mt-1 font-heading text-xl font-semibold">Where do you want to go next?</h2>
+              <p className="mt-1 text-xs leading-5 text-white/55">Product, student tools, practical guides and company pages.</p>
             </div>
 
-            <div className="mt-4 min-h-0 flex-1 overflow-y-auto pr-1">
-              <nav className="space-y-2">
-                {primaryNav.map((item) => (
-                  <div
-                    key={item.label}
-                    className="rounded-2xl border border-blue-950/10 bg-blue-50/60 p-1.5 dark:border-white/10 dark:bg-white/[0.04]"
-                  >
-                    <Link
-                      href={item.href}
-                      onClick={() => setOpen(false)}
-                      className="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white dark:text-white dark:hover:bg-white/7"
-                    >
-                      <span className="inline-flex items-center gap-2">
-                        {item.label === "Tools" ? <Sparkles className="size-4 animate-pulse text-primary dark:text-emerald-200" aria-hidden="true" /> : null}
+            <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3">
+              <nav className="divide-y divide-[#173d36]/9 overflow-hidden rounded-2xl border border-[#173d36]/10 bg-white dark:divide-white/8 dark:border-white/10 dark:bg-white/[0.025]">
+                {primaryNav.map((item) => hasChildren(item) ? (
+                  <div key={item.label}>
+                    <div className="flex items-center gap-1 px-2 py-1.5">
+                      <Link href={item.href} onClick={() => setOpen(false)} className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-2.5 py-2.5 text-sm font-bold text-[#1d3d36] dark:text-white">
+                        <span className={`grid size-8 shrink-0 place-items-center rounded-lg ${mobileSection === item.label ? "bg-[#177e70] text-white" : "bg-[#e6f6ef] text-[#177e70] dark:bg-emerald-300/10 dark:text-emerald-200"}`}>
+                          {item.label === "Tools" ? <Sparkles className="size-4" /> : item.label.slice(0, 1)}
+                        </span>
                         {item.label}
-                      </span>
-                      {hasChildren(item) ? <ChevronDown className="size-3.5" /> : null}
-                    </Link>
-                    {hasChildren(item) ? (
-                      <div className="mt-1 space-y-1 border-t border-blue-950/8 px-2 pt-2 dark:border-white/10">
-                        {(item.label === "Tools" ? item.items : item.items.slice(0, 4)).map((child) => (
-                          <Link
-                            key={child.href}
-                            href={child.href}
-                            onClick={() => setOpen(false)}
-                            className="block rounded-xl px-3 py-2 text-xs font-medium text-slate-600 transition hover:bg-white hover:text-slate-950 dark:text-muted dark:hover:bg-white/7 dark:hover:text-white"
-                          >
-                            {child.label}
+                      </Link>
+                      <button type="button" onClick={() => setMobileSection((current) => current === item.label ? null : item.label)} className="grid size-10 shrink-0 place-items-center rounded-xl text-[#60776f] hover:bg-[#edf7f2] dark:text-slate-300 dark:hover:bg-white/7" aria-label={`Toggle ${item.label} menu`} aria-expanded={mobileSection === item.label}>
+                        <ChevronDown className={`size-4 transition ${mobileSection === item.label ? "rotate-180" : ""}`} />
+                      </button>
+                    </div>
+                    {mobileSection === item.label ? (
+                      <div className="mx-3 mb-3 overflow-hidden rounded-xl bg-[#f1f8f4] dark:bg-white/[0.045]">
+                        {item.items.map((child, index) => (
+                          <Link key={child.href} href={child.href} onClick={() => setOpen(false)} className="group/mobile flex gap-3 border-b border-[#173d36]/8 px-3 py-3 last:border-b-0 dark:border-white/8">
+                            <span className="mt-0.5 text-[0.65rem] font-bold text-[#1a9a7f]">0{index + 1}</span>
+                            <span className="min-w-0"><span className="block text-xs font-bold text-[#27473f] dark:text-white">{child.label}</span><span className="mt-0.5 line-clamp-2 block text-[0.7rem] leading-5 text-[#748780] dark:text-slate-400">{child.description}</span></span>
                           </Link>
                         ))}
                       </div>
                     ) : null}
                   </div>
+                ) : (
+                  <Link key={item.label} href={item.href} onClick={() => setOpen(false)} className="flex items-center justify-between px-4 py-3.5 text-sm font-bold text-[#1d3d36] dark:text-white"><span>{item.label}</span><ArrowRight className="size-4 text-[#789089]" /></Link>
                 ))}
               </nav>
             </div>
 
-            <div className="mt-4 shrink-0 space-y-3 border-t border-blue-950/10 pt-4 dark:border-white/10">
-              <HeaderUserMenu user={user} callbackUrl={currentPath} />
-              <ProductTourTrigger className="w-full justify-center" />
+            <div className="shrink-0 border-t border-[#173d36]/10 bg-white px-4 py-3 dark:border-white/10 dark:bg-white/[0.025]">
+              <div className="grid grid-cols-[1fr_auto] gap-2">
+                <ProductTourTrigger className="w-full justify-center" />
+                <HeaderUserMenu user={user} callbackUrl={currentPath} />
+              </div>
             </div>
           </aside>
         </div>

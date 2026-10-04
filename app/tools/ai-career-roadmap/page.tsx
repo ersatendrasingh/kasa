@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, GraduationCap, Route, Sparkles, Target } from "lucide-react";
+import { ArrowRight, CheckCircle2, CircleDot, Sparkles } from "lucide-react";
 import { JsonLd } from "@/components/site/structured-data";
 import { siteContainerClasses } from "@/components/site/site-container";
-import { ToolBreadcrumb, ToolHeroFeatureCard, ToolHeroKeywords } from "@/components/tools/tool-hero-extras";
-import { ToolSeoSection } from "@/components/tools/tool-seo-section";
+import { ToolBreadcrumb } from "@/components/tools/tool-hero-extras";
 import { AiCareerRoadmap } from "@/components/tools/ai-career-roadmap";
 
 export const metadata: Metadata = {
@@ -85,130 +84,124 @@ export default function AiCareerRoadmapPage() {
   ];
 
   return (
-    <div className="bg-[#eef7ff] text-slate-950 dark:bg-surface-strong dark:text-white">
+    <div className="bg-[#fbfdf9] text-[#122c28] dark:bg-surface-strong dark:text-white">
       <JsonLd data={jsonLd} />
-      <section className="relative overflow-hidden px-4 pb-10 pt-[9.25rem] sm:px-6 sm:pt-[10.25rem] lg:px-8 lg:pt-[10.75rem]">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_16%,rgba(43,168,255,0.22),transparent_25rem),linear-gradient(180deg,#ffffff_0%,#eef7ff_64%,#f8fbff_100%)] dark:bg-[radial-gradient(circle_at_74%_22%,rgba(88,201,138,0.18),transparent_24rem),linear-gradient(180deg,rgba(18,35,67,0.96),rgba(6,17,38,1))]" />
+      <section className="relative overflow-hidden border-b border-[#173d36]/10 bg-[radial-gradient(circle_at_82%_18%,rgba(111,222,191,0.30),transparent_27rem),radial-gradient(circle_at_8%_80%,rgba(255,191,151,0.24),transparent_22rem),linear-gradient(135deg,#f8fff9,#f4faf5_48%,#effaf7)] pb-12 pt-[8.75rem] dark:border-white/10 dark:bg-[radial-gradient(circle_at_82%_18%,rgba(68,192,155,0.18),transparent_27rem),linear-gradient(135deg,#10211e,#142a25)] sm:pt-[9.5rem] lg:pt-[10rem]">
         <div className={siteContainerClasses({ className: "relative" })}>
-          <Link href="/tools" className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:gap-3 dark:text-emerald-200">
-            <ArrowLeft className="size-4" aria-hidden="true" />
-            Back to tools
-          </Link>
-
-          <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+          <ToolBreadcrumb current="AI Career Roadmap" />
+          <div className="mt-6 grid gap-9 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-blue-950/10 bg-white/82 px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary shadow-sm dark:border-white/10 dark:bg-white/8 dark:text-emerald-200">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#177e70]/20 bg-white/75 px-3.5 py-2 text-xs font-bold uppercase tracking-[0.17em] text-[#177e70] shadow-sm backdrop-blur dark:border-emerald-300/20 dark:bg-white/5 dark:text-emerald-200">
                 <Sparkles className="size-4" aria-hidden="true" />
-                Free AI student tool
+                Free personal career planner
               </div>
-              <ToolBreadcrumb current="AI Career Roadmap" />
-              <h1 className="mt-6 max-w-4xl font-heading text-4xl font-semibold leading-[1.06] text-slate-950 sm:text-5xl lg:text-[3.6rem] dark:text-white">
-                AI Career Roadmap Generator for students and freshers.
+              <h1 className="mt-5 max-w-3xl font-heading text-[2.7rem] font-semibold leading-[1.02] tracking-[-0.035em] text-[#102a26] sm:text-[3.5rem] lg:text-[4rem] dark:text-white">
+                Turn “what should I learn?” into a plan you can follow.
               </h1>
-              <p className="mt-5 max-w-2xl text-base leading-8 text-slate-700 sm:text-lg dark:text-slate-300">
-                Choose your target role, add your current skills, and get a practical roadmap with weekly tasks,
-                role-wise skills, project ideas, interview prep, and job search actions.
+              <p className="mt-5 max-w-xl text-base leading-7 text-[#536d66] sm:text-lg sm:leading-8 dark:text-slate-300">
+                Tell us your target role, current skills and available time. KASA turns them into weekly learning sprints, portfolio projects, interview preparation and job-search actions.
               </p>
-              <ToolHeroKeywords
-                keywords={[
-                  "AI career roadmap",
-                  "weekly learning plan",
-                  "project ideas",
-                  "interview prep",
-                  "student career planner",
-                ]}
-              />
+              <Link href="#build-roadmap" className="mt-7 inline-flex h-12 items-center gap-2 rounded-full bg-[image:var(--button-solid)] px-6 text-sm font-bold text-white shadow-[0_14px_35px_rgba(20,112,96,0.22)] transition hover:-translate-y-0.5">
+                Build my roadmap <ArrowRight className="size-4" aria-hidden="true" />
+              </Link>
+              <div className="mt-7 flex flex-wrap gap-x-6 gap-y-3 text-sm font-medium text-[#48645d] dark:text-slate-300">
+                {['Skills in priority order', 'Weekly checkpoints', 'Projects with resume proof'].map((item) => (
+                  <span key={item} className="inline-flex items-center gap-2"><CheckCircle2 className="size-4 text-[#1a9a7f]" />{item}</span>
+                ))}
+              </div>
             </div>
 
-            <div className="hidden gap-4 lg:grid lg:grid-cols-2">
-              {[
-                {
-                  title: "Role-wise skills",
-                  description: "Know what to learn first for your target job.",
-                  icon: Target,
-                  points: ["Priority skills", "Current skill gap", "Beginner-friendly order"],
-                },
-                {
-                  title: "Weekly plan",
-                  description: "Turn goals into focused weekly tasks.",
-                  icon: Route,
-                  points: ["1-12 month timeline", "Daily study time", "Clear weekly outcomes"],
-                },
-                {
-                  title: "Project ideas",
-                  description: "Build portfolio proof recruiters can review.",
-                  icon: Sparkles,
-                  points: ["Project brief", "Skills used", "Resume bullet ideas"],
-                },
-                {
-                  title: "Interview prep",
-                  description: "Practice topics and questions for fresher roles.",
-                  icon: GraduationCap,
-                  points: ["Technical topics", "HR prep", "Job search actions"],
-                },
-              ].map((item) => (
-                <ToolHeroFeatureCard key={item.title} title={item.title} description={item.description} icon={item.icon} points={item.points} />
-              ))}
+            <div className="relative mx-auto w-full max-w-[48rem]">
+              <div className="rounded-[1.6rem] border border-white/80 bg-white/88 p-5 shadow-[0_28px_80px_rgba(22,79,69,0.16)] backdrop-blur dark:border-white/10 dark:bg-white/[0.055] sm:p-6">
+                <div className="flex items-center justify-between gap-4 border-b border-[#173d36]/10 pb-4 dark:border-white/10">
+                  <div>
+                    <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-[#177e70] dark:text-emerald-200">Preview · Frontend developer</p>
+                    <h2 className="mt-1 font-heading text-xl font-semibold text-[#16332d] dark:text-white">12-week route to interview readiness</h2>
+                  </div>
+                  <span className="rounded-full bg-[#e6f7ef] px-3 py-1.5 text-xs font-bold text-[#177e70] dark:bg-emerald-300/10 dark:text-emerald-200">2 hrs/day</span>
+                </div>
+                <div className="mt-5 grid gap-3 sm:grid-cols-[4.5rem_1fr]">
+                  {[['01–03', 'Foundation', 'Close JavaScript gaps and ship one responsive interface.'], ['04–07', 'Build proof', 'Create a React project with API, states and deployment.'], ['08–10', 'Interview', 'Practice DSA basics, frontend questions and project stories.'], ['11–12', 'Apply', 'Polish resume, portfolio and targeted applications.']].map(([weeks, title, body], index) => (
+                    <div key={weeks} className="contents">
+                      <div className="flex items-center gap-2 text-xs font-bold text-[#739089] sm:block sm:pt-3"><span className="text-[#1a9a7f]">{weeks}</span><span className="sm:hidden">weeks</span></div>
+                      <div className="relative rounded-xl border border-[#173d36]/10 bg-[#f7fbf8] p-3.5 dark:border-white/10 dark:bg-white/[0.04]">
+                        <span className="absolute -left-[3.15rem] top-4 hidden h-px w-10 bg-[#8bcdbd] sm:block" />
+                        <div className="flex items-start gap-3"><span className="mt-1 grid size-6 shrink-0 place-items-center rounded-full bg-[#dff5ec] text-[0.65rem] font-bold text-[#177e70] dark:bg-emerald-300/10 dark:text-emerald-200">{index + 1}</span><div><h3 className="text-sm font-bold text-[#183a33] dark:text-white">{title}</h3><p className="mt-1 text-xs leading-5 text-[#617871] dark:text-slate-300">{body}</p></div></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="absolute -bottom-5 -right-3 hidden rotate-2 rounded-2xl bg-[#ffcfac] px-4 py-3 shadow-xl sm:block">
+                <p className="text-[0.62rem] font-bold uppercase tracking-[0.18em] text-[#8b4e2d]">Not another skill list</p>
+                <p className="mt-1 text-sm font-bold text-[#4d2c20]">Every week ends with proof.</p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <AiCareerRoadmap />
+      <div id="build-roadmap"><AiCareerRoadmap /></div>
 
-      <section className="bg-[#eef7ff] px-4 py-12 dark:bg-surface-strong sm:px-6 lg:px-8">
-        <div className="mx-auto grid w-full max-w-[108rem] gap-4 md:grid-cols-3">
-          {[
+      <section className="bg-[#153f37] py-14 text-white dark:bg-[#0b1c19] sm:py-16">
+        <div className={siteContainerClasses()}>
+          <div className="grid gap-8 lg:grid-cols-[0.68fr_1.32fr]">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#7ce0bf]">From learning to proof</p>
+              <h2 className="mt-3 max-w-xl font-heading text-3xl font-semibold leading-[1.08] sm:text-[2.55rem]">A roadmap is useful only when it changes what you do next.</h2>
+              <p className="mt-4 max-w-lg text-sm leading-7 text-white/68">The output connects skills, projects, interview preparation and applications instead of treating them as separate problems.</p>
+            </div>
+            <div className="border-t border-white/12">
+              {[
           {
             title: "Skills become easier to prioritize",
             body: "Students often try to learn everything at once. This roadmap separates high-priority skills from optional skills so the first few weeks stay focused.",
-            points: ["Target role", "Current skills", "Priority order"],
+            label: "Learn",
           },
           {
             title: "Projects become resume proof",
             body: "The roadmap suggests projects with skills and resume bullets, so learning does not stay theoretical.",
-            points: ["Portfolio projects", "Resume bullets", "GitHub proof"],
+            label: "Build",
           },
           {
             title: "Interview prep starts early",
             body: "Each roadmap includes interview topics and practice questions, helping students prepare before applications begin.",
-            points: ["HR questions", "Technical topics", "Job search actions"],
+            label: "Prove",
           },
-        ].map((section) => (
-          <div key={section.title} className="rounded-[1.2rem] border border-blue-950/10 bg-white p-5 shadow-sm shadow-blue-950/5 dark:border-white/10 dark:bg-white/[0.04]">
-            <h2 className="font-heading text-xl font-semibold text-slate-950 dark:text-white">{section.title}</h2>
-            <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">{section.body}</p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {section.points.map((point) => (
-                <span key={point} className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-primary dark:bg-primary/12 dark:text-emerald-200">{point}</span>
-              ))}
+                ].map((section, index) => (
+                  <div key={section.title} className="grid gap-3 border-b border-white/12 py-5 sm:grid-cols-[3.5rem_0.8fr_1.2fr] sm:items-start">
+                    <span className="font-heading text-2xl font-semibold text-[#7ce0bf]">0{index + 1}</span>
+                    <div><span className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-white/45">{section.label}</span><h3 className="mt-1 text-base font-bold">{section.title}</h3></div>
+                    <p className="text-sm leading-7 text-white/65">{section.body}</p>
+                  </div>
+                ))}
             </div>
           </div>
-        ))}
         </div>
       </section>
 
-      <ToolSeoSection
-        eyebrow="Career roadmap guide"
-        title="How the AI career roadmap helps students"
-        description="A good roadmap should not only list skills. It should tell you what to learn, what to build, what to show on your resume, and how to prepare for interviews."
-        keywords={["career roadmap", "student career plan", "weekly learning plan", "portfolio projects", "interview prep"]}
-        faqs={faqs}
-        relatedTools={[
-          { href: "/tools/resume-builder-studio", label: "Free Resume Builder" },
-          { href: "/tools/resume-ats-checker", label: "AI Resume ATS Checker" },
-          { href: "/tools/final-year-project-kit-generator", label: "AI Final Year Project Kit" },
-        ]}
-      />
-
-      <section className="bg-white px-4 py-12 dark:bg-surface sm:px-6 lg:px-8">
-        <div className="mx-auto grid w-full max-w-[108rem] gap-4 md:grid-cols-3">
-          {["No job guarantee, only practical guidance.", "Best results come when you update skills and projects weekly.", "Use the roadmap with resume builder and ATS checker for stronger applications."].map((point) => (
-            <div key={point} className="flex gap-3 rounded-[1rem] border border-blue-950/10 bg-[#f8fbff] p-5 dark:border-white/10 dark:bg-white/[0.04]">
-              <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-primary dark:text-emerald-300" aria-hidden="true" />
-              <p className="text-sm leading-6 text-slate-700 dark:text-slate-200">{point}</p>
+      <section className="bg-[#fffaf4] py-14 dark:bg-surface sm:py-16">
+        <div className={siteContainerClasses()}>
+          <div className="grid gap-8 lg:grid-cols-[0.7fr_1.3fr]">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#c66a42] dark:text-[#ffb791]">Before you generate</p>
+              <h2 className="mt-3 max-w-xl font-heading text-3xl font-semibold leading-[1.1] sm:text-[2.5rem]">Give honest inputs. Get a roadmap you can actually use.</h2>
+              <p className="mt-4 max-w-lg text-sm leading-7 text-[#677a73] dark:text-slate-300">This is planning guidance, not a job guarantee. Update the plan as your skills, projects and available time change.</p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link href="/tools/resume-builder-studio" className="inline-flex items-center gap-2 text-sm font-bold text-[#177e70] dark:text-emerald-200">Build your resume <ArrowRight className="size-4" /></Link>
+                <Link href="/tools/resume-ats-checker" className="inline-flex items-center gap-2 text-sm font-bold text-[#177e70] dark:text-emerald-200">Check ATS score <ArrowRight className="size-4" /></Link>
+              </div>
             </div>
-          ))}
+            <div className="grid overflow-hidden rounded-[1.25rem] border border-[#5a3f2c]/15 md:grid-cols-2 dark:border-white/10">
+              {faqs.map((faq, index) => (
+                <article key={faq.question} className="bg-white/55 p-5 md:even:border-l md:[&:nth-child(n+3)]:border-t border-[#5a3f2c]/15 dark:border-white/10 dark:bg-white/[0.035]">
+                  <div className="flex items-center gap-2 text-xs font-bold text-[#c66a42] dark:text-[#ffb791]"><CircleDot className="size-3.5" />0{index + 1}</div>
+                  <h3 className="mt-3 text-base font-bold text-[#2f403a] dark:text-white">{faq.question}</h3>
+                  <p className="mt-2 text-sm leading-6 text-[#6a7973] dark:text-slate-300">{faq.answer}</p>
+                </article>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
     </div>
