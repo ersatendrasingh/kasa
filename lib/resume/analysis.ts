@@ -138,13 +138,13 @@ export function reportSections(analysis: ResumeAnalysis): [string, string[]][] {
     ["Areas to improve", analysis.weakAreas],
     ["Grammar and writing", (analysis.grammarIssues || []).map((item) => `Original: ${item.original}\nSuggestion: ${item.suggestion}\nWhy: ${item.reason}`)],
     ["Formatting review", [analysis.formattingNote || "Layout was not verified.", ...(analysis.formattingIssues || []).map((item) => `${item.issue}\nEvidence: ${item.evidence}\nFix: ${item.suggestion}`)]],
-    ["AI bullet suggestions", (analysis.bulletSuggestions || []).map((item) => `Original: ${item.original}\nSuggestion: ${item.suggestion}\nWhy: ${item.reason}`)],
+    ["Bullet suggestions", (analysis.bulletSuggestions || []).map((item) => `Original: ${item.original}\nSuggestion: ${item.suggestion}\nWhy: ${item.reason}`)],
     ["Improved bullets", analysis.improvedBullets],
     ["Recruiter tips", analysis.recruiterChecklist],
     ["Optional project ideas", analysis.projectsToAdd],
     ["Interview practice", analysis.interviewQuestions],
     ["Career roadmap", analysis.roadmap.flatMap((item) => [`${item.week}: ${item.focus}`, ...item.tasks])],
     ["Salary context", [analysis.salaryRange]],
-    ["About this assessment", ["KASA provides an AI-assisted review, not an employer's ATS result or an interview guarantee. Readiness is a weighted average: Keywords 20%, Skills 20%, Projects 15%, Impact 20%, Structure 10%, Clarity 15%. Job match measures the extracted requirements only; partial matches count as half. Add skills and achievements only when true."]],
+    ["About this assessment", ["KASA calculates readiness with fixed local rules and may use Gemini free-tier assistance for writing suggestions. This is not an employer's ATS result or an interview guarantee. Readiness is a weighted average: Keywords 20%, Skills 20%, Projects 15%, Impact 20%, Structure 10%, Clarity 15%. Job match measures the extracted requirements only; partial matches count as half. Add skills and achievements only when true."]],
   ];
 }

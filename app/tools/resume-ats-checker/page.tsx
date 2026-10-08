@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/tools/resume-ats-checker" },
   openGraph: {
     title: "Free ATS Resume Checker & ATS Score Checker",
-    description: "Check your ATS score, missing keywords, skills, grammar and formatting. Get practical AI suggestions and download a free PDF report.",
+    description: "Check your ATS score, missing keywords, skills and structure with local scoring, optional free-tier Gemini suggestions, and a downloadable PDF report.",
     url: "/tools/resume-ats-checker",
     type: "website",
     siteName: "KASA",
@@ -82,7 +82,7 @@ const resumeAtsFaqs = [
   },
   {
     question: "Does the checker review grammar and resume formatting?",
-    answer: "It suggests sentence-level writing corrections and reviews observable structure, headings, dates and consistency. Text extraction cannot fully verify fonts, margins, columns or how a specific employer’s ATS parses the file.",
+    answer: "It reviews observable text structure, headings, dates, contact details and consistency. Text extraction cannot fully verify fonts, margins, columns or how a specific employer’s ATS parses the file.",
   },
   {
     question: "Which resume files can I upload?",
@@ -103,12 +103,12 @@ const resumeAtsFaqs = [
   },
   {
     question: "How is my resume data handled?",
-    answer: "Your resume and optional job description are sent to the configured AI provider for analysis. Saving the resume text and report on your device is optional, and Reset clears the saved checker report.",
+    answer: "PDF, DOCX and TXT text is extracted in your browser. KASA calculates the score locally on its server, then may send redacted resume text to Gemini for writing suggestions when the free Gemini API is configured. Email, phone and profile URLs are removed first. Google's free tier may use submitted content to improve its products. Saving the report on your device is optional, and Reset clears it.",
   },
   {
     question: "Does an ATS score guarantee interview selection?",
     answer:
-      "No. An ATS score is an AI-assisted review estimate. Interview selection depends on the job description, recruiter judgment, competition and the evidence in your actual experience.",
+      "No. An ATS score is a rule-based review estimate. Interview selection depends on the job description, recruiter judgment, competition and the evidence in your actual experience.",
   },
 ];
 
@@ -312,7 +312,7 @@ function ResumeAtsSeoContent() {
                 KASA&apos;s free ATS resume checker reads a PDF, DOCX, TXT file, or pasted resume text and organizes the findings into a clear report. The ATS score checker reviews keywords, skills, projects, measurable impact, structure, and writing clarity. Add a job description when you want an exact requirement match; otherwise, the review uses the target role detected from your resume.
               </p>
               <p>
-                The report separates general resume readiness from job-description coverage. It shows skills already supported by the resume, missing keywords, grammar and formatting observations, stronger bullet suggestions, and recruiter checks. The score is an AI-assisted diagnostic estimate, not a result from an employer&apos;s private ATS and not a guarantee of interview selection.
+                The report separates general resume readiness from job-description coverage. Local rules calculate the score and Gemini free-tier enhancement may improve writing suggestions. It shows supported skills, missing keywords, structure observations, practical next steps, and recruiter checks. This is not a result from an employer&apos;s private ATS or a guarantee of interview selection.
               </p>
               <p>
                 Students and freshers can use the resume ATS checker to improve projects, internships, placement resumes, technical skills, and entry-level keywords. Experienced professionals can strengthen quantified achievements, leadership evidence, domain expertise, and senior-role alignment. Career switchers can check whether transferable skills and recent projects clearly support the new target role.

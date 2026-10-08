@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { createResumeAtsPdf, needsUnicodePrint } from "@/lib/resume/report-pdf";
 import { reportSections, type ResumeAnalysis } from "@/lib/resume/analysis";
+import { recoverResumeStructure } from "@/lib/resume/text-structure";
 import { ToolToast, type ToolToastState } from "@/components/tools/tool-toast";
 
 const roleFamilies = [
@@ -145,7 +146,7 @@ const popularSkills = [
   "Figma",
 ] as const;
 
-const storageKey = "kasa-ai-resume-ats:v2:last";
+const storageKey = "kasa-ai-resume-ats:v3:last";
 const resumeBuilderDraftKey = "kasa-ai-resume-builder:draft";
 const resumeBuilderAtsHandoffKey = "kasa-resume-builder:ats-handoff";
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(Number.isFinite(value) ? value : min, min), max);
@@ -224,7 +225,7 @@ export function ResumeAtsChecker() {
     setToast({ id: Date.now(), type, title, message });
   }, []);
 
-  const restoreSavedReport = useCallback((saved: Partial<SavedResumeAnalysis>, message = "Last AI resume report restored.") => {
+  const restoreSavedReport = useCallback((saved: Partial<SavedResumeAnalysis>, message = "Last resume report restored.") => {
     if (!saved.analysis) return;
     setResumeText(saved.resumeText || "");
     setJobDescription(saved.jobDescription || "");
@@ -285,7 +286,7 @@ export function ResumeAtsChecker() {
       if (!raw) return;
       const saved = parseSavedReport(raw);
       if (!saved?.analysis) return;
-      restoreSavedReport(saved, "Last AI resume report restored.");
+      restoreSavedReport(saved, "Last resume report restored.");
     }, 0);
     return () => window.clearTimeout(timeoutId);
   }, [notify, restoreSavedReport]);
@@ -335,16 +336,10 @@ export function ResumeAtsChecker() {
     trackAts("upload_started", { file_type: mimeType === "application/pdf" ? "pdf" : mimeType === "text/plain" ? "txt" : "docx" });
     try {
       const extractedText = await extractReadableTextFromUpload(file, mimeType);
-      if (mimeType !== "application/pdf" && extractedText.trim().length < 300) throw new Error("Not enough readable resume text. Try a PDF or paste at least 300 characters.");
+      if (extractedText.trim().length < 300) throw new Error("Not enough readable resume text. Try a text-based PDF or paste at least 300 characters.");
       if (extractedText.length > 30000) throw new Error("This resume is too long. Use up to 30,000 characters.");
-      const raw = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result || ""));
-        reader.onerror = () => reject(new Error("File could not be read. Try uploading again."));
-        reader.readAsDataURL(file);
-      });
       if (version !== uploadVersion.current) return;
-      const nextResume = { name: file.name, mimeType, data: mimeType === "application/pdf" ? raw.split(",")[1] || "" : "", size: file.size, text: extractedText || undefined };
+      const nextResume = { name: file.name, mimeType, data: "", size: file.size, text: extractedText || undefined };
       setUploadedResume(nextResume);
       setResumeText(extractedText);
       setCandidateName(deriveNameFromResume(file.name) || "Candidate");
@@ -381,17 +376,15 @@ export function ResumeAtsChecker() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           resumeText: pastedText || resumeFile?.text || "",
-          fileData: shouldAttachResumeFile(resumeFile) ? resumeFile?.data : undefined,
-          fileMimeType: shouldAttachResumeFile(resumeFile) ? resumeFile?.mimeType : undefined,
           fileName: resumeFile?.name,
         }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(typeof data?.error === "string" ? data.error : "Resume profile detection failed.");
       const profile = data.profile as Partial<ResumeProfile> | undefined;
-      if (!profile) throw new Error("AI could not detect a usable profile from this resume.");
+      if (!profile) throw new Error("Could not detect a usable profile from this resume.");
 
-      if (profile.candidateName) setCandidateName(profile.candidateName);
+      if (profile.candidateName && profile.candidateName !== "Candidate") setCandidateName(profile.candidateName);
       setCandidateEmail(profile.candidateEmail || "");
       setCandidatePhone(profile.candidatePhone || "");
       if (profile.detectedRole) setTargetRole(profile.detectedRole);
@@ -405,8 +398,8 @@ export function ResumeAtsChecker() {
       }
       clearGenerated();
       setDetectedSummary(profile.summary || `Detected ${formatExperienceLabel(nextYears)} profile from your resume.`);
-      setActionMessage("Profile detected from resume. Review the role and generate your AI ATS report.");
-      notify("success", "Profile detected", "AI detected role, experience, and skills from your resume.");
+      setActionMessage("Profile detected locally. Review the role and generate your free ATS report.");
+      notify("success", "Profile detected", "Role, experience, and skills were detected without a paid AI call.");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Resume profile detection failed. You can still generate the ATS report.";
       setActionMessage(message);
@@ -472,7 +465,6 @@ export function ResumeAtsChecker() {
     const effectiveResumeText = isWorkspaceRecheck
       ? editedResumeText.trim()
       : resumeText.trim() || uploadedResume?.text || "";
-    const attachFile = !isWorkspaceRecheck && shouldAttachResumeFile(uploadedResume);
     if (!uploadedResume && effectiveResumeText.length < 300) {
       setActionMessage("Upload a resume file or paste at least 300 characters from your resume.");
       notify("error", "Resume needed", "Upload a resume file or paste at least 300 characters from your resume.");
@@ -493,8 +485,6 @@ export function ResumeAtsChecker() {
         body: JSON.stringify({
           resumeText: effectiveResumeText,
           jobDescription,
-          fileData: attachFile ? uploadedResume?.data : undefined,
-          fileMimeType: attachFile ? uploadedResume?.mimeType : undefined,
           fileName: uploadedResume?.name,
           candidateName,
           candidateEmail,
@@ -510,8 +500,8 @@ export function ResumeAtsChecker() {
         }),
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(typeof data?.error === "string" ? data.error : "AI resume analysis failed.");
-      if (!data.analysis) throw new Error("AI did not return a usable resume report.");
+      if (!response.ok) throw new Error(typeof data?.error === "string" ? data.error : "Resume analysis failed.");
+      if (!data.analysis) throw new Error("The checker did not return a usable resume report.");
       setProgress(96);
       setAnalysis(data.analysis);
       if (saveReport) {
@@ -526,7 +516,7 @@ export function ResumeAtsChecker() {
       notify("success", "ATS report generated", successMessage);
       window.setTimeout(() => resultPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "AI resume analysis failed. Please try again.";
+      const message = error instanceof Error ? error.message : "Resume analysis failed. Please try again.";
       setActionMessage(message);
       notify("error", "ATS analysis failed", message);
       trackAts("analysis_failed");
@@ -945,7 +935,7 @@ const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(function Result
     setWorkspaceText(previous.text);
     setAppliedFixes(previous.appliedFixes);
     setUndoStack((items) => items.slice(0, -1));
-    setWorkspaceMessage("Last AI change undone.");
+    setWorkspaceMessage("Last suggested change undone.");
   };
 
   const downloadImprovedResume = async (format: "pdf" | "doc" | "txt") => {
@@ -1018,7 +1008,7 @@ const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(function Result
               <CompactList title="Top fixes" items={analysis.quickWins.slice(0, 3)} tone="priority" numbered />
               <CompactList title="Strengths" items={analysis.strengths} tone="positive" />
               <CompactList title="Weak areas" items={analysis.weakAreas} tone="warning" />
-              <details className="rounded-xl border border-blue-950/10 px-3.5 py-3 text-xs leading-5 dark:border-white/10 lg:col-span-3"><summary className="cursor-pointer font-semibold text-slate-800 dark:text-slate-100">How this score was calculated</summary><p className="mt-2 text-slate-500 dark:text-slate-400">AI-assisted readiness estimate: Keywords 20%, Skills 20%, Projects 15%, Impact 20%, Structure 10%, Clarity 15%.</p><div className="mt-2 grid gap-x-5 gap-y-1 sm:grid-cols-2">{analysis.componentScores.map((item) => <p key={item.label}><strong>{item.label}:</strong> {item.reason}</p>)}</div></details>
+              <details className="rounded-xl border border-blue-950/10 px-3.5 py-3 text-xs leading-5 dark:border-white/10 lg:col-span-3"><summary className="cursor-pointer font-semibold text-slate-800 dark:text-slate-100">How this score was calculated</summary><p className="mt-2 text-slate-500 dark:text-slate-400">Free rule-based readiness estimate: Keywords 20%, Skills 20%, Projects 15%, Impact 20%, Structure 10%, Clarity 15%.</p><div className="mt-2 grid gap-x-5 gap-y-1 sm:grid-cols-2">{analysis.componentScores.map((item) => <p key={item.label}><strong>{item.label}:</strong> {item.reason}</p>)}</div></details>
             </div>
           ) : null}
 
@@ -1028,7 +1018,7 @@ const ResultPanel = forwardRef<HTMLDivElement, ResultPanelProps>(function Result
                 <div>
                   <div className="flex flex-wrap items-center gap-2"><span className="rounded-full bg-emerald-600 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white">Live improvement workspace</span><span className="text-xs font-semibold text-emerald-800 dark:text-emerald-200">{appliedFixes.length} change{appliedFixes.length === 1 ? "" : "s"} applied</span></div>
                   <h4 className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">Improve the resume here, then confirm the new score.</h4>
-                  <p className="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-300">The projected score is a guide based on selected improvements. Only a fresh AI check confirms the actual result.</p>
+                  <p className="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-300">The projected score is a guide based on selected improvements. Run a fresh free check to confirm the result.</p>
                 </div>
                 <div className="rounded-2xl bg-white px-4 py-3 text-center shadow-sm dark:bg-slate-950"><div className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Projected ATS score</div><div className="mt-1 font-heading text-3xl font-semibold text-emerald-700 dark:text-emerald-300">{projectedScore}<span className="ml-1 text-sm text-slate-400">/100</span></div><div className="mt-1 text-xs font-semibold text-emerald-700 dark:text-emerald-200">{projectedGain ? `+${projectedGain} potential` : "Choose a fix below"}</div></div>
               </div>
@@ -1139,7 +1129,7 @@ function buildImprovementActions(analysis: ResumeAnalysis): ImprovementAction[] 
   analysis.bulletSuggestions.slice(0, 4).forEach((item) => addReplaceAction(item, "Impact", getImpact("Impact"), "Strengthen a bullet"));
 
   const knownTerms = new Set([...analysis.missingSkills, ...analysis.missingKeywords].map((item) => item.toLowerCase()));
-  // The AI analysis decides which gaps belong to this resume. Do not cap the
+  // The analysis decides which gaps belong to this resume. Do not cap the
   // list here: hiding later items made the workspace look like a fixed demo.
   analysis.missingSkills.forEach((skill) => {
     const cleanSkill = skill.trim();
@@ -1394,15 +1384,16 @@ function HighlightedResumeText({ text, terms, rewrittenPhrases = [] }: { text: s
   return <>{text.split(expression).map((part, index) => {
     const highlight = highlights.find((item) => item.value.toLowerCase() === part.toLowerCase());
     if (!highlight) return part;
-    return <mark key={`${part}-${index}`} title={highlight.kind === "rewrite" ? "AI rewritten text" : "Added to resume"} className={`rounded px-1 font-semibold ${highlight.kind === "rewrite" ? "bg-blue-100 text-blue-900 ring-1 ring-blue-200 dark:bg-blue-400/25 dark:text-blue-100" : "bg-emerald-100 text-emerald-900 ring-1 ring-emerald-200 dark:bg-emerald-400/25 dark:text-emerald-100"}`}>{part}</mark>;
+    return <mark key={`${part}-${index}`} title={highlight.kind === "rewrite" ? "Suggested rewrite" : "Added to resume"} className={`rounded px-1 font-semibold ${highlight.kind === "rewrite" ? "bg-blue-100 text-blue-900 ring-1 ring-blue-200 dark:bg-blue-400/25 dark:text-blue-100" : "bg-emerald-100 text-emerald-900 ring-1 ring-emerald-200 dark:bg-emerald-400/25 dark:text-emerald-100"}`}>{part}</mark>;
   })}</>;
 }
 
 function splitResumeSections(value: string) {
-  const lines = normalizeResumeBulletText(value).replace(/\r\n?/g, "\n").split("\n").map((line) => line.trim()).filter(Boolean);
+  const lines = recoverResumeStructure(normalizeResumeBulletText(value)).split("\n").map((line) => line.trim()).filter(Boolean);
   const headingPattern = /^(professional summary|summary|profile|experience|professional experience|work experience|employment|projects?|selected projects|technical skills|core technical skills|skills|education|certifications?|achievements?|additional strengths|contact)$/i;
   const sections: Array<{ heading: string; content: string }> = [];
-  let current = { heading: lines.shift() || "Resume draft", content: "" };
+  const header = splitResumeHeader(lines.shift() || "Resume draft");
+  let current = { heading: header.heading, content: header.content };
   lines.forEach((line) => {
     if (headingPattern.test(line.replace(/:$/, ""))) {
       sections.push(current);
@@ -1413,6 +1404,12 @@ function splitResumeSections(value: string) {
   });
   sections.push(current);
   return sections.filter((section) => section.heading || section.content);
+}
+
+function splitResumeHeader(line: string) {
+  const match = line.match(/^([A-Z][A-Za-zÀ-ÿ.'-]+(?:\s+[A-Z][A-Za-zÀ-ÿ.'-]+){1,2}?)(?=\s+(?:Senior|Junior|Lead|Principal|Staff|Full Stack|Frontend|Backend|Software|Web|Data|Cloud|DevOps|Product|Project|Engineering|UI\/UX|Graphic|Digital|Finance|HR|Operations|Sales|Customer|Teacher|Academic)\b)/);
+  if (!match) return { heading: line, content: "" };
+  return { heading: match[1], content: line.slice(match[1].length).trim() };
 }
 
 function normalizeResumeBulletText(value: string) {
@@ -1432,10 +1429,6 @@ function getSupportedMimeType(file: File) {
   return "";
 }
 
-function shouldAttachResumeFile(resumeFile: UploadedResume | null | undefined) {
-  return Boolean(resumeFile?.data && resumeFile.mimeType === "application/pdf");
-}
-
 async function extractReadableTextFromUpload(file: File, mimeType: string) {
   if (mimeType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
     const mammoth = await import("mammoth");
@@ -1443,6 +1436,33 @@ async function extractReadableTextFromUpload(file: File, mimeType: string) {
     return result.value.trim();
   }
   if (mimeType === "text/plain") return (await file.text()).trim();
+  if (mimeType === "application/pdf") {
+    const pdfjs = await import("pdfjs-dist");
+    pdfjs.GlobalWorkerOptions.workerSrc = new URL("pdfjs-dist/build/pdf.worker.min.mjs", import.meta.url).toString();
+    const task = pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()) });
+    const document = await task.promise;
+    const pages: string[] = [];
+    for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
+      const page = await document.getPage(pageNumber);
+      const content = await page.getTextContent();
+      const textItems = content.items.flatMap((item) => "str" in item && item.str.trim()
+        ? [{ text: item.str.trim(), x: item.transform[4], y: item.transform[5], width: item.width, hasEol: item.hasEOL }]
+        : []);
+      const rows: Array<{ y: number; items: typeof textItems }> = [];
+      textItems.sort((left, right) => Math.abs(right.y - left.y) > 2 ? right.y - left.y : left.x - right.x).forEach((item) => {
+        const row = rows.find((candidate) => Math.abs(candidate.y - item.y) <= 2);
+        if (row) row.items.push(item);
+        else rows.push({ y: item.y, items: [item] });
+      });
+      const pageText = rows
+        .sort((left, right) => right.y - left.y)
+        .map((row) => row.items.sort((left, right) => left.x - right.x).map((item) => item.text).join(" "))
+        .join("\n");
+      pages.push(pageText);
+    }
+    await task.destroy();
+    return recoverResumeStructure(pages.join("\n\n"));
+  }
   return "";
 }
 
@@ -1673,7 +1693,7 @@ function createPrintableAtsReport({
   <main class="report">
     <section class="hero">
       <div>
-        <div class="eyebrow">KASA AI Resume ATS Checker</div>
+        <div class="eyebrow">KASA Resume ATS Checker</div>
         <h1>${escapeHtml(candidateName)} ATS Score Report</h1>
         <p>${escapeHtml(targetRole)} · ${escapeHtml(roleFamily)} · ${yearsExperience} years experience · Target ${targetPackage} LPA</p>
       </div>
@@ -1973,7 +1993,7 @@ function GenerationOverlay({ progress }: { progress: number }) {
             <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Reviewing keywords, writing and resume structure…</p>
           </div>
         </div>
-        <div className="mt-6 flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400"><span>AI analysis</span><span>{Math.round(progress)}%</span></div>
+        <div className="mt-6 flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400"><span>Free ATS analysis</span><span>{Math.round(progress)}%</span></div>
         <div className="mt-3 h-3 overflow-hidden rounded-full bg-slate-200 shadow-inner dark:bg-white/12"><div className="h-full rounded-full bg-[image:var(--button-solid)] transition-[width] duration-500" style={{ width: `${clamp(progress, 0, 100)}%` }} /></div>
       </div>
     </div>
