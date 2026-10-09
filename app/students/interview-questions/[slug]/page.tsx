@@ -23,6 +23,7 @@ import { InterviewQuestionViewCounter } from "@/components/site/interview-questi
 import { siteButtonClasses } from "@/components/site/site-button";
 import { siteContainerClasses } from "@/components/site/site-container";
 import { prisma } from "@/lib/admin/prisma";
+import { buildInterviewQaSchema, type QaAnswerInput } from "@/lib/seo/interview-qa-schema";
 
 export const dynamic = "force-dynamic";
 
@@ -277,62 +278,53 @@ export default async function InterviewQuestionDetailPage({
 
   const officialAnswer = question.answer && question.answer !== placeholderAnswer ? question.answer : "";
   const acceptedCommunityAnswer = question.answers.find((answer) => answer.isAccepted);
-  const acceptedAnswer = acceptedCommunityAnswer
+  const acceptedAnswer: QaAnswerInput | undefined = acceptedCommunityAnswer
     ? {
-        "@type": "Answer",
+        anchor: `answer-${acceptedCommunityAnswer.id}`,
         text: acceptedCommunityAnswer.body,
         upvoteCount: acceptedCommunityAnswer.voteScore,
         dateCreated: acceptedCommunityAnswer.createdAt.toISOString(),
         dateModified: acceptedCommunityAnswer.updatedAt.toISOString(),
-        author: { "@type": "Person", name: displayName(acceptedCommunityAnswer.authorName) },
+        author: { type: "Person", name: displayName(acceptedCommunityAnswer.authorName) },
       }
     : officialAnswer
       ? {
-          "@type": "Answer",
+          anchor: "official-answer",
           text: officialAnswer,
           upvoteCount: question.voteScore,
           dateCreated: question.createdAt.toISOString(),
           dateModified: question.updatedAt.toISOString(),
-          author: { "@type": "Organization", name: "KASA", url: "https://www.getkasa.in" },
+          author: { type: "Organization", name: "KASA" },
         }
       : undefined;
-  const suggestedAnswers = [
+  const suggestedAnswers: QaAnswerInput[] = [
     ...(officialAnswer && acceptedCommunityAnswer
       ? [
           {
-            "@type": "Answer",
+            anchor: "official-answer",
             text: officialAnswer,
             upvoteCount: question.voteScore,
             dateCreated: question.createdAt.toISOString(),
             dateModified: question.updatedAt.toISOString(),
-            author: { "@type": "Organization", name: "KASA", url: "https://www.getkasa.in" },
+            author: { type: "Organization" as const, name: "KASA" },
           },
         ]
       : []),
     ...question.answers
       .filter((answer) => answer.id !== acceptedCommunityAnswer?.id)
       .map((answer) => ({
-        "@type": "Answer",
+        anchor: `answer-${answer.id}`,
         text: answer.body,
         upvoteCount: answer.voteScore,
         dateCreated: answer.createdAt.toISOString(),
         dateModified: answer.updatedAt.toISOString(),
-        author: { "@type": "Person", name: displayName(answer.authorName) },
+        author: { type: "Person" as const, name: displayName(answer.authorName) },
       })),
   ];
   const canonicalUrl = `${pageBaseUrl}/${preferredSlug}`;
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "QAPage",
-    "@id": `${canonicalUrl}#qa`,
-    url: canonicalUrl,
-    inLanguage: "en-IN",
-    isPartOf: { "@id": "https://www.getkasa.in/#website" },
-    publisher: { "@id": "https://www.getkasa.in/#organization" },
-    mainEntity: {
-      "@type": "Question",
-      "@id": `${canonicalUrl}#question`,
-      url: canonicalUrl,
+  const jsonLd = buildInterviewQaSchema({
+    canonicalUrl,
+    question: {
       name: question.question,
       text: question.context || question.question,
       answerCount: question.answers.length + (officialAnswer ? 1 : 0),
@@ -343,13 +335,13 @@ export default async function InterviewQuestionDetailPage({
       dateCreated: question.createdAt.toISOString(),
       dateModified: question.updatedAt.toISOString(),
       author: {
-        "@type": question.authorName ? "Person" : "Organization",
+        type: question.authorName ? "Person" : "Organization",
         name: displayName(question.authorName),
       },
-      acceptedAnswer,
-      suggestedAnswer: suggestedAnswers.length ? suggestedAnswers : undefined,
     },
-  };
+    acceptedAnswer,
+    suggestedAnswers,
+  });
 
   return (
     <div className="bg-background text-foreground">
@@ -378,7 +370,7 @@ export default async function InterviewQuestionDetailPage({
 
           <div className="grid gap-6 lg:grid-cols-[1fr_25rem]">
             <main className="grid gap-5">
-              <article className="rounded-[1.4rem] border border-border bg-card p-6 text-card-foreground shadow-xl">
+              <article id="question" className="rounded-[1.4rem] border border-border bg-card p-6 text-card-foreground shadow-xl">
                 <div className="flex flex-wrap gap-2">
                   {question.role ? <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">{question.role.title}</span> : null}
                   {question.topic ? <span className="rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground">{question.topic.title}</span> : null}
@@ -396,7 +388,7 @@ export default async function InterviewQuestionDetailPage({
 
                 <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                   <VoteControls target="QUESTION" targetId={question.id} slug={question.slug} score={question.voteScore} isLoggedIn={isLoggedIn} />
-                  <span>Asked by {displayName(question.authorName)}</span>
+                  <span id="question-author">Asked by {displayName(question.authorName)}</span>
                   <span>{formatDate(question.createdAt)}</span>
                   <InterviewQuestionViewCounter
                     questionId={question.id}
@@ -406,7 +398,7 @@ export default async function InterviewQuestionDetailPage({
               </article>
 
               {officialAnswer ? (
-                <article className="rounded-[1.2rem] border border-border bg-card p-6 text-card-foreground shadow-sm">
+                <article id="official-answer" className="scroll-mt-28 rounded-[1.2rem] border border-border bg-card p-6 text-card-foreground shadow-sm">
                   <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
                     <CheckCircle2 className="size-4" aria-hidden="true" />
                     KASA answer
@@ -445,10 +437,10 @@ export default async function InterviewQuestionDetailPage({
 
                 <div className="mt-6 grid gap-4">
                   {question.answers.map((answer) => (
-                    <article key={answer.id} className="rounded-[1rem] border border-border bg-surface-muted p-5">
+                    <article id={`answer-${answer.id}`} key={answer.id} className="scroll-mt-28 rounded-[1rem] border border-border bg-surface-muted p-5">
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div className="text-sm text-muted-foreground">
-                          Answered by <span className="font-semibold text-foreground">{displayName(answer.authorName)}</span> on {formatDate(answer.createdAt)}
+                          Answered by <span id={`answer-${answer.id}-author`} className="font-semibold text-foreground">{displayName(answer.authorName)}</span> on {formatDate(answer.createdAt)}
                         </div>
                         <VoteControls target="ANSWER" targetId={answer.id} slug={question.slug} score={answer.voteScore} isLoggedIn={isLoggedIn} />
                       </div>
