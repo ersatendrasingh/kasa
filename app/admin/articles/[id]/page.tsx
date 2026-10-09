@@ -180,7 +180,7 @@ export default async function AdminArticleDetailPage({
 
         <ArticleStudioLayout>
           <div className="grid min-w-0 gap-6">
-            <Card className="!overflow-visible">
+            <Card className="min-w-0 !overflow-visible">
               <CardHeader>
                 <div className="flex items-start gap-3">
                   <IconTile>
@@ -189,7 +189,7 @@ export default async function AdminArticleDetailPage({
                   <CardTitle>Article content</CardTitle>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="min-w-0">
                 <ArticleContentEditor
                   articleId={article.id}
                   baseUrl={`${siteOrigin}${BLOG_BASE_PATH}/`}
@@ -234,7 +234,7 @@ export default async function AdminArticleDetailPage({
             </Card>
           </div>
 
-          <aside id="article-settings-sidebar" className="grid h-fit min-w-0 self-start gap-6 xl:sticky xl:top-44 xl:max-h-[calc(100svh-12rem)] xl:overflow-y-auto xl:pr-1 xl:[scrollbar-width:none] xl:[&::-webkit-scrollbar]:hidden">
+          <aside id="article-settings-sidebar" className="grid h-fit min-w-0 self-start gap-6 transition-[opacity,transform] duration-300 ease-out xl:sticky xl:top-44 xl:max-h-[calc(100svh-12rem)] xl:overflow-y-auto xl:pr-1 xl:[scrollbar-width:none] xl:[&::-webkit-scrollbar]:hidden">
             <Card>
               <CardHeader>
                 <div className="flex items-start gap-3">

@@ -122,7 +122,7 @@ export function ArticleContentEditor({
   const saving = isPending || saveState === "saving";
   return (
     <form
-      className="grid gap-4"
+      className="grid min-w-0 gap-4"
       onSubmit={(event) => {
         event.preventDefault();
         if (timer.current) clearTimeout(timer.current);
@@ -139,7 +139,7 @@ export function ArticleContentEditor({
         <Label htmlFor="excerpt">Excerpt</Label>
         <Textarea id="excerpt" name="excerpt" rows={3} value={values.excerpt} onChange={(event) => update({ excerpt: event.target.value })} className={adminTextareaClass} />
       </div>
-      <div className="grid gap-2">
+      <div className="grid min-w-0 gap-2">
         <Label htmlFor="content">Story body</Label>
         <ArticleRichEditor name="content" defaultValue={initialContent} onChange={(content) => update({ content })} />
       </div>

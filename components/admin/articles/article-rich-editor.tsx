@@ -274,7 +274,7 @@ export function ArticleRichEditor({
   }
 
   return (
-    <div className="relative rounded-2xl border border-blue-200 bg-white shadow-sm dark:border-white/10 dark:bg-slate-950">
+    <div className="relative w-full min-w-0 max-w-full rounded-2xl border border-blue-200 bg-white shadow-sm dark:border-white/10 dark:bg-slate-950">
       <input type="hidden" name={name} value={html} />
       <div data-article-toolbar className="sticky top-16 z-40 flex items-center gap-1 overflow-x-auto rounded-t-2xl border-b border-blue-100 bg-white/95 p-3 shadow-[0_10px_20px_rgba(15,23,42,.08)] backdrop-blur dark:border-white/10 dark:bg-slate-950/95">
         <DropdownMenu modal={false}>
