@@ -55,11 +55,11 @@ const hasValidAdsenseClientId = /^ca-pub-\d{10,}$/.test(ADSENSE_CLIENT_ID ?? "")
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.getkasa.in"),
   title: {
-    default: "KASA | LMS Software for Coaching Institutes and Online Academies",
+    default: "KASA | LMS Software, Free Education Tools & Guides",
     template: "%s | KASA",
   },
   description:
-    "KASA is an all-in-one LMS software for coaching institutes, online academies, trainers, and EdTech teams to sell courses, run live classes, manage students, collect payments, issue certificates, and track growth.",
+    "KASA is an LMS platform for coaching institutes and online academies, with free education tools and practical guides for students, teachers, and academy teams.",
   applicationName: "KASA",
   authors: [{ name: "KASA", url: "https://www.getkasa.in" }],
   creator: "KASA",
@@ -81,23 +81,23 @@ export const metadata: Metadata = {
     locale: "en_IN",
     url: "https://www.getkasa.in",
     siteName: "KASA",
-    title: "KASA | LMS Software for Coaching Institutes and Online Academies",
+    title: "KASA | LMS Software, Free Education Tools & Guides",
     description:
-      "Launch a branded academy website, sell courses, manage learners, live classes, payments, certificates, and institute operations from one LMS platform.",
+      "Run courses and learner operations with KASA LMS, use free education tools, and read practical guides for students, teachers, and academy teams.",
     images: [
       {
         url: "/kasa-hero.png",
         width: 1200,
         height: 630,
-        alt: "KASA LMS software for coaching institutes and online academies",
+        alt: "KASA LMS software, free education tools and practical guides",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "KASA | LMS Software for Coaching Institutes",
+    title: "KASA | LMS Software, Free Education Tools & Guides",
     description:
-      "All-in-one LMS, academy website, live classes, payments, certificates, and education CRM for modern training institutes.",
+      "LMS software for academies plus free tools and practical guides for students, teachers, and education teams.",
     images: ["/kasa-hero.png"],
   },
   robots: {

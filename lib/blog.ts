@@ -195,6 +195,22 @@ export async function getRelatedBlogArticles(article: BlogArticle, limit = 3): P
   });
 }
 
+export async function getLatestBlogArticles(limit = 4): Promise<BlogArticle[]> {
+  return db.article.findMany({
+    where: publishedArticleWhere(),
+    include: {
+      category: true,
+      tags: {
+        include: {
+          tag: true,
+        },
+      },
+    },
+    orderBy: [{ publishedAt: "desc" }, { updatedAt: "desc" }],
+    take: limit,
+  });
+}
+
 export async function getBlogTaxonomies() {
   const [categories, tags] = await Promise.all([
     db.articleCategory.findMany({
