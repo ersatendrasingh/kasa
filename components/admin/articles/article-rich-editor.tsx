@@ -428,13 +428,11 @@ export function ArticleRichEditor({
               aria-label="Table tools"
               title="Table tools"
               className={cn(
-                "flex h-9 items-center gap-1.5 rounded-lg border border-transparent px-2.5 text-sm font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-primary",
+                "grid size-9 place-items-center rounded-lg border border-transparent text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-primary",
                 editorState?.table && "border-primary bg-primary text-white hover:bg-primary hover:text-white",
               )}
             >
               <Table2Icon className="size-4" />
-              <span>Table</span>
-              <ChevronDownIcon className="size-3.5" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-60 border border-blue-100 bg-white p-1.5 shadow-xl dark:bg-slate-950">

@@ -20,6 +20,7 @@ import { ArticleFeatureToggle } from "@/components/admin/articles/article-featur
 import { ArticleSubmitButton } from "@/components/admin/articles/article-submit-button";
 import { ArticleSaveToast } from "@/components/admin/articles/article-save-toast";
 import { ArticleSeoEditor } from "@/components/admin/articles/article-seo-editor";
+import { ArticleStudioLayout } from "@/components/admin/articles/article-studio-layout";
 import { AdminShell } from "@/components/admin/layouts/admin-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -177,8 +178,8 @@ export default async function AdminArticleDetailPage({
           </div>
         </section>
 
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_19rem]">
-          <div className="grid gap-6">
+        <ArticleStudioLayout>
+          <div className="grid min-w-0 gap-6">
             <Card className="!overflow-visible">
               <CardHeader>
                 <div className="flex items-start gap-3">
@@ -233,7 +234,7 @@ export default async function AdminArticleDetailPage({
             </Card>
           </div>
 
-          <aside className="grid h-fit self-start gap-6 xl:sticky xl:top-44 xl:max-h-[calc(100svh-12rem)] xl:overflow-y-auto xl:pr-1 xl:[scrollbar-width:none] xl:[&::-webkit-scrollbar]:hidden">
+          <aside id="article-settings-sidebar" className="grid h-fit min-w-0 self-start gap-6 xl:sticky xl:top-44 xl:max-h-[calc(100svh-12rem)] xl:overflow-y-auto xl:pr-1 xl:[scrollbar-width:none] xl:[&::-webkit-scrollbar]:hidden">
             <Card>
               <CardHeader>
                 <div className="flex items-start gap-3">
@@ -422,7 +423,7 @@ export default async function AdminArticleDetailPage({
             </Card>
 
           </aside>
-        </div>
+        </ArticleStudioLayout>
       </div>
     </AdminShell>
   );
