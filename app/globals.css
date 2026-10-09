@@ -886,6 +886,59 @@ input:disabled {
   padding: 0;
 }
 
+.blog-article-body .tableWrapper,
+.article-rich-editor .tableWrapper {
+  max-width: 100%;
+  margin: 1.75rem 0;
+  overflow-x: auto;
+  border-radius: 0.9rem;
+}
+
+.blog-article-body table,
+.article-rich-editor table {
+  width: 100%;
+  min-width: 36rem;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.blog-article-body th,
+.blog-article-body td,
+.article-rich-editor th,
+.article-rich-editor td {
+  min-width: 7rem;
+  border: 1px solid var(--border);
+  padding: 0.75rem 0.9rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.blog-article-body th,
+.article-rich-editor th {
+  background: var(--surface-muted);
+  color: var(--foreground);
+  font-weight: 800;
+}
+
+.blog-article-body td,
+.article-rich-editor td {
+  background: var(--card);
+}
+
+.blog-article-body th > :first-child,
+.blog-article-body td > :first-child,
+.article-rich-editor th > :first-child,
+.article-rich-editor td > :first-child {
+  margin-top: 0;
+}
+
+.blog-article-body th > :last-child,
+.blog-article-body td > :last-child,
+.article-rich-editor th > :last-child,
+.article-rich-editor td > :last-child {
+  margin-bottom: 0;
+}
+
 /* Article editor typography is explicit because the project does not use the
    Tailwind Typography plugin. These rules also mirror the published article. */
 .article-rich-editor > :first-child {
@@ -1016,6 +1069,32 @@ input:disabled {
 .article-rich-editor img.ProseMirror-selectednode {
   outline: 3px solid #60a5fa;
   outline-offset: 3px;
+}
+
+.article-rich-editor .selectedCell {
+  position: relative;
+}
+
+.article-rich-editor .selectedCell::after {
+  position: absolute;
+  inset: 0;
+  background: rgba(37, 99, 235, 0.14);
+  content: "";
+  pointer-events: none;
+}
+
+.article-rich-editor .column-resize-handle {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  bottom: -2px;
+  width: 4px;
+  background: #3b82f6;
+  pointer-events: none;
+}
+
+.article-rich-editor.resize-cursor {
+  cursor: col-resize;
 }
 
 .article-rich-editor p.is-editor-empty:first-child::before {

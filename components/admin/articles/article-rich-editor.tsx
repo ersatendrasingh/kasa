@@ -4,6 +4,8 @@ import { useCallback, useMemo, useState } from "react";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
+import { TableKit } from "@tiptap/extension-table";
+import TextAlign from "@tiptap/extension-text-align";
 import type { Level } from "@tiptap/extension-heading";
 import { EditorContent, useEditor, useEditorState } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -13,6 +15,10 @@ import {
   CheckIcon,
   ChevronDownIcon,
   Code2Icon,
+  AlignCenterIcon,
+  AlignJustifyIcon,
+  AlignLeftIcon,
+  AlignRightIcon,
   EraserIcon,
   ImageIcon,
   ItalicIcon,
@@ -23,6 +29,7 @@ import {
   QuoteIcon,
   Redo2Icon,
   StrikethroughIcon,
+  Table2Icon,
   TypeIcon,
   Undo2Icon,
   UnderlineIcon,
@@ -43,6 +50,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
@@ -129,6 +138,19 @@ export function ArticleRichEditor({
         placeholder:
           "Write the article body with headings, examples, internal links, lists, and useful details...",
       }),
+      TextAlign.configure({
+        types: ["heading", "paragraph"],
+        alignments: ["left", "center", "right", "justify"],
+      }),
+      TableKit.configure({
+        table: {
+          resizable: true,
+          renderWrapper: true,
+          HTMLAttributes: {
+            class: "article-content-table",
+          },
+        },
+      }),
     ],
     [],
   );
@@ -175,6 +197,10 @@ export function ArticleRichEditor({
         blockquote: currentEditor.isActive("blockquote"),
         codeBlock: currentEditor.isActive("codeBlock"),
         link: currentEditor.isActive("link"),
+        table: currentEditor.isActive("table"),
+        textAlign: (["center", "right", "justify"] as const).find((alignment) =>
+          currentEditor.isActive({ textAlign: alignment }),
+        ) || "left",
         canUndo: currentEditor.can().chain().focus().undo().run(),
         canRedo: currentEditor.can().chain().focus().redo().run(),
         words: text ? text.split(/\s+/).length : 0,
@@ -332,6 +358,35 @@ export function ArticleRichEditor({
         </ToolbarButton>
         <span className="mx-1 h-9 w-px bg-blue-100" />
         <ToolbarButton
+          label="Align left"
+          active={editorState?.textAlign === "left"}
+          onClick={() => editor.chain().focus().setTextAlign("left").run()}
+        >
+          <AlignLeftIcon className="size-4" />
+        </ToolbarButton>
+        <ToolbarButton
+          label="Align center"
+          active={editorState?.textAlign === "center"}
+          onClick={() => editor.chain().focus().setTextAlign("center").run()}
+        >
+          <AlignCenterIcon className="size-4" />
+        </ToolbarButton>
+        <ToolbarButton
+          label="Align right"
+          active={editorState?.textAlign === "right"}
+          onClick={() => editor.chain().focus().setTextAlign("right").run()}
+        >
+          <AlignRightIcon className="size-4" />
+        </ToolbarButton>
+        <ToolbarButton
+          label="Justify"
+          active={editorState?.textAlign === "justify"}
+          onClick={() => editor.chain().focus().setTextAlign("justify").run()}
+        >
+          <AlignJustifyIcon className="size-4" />
+        </ToolbarButton>
+        <span className="mx-1 h-9 w-px bg-blue-100" />
+        <ToolbarButton
           label="Bullet list"
           active={editorState?.bulletList}
           onClick={() => editor.chain().focus().toggleBulletList().run()}
@@ -366,6 +421,68 @@ export function ArticleRichEditor({
         <ToolbarButton label="Upload image" onClick={() => setImageOpen(true)}>
           <ImageIcon className="size-4" />
         </ToolbarButton>
+        <DropdownMenu modal={false}>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              aria-label="Table tools"
+              title="Table tools"
+              className={cn(
+                "flex h-9 items-center gap-1.5 rounded-lg border border-transparent px-2.5 text-sm font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-primary",
+                editorState?.table && "border-primary bg-primary text-white hover:bg-primary hover:text-white",
+              )}
+            >
+              <Table2Icon className="size-4" />
+              <span>Table</span>
+              <ChevronDownIcon className="size-3.5" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-60 border border-blue-100 bg-white p-1.5 shadow-xl dark:bg-slate-950">
+            <DropdownMenuItem
+              onSelect={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
+              className="min-h-10 px-3"
+            >
+              <Table2Icon className="size-4 text-primary" />
+              Insert 3 × 3 table
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>Rows</DropdownMenuLabel>
+            <DropdownMenuItem disabled={!editorState?.table} onSelect={() => editor.chain().focus().addRowBefore().run()} className="min-h-9 px-3">
+              Add row above
+            </DropdownMenuItem>
+            <DropdownMenuItem disabled={!editorState?.table} onSelect={() => editor.chain().focus().addRowAfter().run()} className="min-h-9 px-3">
+              Add row below
+            </DropdownMenuItem>
+            <DropdownMenuItem disabled={!editorState?.table} onSelect={() => editor.chain().focus().deleteRow().run()} className="min-h-9 px-3">
+              Delete current row
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>Columns</DropdownMenuLabel>
+            <DropdownMenuItem disabled={!editorState?.table} onSelect={() => editor.chain().focus().addColumnBefore().run()} className="min-h-9 px-3">
+              Add column before
+            </DropdownMenuItem>
+            <DropdownMenuItem disabled={!editorState?.table} onSelect={() => editor.chain().focus().addColumnAfter().run()} className="min-h-9 px-3">
+              Add column after
+            </DropdownMenuItem>
+            <DropdownMenuItem disabled={!editorState?.table} onSelect={() => editor.chain().focus().deleteColumn().run()} className="min-h-9 px-3">
+              Delete current column
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem disabled={!editorState?.table} onSelect={() => editor.chain().focus().toggleHeaderRow().run()} className="min-h-9 px-3">
+              Toggle header row
+            </DropdownMenuItem>
+            <DropdownMenuItem disabled={!editorState?.table} onSelect={() => editor.chain().focus().mergeCells().run()} className="min-h-9 px-3">
+              Merge selected cells
+            </DropdownMenuItem>
+            <DropdownMenuItem disabled={!editorState?.table} onSelect={() => editor.chain().focus().splitCell().run()} className="min-h-9 px-3">
+              Split current cell
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem variant="destructive" disabled={!editorState?.table} onSelect={() => editor.chain().focus().deleteTable().run()} className="min-h-10 px-3">
+              Delete table
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <ToolbarButton
           label="Divider"
           onClick={() => editor.chain().focus().setHorizontalRule().run()}
