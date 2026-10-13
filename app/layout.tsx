@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/site/site-footer";
 import { PageUxControls } from "@/components/site/page-ux-controls";
 import { SiteStructuredData } from "@/components/site/structured-data";
 import { Toaster } from "@/components/ui/sonner";
+import { ToolAnalytics } from "@/components/tools/tool-analytics";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
@@ -159,6 +160,7 @@ export default function RootLayout({
           />
         </noscript>
         <ThemeInitializer />
+        <ToolAnalytics />
         <SiteStructuredData />
         <SiteHeader />
         <main className="flex-1">{children}</main>

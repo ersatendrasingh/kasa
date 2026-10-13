@@ -2003,6 +2003,16 @@ function GenerationOverlay({ progress }: { progress: number }) {
 function trackAts(event: string, properties: Record<string, string | boolean> = {}) {
   const analyticsWindow = window as Window & { dataLayer?: Record<string, unknown>[] };
   analyticsWindow.dataLayer?.push({ event: `ats_${event}`, tool: "resume_checker", ...properties });
+  const semanticEvents: Record<string, string[]> = {
+    upload_completed: ["resume_uploaded"],
+    analysis_started: ["ats_analysis_started"],
+    analysis_completed: ["ats_analysis_completed", "ats_score_generated"],
+    analysis_failed: ["ats_analysis_failed"],
+    report_downloaded: ["ats_report_downloaded"],
+  };
+  semanticEvents[event]?.forEach((semanticEvent) => {
+    analyticsWindow.dataLayer?.push({ event: semanticEvent, tool_slug: "resume-ats-checker", ...properties });
+  });
 }
 
 function SuggestionCard({ title, items, onApply, onRemove, appliedItems }: { title: string; items: { original: string; suggestion: string; reason: string }[]; onApply?: (item: { original: string; suggestion: string; reason: string }) => void; onRemove?: (item: { original: string; suggestion: string; reason: string }) => void; appliedItems?: ImprovementAction[] }) {

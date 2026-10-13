@@ -32,6 +32,7 @@ import {
   Zap,
 } from "lucide-react";
 import { type PdfToolDefinition, pdfTools } from "@/lib/pdf-tools";
+import { trackToolEvent } from "@/lib/tool-analytics";
 
 type WorkFile = { id: string; file: File };
 type ResultFile = { url: string; name: string; size: number };
@@ -233,6 +234,10 @@ export function PdfWorkbench({ tool, children }: { tool: PdfToolDefinition; chil
   const [draggedExtractPage, setDraggedExtractPage] = useState<number | null>(null);
   const [extractProgress, setExtractProgress] = useState<MergeProgress>({ open: false, percent: 0, title: "Preparing selected pages", detail: "Building the new PDF page plan" });
 
+  useEffect(() => {
+    trackToolEvent("tool_viewed", { tool_slug: tool.slug, tool_area: "pdf" });
+  }, [tool.slug]);
+
   const mergePages = useMemo(() => {
     const available = new Map(files.flatMap((item, fileIndex) => (previews[item.id]?.pages ?? []).map((src, pageIndex) => {
       const key = `${item.id}:${pageIndex + 1}`;
@@ -419,8 +424,11 @@ export function PdfWorkbench({ tool, children }: { tool: PdfToolDefinition; chil
     });
     if (!accepted.length) {
       setError(tool.accept.includes("pdf") ? "Please choose a PDF file." : "Please choose JPG, PNG, or WebP images.");
+      trackToolEvent("pdf_file_selection_failed", { tool_slug: tool.slug });
       return;
     }
+    trackToolEvent(tool.slug === "jpg-to-pdf" ? "image_files_uploaded" : "pdf_uploaded", { tool_slug: tool.slug, file_count: accepted.length });
+    trackToolEvent("tool_started", { tool_slug: tool.slug, tool_area: "pdf" });
     setError("");
     setResult(null);
     setCompressionReport(null);
@@ -664,6 +672,7 @@ export function PdfWorkbench({ tool, children }: { tool: PdfToolDefinition; chil
       return;
     }
     setBusy(true);
+    trackToolEvent(`${tool.slug.replaceAll("-", "_")}_started`, { tool_slug: tool.slug });
     setError("");
     setResult(null);
     try {
@@ -919,6 +928,7 @@ export function PdfWorkbench({ tool, children }: { tool: PdfToolDefinition; chil
         if (current) URL.revokeObjectURL(current.url);
         return { url, name, size: blob.size };
       });
+      trackToolEvent(`${tool.slug.replaceAll("-", "_")}_completed`, { tool_slug: tool.slug });
       if (tool.slug === "merge-pdf") {
         setMergeProgress({ open: true, percent: 100, title: "Merge complete", detail: `${completedPageCount} pages are ready to download` });
         window.setTimeout(() => setMergeProgress((current) => ({ ...current, open: false })), 1100);
@@ -963,6 +973,7 @@ export function PdfWorkbench({ tool, children }: { tool: PdfToolDefinition; chil
     } catch (caught) {
       const message = caught instanceof Error ? caught.message : "This file could not be processed.";
       setError(message.includes("password") ? "The password is incorrect or this encryption type is not supported." : message);
+      trackToolEvent(`${tool.slug.replaceAll("-", "_")}_failed`, { tool_slug: tool.slug });
       if (tool.slug === "merge-pdf") setMergeProgress((current) => ({ ...current, open: false }));
       if (tool.slug === "split-pdf") setSplitProgress((current) => ({ ...current, open: false }));
       if (tool.slug === "compress-pdf") setCompressionProgress((current) => ({ ...current, open: false }));
@@ -1584,7 +1595,7 @@ export function PdfWorkbench({ tool, children }: { tool: PdfToolDefinition; chil
 
                 {result ? (
                   <div className="mt-6 rounded-2xl border border-emerald-500/25 bg-emerald-50 p-5 dark:bg-emerald-400/10">
-                    <div className="flex flex-wrap items-center gap-4"><span className="grid size-11 place-items-center rounded-full bg-emerald-600 text-white"><Check className="size-5" /></span><div className="min-w-0 flex-1"><strong className="block">{tool.slug === "compress-pdf" && compressionReport?.savedPercent === 0 ? "Your PDF was already optimised" : "Your file is ready"}</strong><span className="mt-1 block truncate text-xs text-black/48 dark:text-white/48">{result.name} · {formatBytes(result.size)}{tool.slug === "compress-pdf" && compressionReport ? ` · ${compressionReport.savedPercent > 0 ? `${compressionReport.savedPercent}% smaller` : "original size preserved"}` : ""}</span></div><a href={result.url} download={result.name} className="inline-flex items-center gap-2 rounded-full bg-emerald-700 px-5 py-3 text-sm font-bold text-white"><Download className="size-4" /> Download</a></div>
+                    <div className="flex flex-wrap items-center gap-4"><span className="grid size-11 place-items-center rounded-full bg-emerald-600 text-white"><Check className="size-5" /></span><div className="min-w-0 flex-1"><strong className="block">{tool.slug === "compress-pdf" && compressionReport?.savedPercent === 0 ? "Your PDF was already optimised" : "Your file is ready"}</strong><span className="mt-1 block truncate text-xs text-black/48 dark:text-white/48">{result.name} · {formatBytes(result.size)}{tool.slug === "compress-pdf" && compressionReport ? ` · ${compressionReport.savedPercent > 0 ? `${compressionReport.savedPercent}% smaller` : "original size preserved"}` : ""}</span></div><a href={result.url} download={result.name} onClick={() => trackToolEvent(`${tool.slug.replaceAll("-", "_")}_downloaded`, { tool_slug: tool.slug })} className="inline-flex items-center gap-2 rounded-full bg-emerald-700 px-5 py-3 text-sm font-bold text-white"><Download className="size-4" /> Download</a></div>
                     {["merge-pdf", "jpg-to-pdf", "rotate-pdf", "delete-pdf-pages", "extract-pdf-pages", "add-pdf-watermark"].includes(tool.slug) ? (
                       <details open className="mt-5 border-t border-emerald-700/15 pt-4">
                         <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-bold"><span>{tool.slug === "merge-pdf" ? "Preview final merged PDF" : tool.slug === "rotate-pdf" ? "Check the corrected PDF" : tool.slug === "delete-pdf-pages" ? "Review the cleaned PDF" : tool.slug === "extract-pdf-pages" ? "Review the extracted PDF" : tool.slug === "add-pdf-watermark" ? "Review the watermarked PDF" : "Preview your finished PDF"}</span><span className="text-lg font-normal">−</span></summary>
