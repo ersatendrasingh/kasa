@@ -429,6 +429,7 @@ export default function SiteHeader() {
             </span>
             <a
               href="mailto:hello@getkasa.in"
+              data-nosnippet
               className="hidden cursor-pointer items-center gap-2 text-[var(--topbar-foreground)] transition hover:opacity-75 lg:inline-flex"
             >
               <Mail className="size-3.5" aria-hidden="true" />

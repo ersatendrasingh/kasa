@@ -427,27 +427,13 @@ export function SiteFooter() {
                 certificates.
               </p>
 
-              <div className="mt-6 grid gap-3 text-sm text-slate-300">
+              <div data-nosnippet className="mt-6 grid gap-3 text-sm text-slate-300">
                 <a
                   href="mailto:hello@getkasa.in"
                   className="inline-flex items-center gap-3 transition hover:text-white"
                 >
                   <Mail className="size-4 text-emerald-300" />
                   hello@getkasa.in
-                </a>
-                <a
-                  href="mailto:support@getkasa.in"
-                  className="inline-flex items-center gap-3 transition hover:text-white"
-                >
-                  <Mail className="size-4 text-emerald-300" />
-                  Demo and support email
-                </a>
-                <a
-                  href="mailto:getkasalms@gmail.com"
-                  className="inline-flex items-center gap-3 transition hover:text-white"
-                >
-                  <Mail className="size-4 text-emerald-300" />
-                  Alternate: getkasalms@gmail.com
                 </a>
                 <span className="inline-flex items-center gap-3">
                   <MapPin className="size-4 text-emerald-300" />

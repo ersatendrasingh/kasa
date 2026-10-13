@@ -190,7 +190,7 @@ export function CompanyPageTemplate({
                 Share the basics now. The product tour can go deep once your
                 team context is clear.
               </p>
-              <div className="grid gap-3 text-sm text-slate-700 dark:text-slate-200">
+              <div data-nosnippet className="grid gap-3 text-sm text-slate-700 dark:text-slate-200">
                 <a href="mailto:hello@getkasa.in" className="mt-5 flex items-center gap-3 rounded-2xl bg-slate-50 p-3 dark:bg-white/[0.05]">
                   <Mail className="size-4 text-primary" aria-hidden="true" />
                   hello@getkasa.in
