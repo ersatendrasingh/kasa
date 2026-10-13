@@ -1,9 +1,14 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { publicSignupAction } from "@/actions/auth";
 import { LoginForm } from "@/components/login-form";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 type SignupPageProps = {
   searchParams: Promise<{ callbackUrl?: string; error?: string }>;

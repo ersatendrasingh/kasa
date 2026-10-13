@@ -1,4 +1,5 @@
-import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+import { permanentRedirect, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { publicLoginAction } from "@/actions/auth";
 import { LoginForm } from "@/components/login-form";
@@ -6,13 +7,23 @@ import { safeRelativePath } from "@/lib/auth/redirects";
 
 export const dynamic = "force-dynamic";
 
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
+
 type LoginPageProps = {
   searchParams: Promise<{ callbackUrl?: string; error?: string }>;
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const [session, params] = await Promise.all([auth(), searchParams]);
+  const params = await searchParams;
   const callbackUrl = safeRelativePath(params.callbackUrl);
+
+  // Google previously discovered this obsolete login URL while /blog was
+  // temporarily treated as protected. Preserve a permanent canonical route.
+  if (callbackUrl === "/blog") permanentRedirect("/blog");
+
+  const session = await auth();
 
   if (session?.user?.id) redirect(callbackUrl);
 
